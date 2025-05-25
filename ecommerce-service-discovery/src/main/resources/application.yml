@@ -1,0 +1,13 @@
+server:
+  port: 8761
+spring:
+  application:
+    name: ecommerce-service-discovery
+  output:
+    ansi:
+      enabled: ALWAYS
+
+eureka:
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
