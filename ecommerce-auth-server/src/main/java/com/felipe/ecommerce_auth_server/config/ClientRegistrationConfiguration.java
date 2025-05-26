@@ -11,7 +11,9 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -43,6 +45,9 @@ public class ClientRegistrationConfiguration {
         .redirectUri("http://127.0.0.1:8080/login/oauth2/code/ecommerce-gateway")
         .scope(OidcScopes.OPENID)
         .scope(OidcScopes.PROFILE)
+        .tokenSettings(TokenSettings.builder()
+          .accessTokenTimeToLive(Duration.ofMinutes(1))
+          .build())
         .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
         .build();
 
