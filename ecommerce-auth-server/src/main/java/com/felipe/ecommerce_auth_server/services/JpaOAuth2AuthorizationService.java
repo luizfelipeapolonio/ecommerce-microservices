@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_auth_server.persistence.entities.AuthorizationEntity;
 import com.felipe.ecommerce_auth_server.persistence.repositories.AuthorizationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -38,6 +40,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
   private final AuthorizationRepository authorizationRepository;
   private final RegisteredClientRepository registeredClientRepository;
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final Logger logger = LoggerFactory.getLogger(JpaOAuth2AuthorizationService.class);
 
   public JpaOAuth2AuthorizationService(AuthorizationRepository authorizationRepository, RegisteredClientRepository registeredClientRepository) {
     Assert.notNull(authorizationRepository, "authorizationRepository cannot be null");
@@ -55,6 +58,10 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
   public void save(OAuth2Authorization authorization) {
     Assert.notNull(authorization, "authorization cannot be null");
     this.authorizationRepository.save(toEntity(authorization));
+    this.logger.info("Created Authorization - registeredClientId: {} - principalName: {} - authorizationGrantType: {}",
+      authorization.getRegisteredClientId(),
+      authorization.getPrincipalName(),
+      authorization.getAuthorizationGrantType().getValue());
   }
 
   @Override

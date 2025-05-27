@@ -2,6 +2,8 @@ package com.felipe.ecommerce_auth_server.services;
 
 import com.felipe.ecommerce_auth_server.persistence.entities.AuthorizationConsentEntity;
 import com.felipe.ecommerce_auth_server.persistence.repositories.AuthorizationConsentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,6 +22,7 @@ import java.util.Set;
 public class JpaOAuth2AuthorizationConsentService implements OAuth2AuthorizationConsentService {
   private final AuthorizationConsentRepository authorizationConsentRepository;
   private final RegisteredClientRepository registeredClientRepository;
+  private final Logger logger = LoggerFactory.getLogger(JpaOAuth2AuthorizationConsentService.class);
 
   public JpaOAuth2AuthorizationConsentService(AuthorizationConsentRepository authorizationConsentRepository, RegisteredClientRepository registeredClientRepository) {
     Assert.notNull(authorizationConsentRepository, "authorizationConsentRepository cannot be null");
@@ -32,6 +35,8 @@ public class JpaOAuth2AuthorizationConsentService implements OAuth2Authorization
   public void save(OAuth2AuthorizationConsent authorizationConsent) {
     Assert.notNull(authorizationConsent, "authorizationConsent cannot be null");
     this.authorizationConsentRepository.save(toEntity(authorizationConsent));
+    this.logger.info("Authorization Consent created - registeredClientId: {} - principalName: {}",
+      authorizationConsent.getRegisteredClientId(), authorizationConsent.getPrincipalName());
   }
 
   @Override

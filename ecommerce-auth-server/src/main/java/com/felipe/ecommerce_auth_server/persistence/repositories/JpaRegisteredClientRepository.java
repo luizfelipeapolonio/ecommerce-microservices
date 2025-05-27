@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_auth_server.persistence.entities.ClientEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -25,6 +27,7 @@ import java.util.Set;
 public class JpaRegisteredClientRepository implements RegisteredClientRepository {
   private final ClientRepository clientRepository;
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final Logger logger = LoggerFactory.getLogger(JpaRegisteredClientRepository.class);
 
   public JpaRegisteredClientRepository(ClientRepository clientRepository) {
     Assert.notNull(clientRepository, "clientRepository cannot be null");
@@ -42,6 +45,7 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
     RegisteredClient existingClient = this.findByClientId(registeredClient.getClientId());
     if(existingClient != null) return;
     this.clientRepository.save(toEntity(registeredClient));
+    this.logger.info("Registered client - clientId: {}", registeredClient.getClientId());
   }
 
   @Override
