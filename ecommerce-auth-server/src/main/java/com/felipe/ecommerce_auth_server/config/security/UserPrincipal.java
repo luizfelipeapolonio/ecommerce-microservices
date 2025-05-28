@@ -26,7 +26,6 @@ import java.util.UUID;
 public class UserPrincipal implements UserDetails {
   private final UUID id;
   private final String email;
-  //@JsonIgnore
   private final String password;
   private final String role;
 
@@ -58,7 +57,7 @@ public class UserPrincipal implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    return List.of(new SimpleGrantedAuthority("ROLE_" + this.role));
   }
 
   @Override
