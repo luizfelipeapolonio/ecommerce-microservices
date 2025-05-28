@@ -47,7 +47,7 @@ public class UserPrincipal implements UserDetails {
     return this.id;
   }
 
-  public String email() {
+  public String getEmail() {
     return this.email;
   }
 
