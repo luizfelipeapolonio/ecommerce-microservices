@@ -9,14 +9,13 @@ spring:
       enabled: ALWAYS
   cloud:
     gateway:
-      mvc:
-        routes:
-        - id: ecommerce-user-service
-          uri: lb://ECOMMERCE-USER-SERVICE
-          predicates:
-          - Path=/api/v1/users/**
-          filters:
-          - TokenRelay=
+      routes:
+      - id: ecommerce-user-service
+        uri: lb://ECOMMERCE-USER-SERVICE
+        predicates:
+        - Path=/api/v1/users/**
+        filters:
+        - TokenRelay=
 
   security:
     oauth2:
