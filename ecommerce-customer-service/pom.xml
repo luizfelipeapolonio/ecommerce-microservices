@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.felipe</groupId>
-	<artifactId>ecommerce-user-service</artifactId>
+	<artifactId>ecommerce-customer-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>ecommerce-user-service</name>
-	<description>User Service of E-commerce application</description>
+	<name>ecommerce-customer-service</name>
+	<description>Customer Service of E-commerce application</description>
 	<url/>
 	<licenses>
 		<license/>
