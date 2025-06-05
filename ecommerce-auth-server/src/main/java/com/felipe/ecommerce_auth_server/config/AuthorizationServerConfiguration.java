@@ -57,8 +57,21 @@ public class AuthorizationServerConfiguration {
     return http.build();
   }
 
+  // For internal bearer token secured endpoints
   @Bean
   @Order(2)
+  public SecurityFilterChain internalResourcesFilterChain(HttpSecurity http) throws Exception {
+    return http
+      .securityMatcher("/auth/internal/**") // Ensure this chain only applies to this path
+      .authorizeHttpRequests(authorize -> authorize
+        .requestMatchers("/auth/internal/**").authenticated())
+      .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()))
+      .build();
+  }
+
+  // For all other endpoints (form login)
+  @Bean
+  @Order(3)
   public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
     return http
       .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
