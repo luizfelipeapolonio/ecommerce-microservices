@@ -1,0 +1,11 @@
+CREATE TABLE addresses (
+    id          BIGINT    PRIMARY KEY,
+    street      VARCHAR(255) NOT NULL,
+    number      VARCHAR(20)  NOT NULL,
+    complement  VARCHAR(100) NOT NULL,
+    district    VARCHAR(255) NOT NULL,
+    zipcode     VARCHAR(30)  NOT NULL,
+    city        VARCHAR(100) NOT NULL,
+    state       VARCHAR(100) NOT NULL,
+    country     VARCHAR(100) NOT NULL
+);
