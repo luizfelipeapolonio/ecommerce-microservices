@@ -18,7 +18,9 @@ public class SecurityConfiguration {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
       .csrf(AbstractHttpConfigurer::disable)
-      .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+      .authorizeHttpRequests(authorize -> authorize
+        .requestMatchers("/api/v1/customers/signup").permitAll()
+        .anyRequest().authenticated())
       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .oauth2ResourceServer(oauth2 -> oauth2
         .jwt(jwt -> jwt.jwtAuthenticationConverter(this.jwtAuthenticationConverter())))
