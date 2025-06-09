@@ -10,10 +10,10 @@ spring:
   cloud:
     gateway:
       routes:
-      - id: ecommerce-user-service
-        uri: lb://ECOMMERCE-USER-SERVICE
+      - id: ecommerce-customer-service
+        uri: lb://ECOMMERCE-CUSTOMER-SERVICE
         predicates:
-        - Path=/api/v1/users/**
+        - Path=/api/v1/customers/**
         filters:
         - TokenRelay=
 
