@@ -17,7 +17,10 @@ public class SecurityConfiguration {
   @Bean
   public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
     return http
-      .authorizeExchange(authorize -> authorize.anyExchange().authenticated())
+      .csrf(ServerHttpSecurity.CsrfSpec::disable)
+      .authorizeExchange(authorize -> authorize
+        .pathMatchers("/api/v1/customers/signup").permitAll()
+        .anyExchange().authenticated())
       .oauth2Login(Customizer.withDefaults())
       .securityMatcher(bearerAwareSecurityMatcher)
       .build();
