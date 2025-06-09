@@ -30,7 +30,7 @@ public class CustomerEntityMapper {
       .id(entity.getId())
       .email(entity.getEmail())
       .username(entity.getUsername())
-      .firstName(entity.getLastName())
+      .firstName(entity.getFirstName())
       .lastName(entity.getLastName())
       .createdAt(entity.getCreatedAt())
       .updatedAt(entity.getUpdatedAt())
