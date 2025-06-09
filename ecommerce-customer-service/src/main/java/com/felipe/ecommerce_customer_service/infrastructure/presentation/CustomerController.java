@@ -3,9 +3,12 @@ package com.felipe.ecommerce_customer_service.infrastructure.presentation;
 import com.felipe.ecommerce_customer_service.core.domain.Customer;
 import com.felipe.ecommerce_customer_service.core.application.usecases.CreateCustomerUseCase;
 import com.felipe.ecommerce_customer_service.infrastructure.dtos.CreateCustomerDTO;
+import com.felipe.ecommerce_customer_service.infrastructure.dtos.CustomerResponseDTO;
 import com.felipe.ecommerce_customer_service.infrastructure.mappers.CustomerDTOMapper;
+import com.felipe.response.ResponsePayload;
+import com.felipe.response.ResponseType;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,11 +28,20 @@ public class CustomerController {
 
   @PostMapping("/signup")
   @ResponseStatus(HttpStatus.CREATED)
-  public ResponseEntity<String> create(@RequestBody CreateCustomerDTO customerDTO) {
+  public ResponsePayload<CustomerResponseDTO> create(@RequestBody CreateCustomerDTO customerDTO) {
     Customer customer = this.dtoMapper.toDomain(customerDTO);
     Customer createdCustomer = this.createCustomerUseCase.execute(customer, customerDTO.password());
-    return ResponseEntity
-      .status(HttpStatus.CREATED)
-      .body("Cliente de email '" + createdCustomer.getEmail() + "' criado com sucesso!");
+
+    return new ResponsePayload.Builder<CustomerResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.CREATED)
+      .message("Conta criada com sucesso")
+      .payload(this.dtoMapper.toResponseDTO(createdCustomer))
+      .build();
+  }
+
+  @GetMapping("/test")
+  public String test() {
+    return "You accessed a protected resource";
   }
 }
