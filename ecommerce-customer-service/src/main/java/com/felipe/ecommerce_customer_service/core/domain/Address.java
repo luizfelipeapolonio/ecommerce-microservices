@@ -51,6 +51,10 @@ public class Address {
     return new Builder();
   }
 
+  public static Builder mutate(Address address) {
+    return new Builder(address);
+  }
+
   private Address(Builder builder) {
     this.id = builder.id;
     this.street = builder.street;
@@ -75,6 +79,18 @@ public class Address {
     private String country;
 
     private Builder() {}
+
+    private Builder(Address address) {
+      this.id = address.getId();
+      this.street = address.getStreet();
+      this.number = address.getNumber();
+      this.complement = address.getComplement();
+      this.district = address.getDistrict();
+      this.zipcode = address.getZipcode();
+      this.city = address.getCity();
+      this.state = address.getState();
+      this.country = address.getCountry();
+    }
 
     public Builder id(Long id) {
       this.id = id;

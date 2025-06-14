@@ -49,6 +49,10 @@ public class Customer {
     return new Builder();
   }
 
+  public static Builder mutate(Customer customer) {
+    return new Builder(customer);
+  }
+
   private Customer(Builder builder) {
     this.id = builder.id;
     this.email = builder.email;
@@ -71,6 +75,17 @@ public class Customer {
     private Address address;
 
     private Builder() {}
+
+    private Builder(Customer customer) {
+      this.id = customer.getId();
+      this.email = customer.getEmail();
+      this.username = customer.getUsername();
+      this.firstName = customer.getFirstName();
+      this.lastName = customer.getLastName();
+      this.createdAt = customer.getCreatedAt();
+      this.updatedAt = customer.getUpdatedAt();
+      this.address = customer.getAddress();
+    }
 
     public Builder id(UUID id) {
       this.id = id;
