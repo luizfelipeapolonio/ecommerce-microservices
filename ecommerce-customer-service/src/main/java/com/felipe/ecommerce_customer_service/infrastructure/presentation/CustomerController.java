@@ -16,6 +16,7 @@ import com.felipe.ecommerce_customer_service.infrastructure.mappers.AddressDTOMa
 import com.felipe.ecommerce_customer_service.infrastructure.mappers.CustomerDTOMapper;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -56,7 +57,7 @@ public class CustomerController {
 
   @PostMapping("/signup")
   @ResponseStatus(HttpStatus.CREATED)
-  public ResponsePayload<CustomerDTO> create(@RequestBody CreateCustomerDTO customerDTO) {
+  public ResponsePayload<CustomerDTO> create(@Valid @RequestBody CreateCustomerDTO customerDTO) {
     Customer customer = this.customerDTOMapper.toDomain(customerDTO);
     Customer createdCustomer = this.createCustomerUseCase.execute(customer, customerDTO.password());
 
@@ -98,7 +99,7 @@ public class CustomerController {
   @PostMapping("/profile/address")
   @ResponseStatus(HttpStatus.CREATED)
   public ResponsePayload<CustomerProfileDTO> insertAddress(@AuthenticationPrincipal Jwt jwt,
-                                                           @RequestBody AddressDTO addressDTO) {
+                                                           @Valid @RequestBody AddressDTO addressDTO) {
     Address address = this.addressDTOMapper.toDomain(addressDTO);
     Customer updatedCustomer = this.insertAddressUseCase.execute(jwt.getSubject(), address);
 
