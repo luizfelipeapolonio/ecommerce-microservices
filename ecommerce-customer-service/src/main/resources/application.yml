@@ -44,3 +44,13 @@ eureka:
 auth:
   server:
     internal-uri: http://localhost:8180/auth/internal/users
+
+springdoc:
+  override-with-generic-response: false
+  api-docs:
+    version: openapi_3_0
+    enabled: true
+    path: /customer-service/v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /customer-service/swagger-ui.html
