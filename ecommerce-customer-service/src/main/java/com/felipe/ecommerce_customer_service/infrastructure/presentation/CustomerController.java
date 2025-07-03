@@ -7,6 +7,7 @@ import com.felipe.ecommerce_customer_service.core.application.usecases.UpdateCus
 import com.felipe.ecommerce_customer_service.core.domain.Address;
 import com.felipe.ecommerce_customer_service.core.domain.Customer;
 import com.felipe.ecommerce_customer_service.core.application.usecases.CreateCustomerUseCase;
+import com.felipe.ecommerce_customer_service.infrastructure.config.openapi.CustomerApi;
 import com.felipe.ecommerce_customer_service.infrastructure.dtos.AddressDTO;
 import com.felipe.ecommerce_customer_service.infrastructure.dtos.CreateCustomerDTO;
 import com.felipe.ecommerce_customer_service.infrastructure.dtos.CustomerProfileDTO;
@@ -30,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/customers")
-public class CustomerController {
+public class CustomerController implements CustomerApi {
   private final CreateCustomerUseCase createCustomerUseCase;
   private final GetCustomerByEmailUseCase getCustomerByEmailUseCase;
   private final UpdateCustomerProfileUseCase updateCustomerProfileUseCase;
@@ -55,6 +56,7 @@ public class CustomerController {
     this.addressDTOMapper = addressDTOMapper;
   }
 
+  @Override
   @PostMapping("/signup")
   @ResponseStatus(HttpStatus.CREATED)
   public ResponsePayload<CustomerDTO> create(@Valid @RequestBody CreateCustomerDTO customerDTO) {
@@ -69,6 +71,7 @@ public class CustomerController {
       .build();
   }
 
+  @Override
   @GetMapping("/profile")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<CustomerProfileDTO> getAuthCustomerProfile(@AuthenticationPrincipal Jwt jwt) {
@@ -82,6 +85,7 @@ public class CustomerController {
       .build();
   }
 
+  @Override
   @PatchMapping("/profile")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<CustomerProfileDTO> updateCustomerProfile(@AuthenticationPrincipal Jwt jwt,
@@ -96,6 +100,7 @@ public class CustomerController {
       .build();
   }
 
+  @Override
   @PostMapping("/profile/address")
   @ResponseStatus(HttpStatus.CREATED)
   public ResponsePayload<CustomerProfileDTO> insertAddress(@AuthenticationPrincipal Jwt jwt,
@@ -111,6 +116,7 @@ public class CustomerController {
       .build();
   }
 
+  @Override
   @PatchMapping("/profile/address")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<CustomerProfileDTO> updateAddress(@AuthenticationPrincipal Jwt jwt,
