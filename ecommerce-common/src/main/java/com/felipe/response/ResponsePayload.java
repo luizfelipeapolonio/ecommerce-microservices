@@ -1,5 +1,6 @@
 package com.felipe.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 
@@ -42,6 +43,7 @@ public class ResponsePayload<T> {
    *
    * @return the response type as a String value
    */
+  @Schema(name = "type", type = "string")
   public String getType() {
     return this.type;
   }
@@ -51,6 +53,7 @@ public class ResponsePayload<T> {
    *
    * @return the HTTP status as an int value
    */
+  @Schema(name = "code", type = "integer", format = "int32")
   public int getCode() {
     return this.code;
   }
@@ -60,6 +63,7 @@ public class ResponsePayload<T> {
    *
    * @return the message as a String value
    */
+  @Schema(name = "message", type = "string")
   public String getMessage() {
     return this.message;
   }
@@ -69,6 +73,7 @@ public class ResponsePayload<T> {
    *
    * @return the payload of {@code T} type
    */
+  @Schema(name = "payload", type = "object")
   public T getPayload() {
     return this.payload;
   }

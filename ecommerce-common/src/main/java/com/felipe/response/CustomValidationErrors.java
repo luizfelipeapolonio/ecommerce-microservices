@@ -1,5 +1,6 @@
 package com.felipe.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.validation.FieldError;
 
 public class CustomValidationErrors {
@@ -7,7 +8,8 @@ public class CustomValidationErrors {
   private Object rejectedValue;
   private String cause;
 
-  public CustomValidationErrors() {}
+  public CustomValidationErrors() {
+  }
 
   public CustomValidationErrors(FieldError fieldError) {
     this.field = fieldError.getField();
@@ -15,6 +17,7 @@ public class CustomValidationErrors {
     this.cause = fieldError.getDefaultMessage();
   }
 
+  @Schema(name = "field", type = "string", example = "somevalue")
   public String getField() {
     return this.field;
   }
@@ -23,6 +26,7 @@ public class CustomValidationErrors {
     this.field = field;
   }
 
+  @Schema(name = "rejectedValue", type = "object", example = "abcd")
   public Object getRejectedValue() {
     return this.rejectedValue;
   }
@@ -31,6 +35,7 @@ public class CustomValidationErrors {
     this.rejectedValue = rejectedValue;
   }
 
+  @Schema(name = "cause", type = "string", example = "Somevalue must be at least 6 characters long")
   public String getCause() {
     return this.cause;
   }
