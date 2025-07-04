@@ -9,11 +9,22 @@ spring:
       enabled: ALWAYS
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+            allowedHeaders: "*"
       routes:
       - id: ecommerce-customer-service
         uri: lb://ECOMMERCE-CUSTOMER-SERVICE
         predicates:
-        - Path=/api/v1/customers/**
+        - Path=/api/v1/customers/**,/customer-service/v3/api-docs
         filters:
         - TokenRelay=
 
@@ -47,3 +58,11 @@ logging:
       springframework:
         cloud:
           gateway: DEBUG
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: E-commerce Gateway
+        url: /v3/api-docs
+      - name: E-commerce Customer Service
+        url: /customer-service/v3/api-docs
