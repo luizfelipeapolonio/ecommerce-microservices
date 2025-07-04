@@ -3,6 +3,7 @@ package com.felipe.ecommerce_gateway.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -13,13 +14,15 @@ import org.springframework.security.web.server.util.matcher.ServerWebExchangeMat
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
-
+  private static final String[] DOCS_WHITELIST = {"/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
+                                                  "/customer-service/v3/api-docs/**"};
   @Bean
   public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
     return http
       .csrf(ServerHttpSecurity.CsrfSpec::disable)
       .authorizeExchange(authorize -> authorize
         .pathMatchers("/api/v1/customers/signup").permitAll()
+        .pathMatchers(HttpMethod.GET, DOCS_WHITELIST).permitAll()
         .anyExchange().authenticated())
       .oauth2Login(Customizer.withDefaults())
       .securityMatcher(bearerAwareSecurityMatcher)
