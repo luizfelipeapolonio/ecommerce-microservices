@@ -24,6 +24,7 @@ public class SecurityConfiguration {
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers(HttpMethod.POST, "/api/v1/customers/signup").permitAll()
         .requestMatchers(HttpMethod.GET, DOCS_WHITELIST).permitAll()
+        .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
         .anyRequest().authenticated())
       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .oauth2ResourceServer(oauth2 -> oauth2
