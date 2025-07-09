@@ -3,6 +3,10 @@ package com.felipe.ecommerce_customer_service.infrastructure.gateway;
 import com.felipe.ecommerce_customer_service.core.application.exceptions.AuthServerException;
 import com.felipe.ecommerce_customer_service.core.application.gateway.AuthServerGateway;
 import com.felipe.ecommerce_customer_service.core.application.dtos.CustomerAuthDataDTO;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +29,8 @@ public class AuthServerGatewayImpl implements AuthServerGateway {
   }
 
   @Override
+  @CircuitBreaker(name = "createCustomerCircuitBreaker", fallbackMethod = "fallback")
+  @RateLimiter(name = "createCustomerCircuitBreaker", fallbackMethod = "fallback")
   public void registerCustomer(CustomerAuthDataDTO customerData) throws AuthServerException {
     try {
       String body = this.restClient
@@ -40,5 +46,15 @@ public class AuthServerGatewayImpl implements AuthServerGateway {
       this.logger.error("Auth Server rest client call -> {}", ex.getMessage());
       throw new AuthServerException("Ocorreu um erro ao se comunicar com o servidor", ex);
     }
+  }
+
+  private void fallback(CallNotPermittedException ex) {
+    this.logger.error("Circuitbreaker fallback -> {}", ex.getMessage());
+    throw ex;
+  }
+
+  private void fallback(RequestNotPermitted ex) {
+    this.logger.error("RateLimiter fallback -> {}", ex.getMessage());
+    throw ex;
   }
 }
