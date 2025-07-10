@@ -34,7 +34,12 @@ public interface CustomerApi {
       }),
       @ApiResponse(responseCode = "409", description = "Returns an error response if the given e-mail already exists", content = {
         @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
-          @ExampleObject(name = "Error response", ref = "EmailConflict")
+          @ExampleObject(name = "Error response", ref = "EmailConflictExample")
+        })
+      }),
+      @ApiResponse(responseCode = "429", description = "Returns an error response if there are too many requests in a given period of time", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
+          @ExampleObject(name = "Error response", ref = "TooManyRequestsExample")
         })
       }),
       @ApiResponse(responseCode = "422", ref = "ValidationErrors"),

@@ -203,10 +203,17 @@ public class OpenAPIConfiguration {
 
       // Examples
       this.apiUtils.createExample(
-        "EmailConflict",
+        "EmailConflictExample",
         ResponseType.ERROR,
         HttpStatus.CONFLICT,
         "E-mail 'john@email.com' already exists",
+        null
+      );
+      this.apiUtils.createExample(
+        "TooManyRequestsExample",
+        ResponseType.ERROR,
+        HttpStatus.TOO_MANY_REQUESTS,
+        "You have sent too many requests in a given amount of time. Please try again later",
         null
       );
       AddressDTO addressDTO = new AddressDTO(
