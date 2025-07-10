@@ -37,7 +37,7 @@ public class OpenApiUtils {
     return this.examples;
   }
 
-  public void createSchemaFromClass(String schemaName, ModelConverters modelConverterInstance, Class<? > clazz, SchemaCustomizer customizer) {
+  public void createSchemaFromClass(String schemaName, ModelConverters modelConverterInstance, Class<?> clazz, SchemaCustomizer customizer) {
     Schema<?> schema = modelConverterInstance.resolveAsResolvedSchema(new AnnotatedType(clazz)).schema;
     schema.setName(schemaName);
     schema.setType("object");
