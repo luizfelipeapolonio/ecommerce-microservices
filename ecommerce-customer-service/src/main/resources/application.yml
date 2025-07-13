@@ -36,8 +36,15 @@ spring:
 
 # === Actuator ===
 management:
-  endpoints.web.exposure.include: '*'
-  endpoint.health.show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
   health:
     circuitbreakers.enabled: true
     ratelimiters.enabled: true
