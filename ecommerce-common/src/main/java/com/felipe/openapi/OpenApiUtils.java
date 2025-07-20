@@ -1,12 +1,15 @@
 package com.felipe.openapi;
 
+import com.felipe.response.CustomValidationErrors;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
@@ -22,7 +25,7 @@ public class OpenApiUtils {
 
   public static final String SCHEMAS_REF = "#/components/schemas/";
 
-  public OpenApiUtils() {
+  private OpenApiUtils() {
   }
 
   public Map<String, Schema> getSchemas() {
@@ -77,5 +80,80 @@ public class OpenApiUtils {
     Example example = new Example();
     example.setValue(exampleObject);
     this.examples.put(exampleName, example);
+  }
+
+  public static OpenApiUtils getInstance() {
+    return new OpenApiUtils();
+  }
+
+  public static OpenApiUtils getInstanceWithCommonSchemas() {
+    return new OpenApiUtils().createCommonSchemas();
+  }
+
+  private OpenApiUtils createCommonSchemas() {
+    ModelConverters modelConverterInstance = ModelConverters.getInstance();
+    this.createSchemaFromClass(
+      "ResponsePayload<Void>",
+      modelConverterInstance,
+      ResponsePayload.class,
+      SchemaCustomizer.withDefaults()
+    );
+    this.createSchemaFromClass(
+      "CustomValidationErrors",
+      modelConverterInstance,
+      CustomValidationErrors.class,
+      SchemaCustomizer.withDefaults()
+    );
+    this.createSchema("ResponsePayload<List<CustomValidationErrors>>", schema -> {
+      schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+      schema.addAllOfItem(new ObjectSchema()
+        .addProperty("payload", new ArraySchema()
+          .items(new ObjectSchema().$ref(SCHEMAS_REF + "CustomValidationErrors"))));
+    });
+
+    // Global API response schemas
+    this.createApiResponse(
+      "ValidationErrors",
+      "Returns an error response with the fields validation errors",
+      "application/json",
+      schema -> {
+        final String schemaName = "ResponsePayload<List<CustomValidationErrors>>";
+        schema.setTitle(schemaName);
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + schemaName));
+        schema.addAllOfItem(new ObjectSchema()
+          .addProperty("type", new ObjectSchema().type("string").example("error")))
+          .addProperty("code", new ObjectSchema().type("integer").format("int32").example(422))
+          .addProperty("message", new ObjectSchema().type("string").example("Validation errors"));
+      }
+    );
+    this.createApiResponse(
+      "InternalServerError",
+      "Internal Server Error",
+      "application/json",
+      schema -> {
+        final String schemaName = "ResponsePayload<Void>";
+        schema.setTitle(schemaName);
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + schemaName));
+        schema.addAllOfItem(new ObjectSchema()
+          .addProperty("type", new ObjectSchema().type("string").example("error"))
+          .addProperty("code", new ObjectSchema().type("integer").format("int32").example(500))
+          .addProperty("message", new ObjectSchema().type("string").example("An internal server error occurred")))
+          .addProperty("payload", new ObjectSchema().example(null));
+      });
+    this.createApiResponse(
+      "NotFound",
+      "Resource not found",
+      "application/json",
+      schema -> {
+        final String schemaName = "ResponsePayload<Void>";
+        schema.setTitle(schemaName);
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + schemaName));
+        schema.addAllOfItem(new ObjectSchema()
+          .addProperty("type", new ObjectSchema().type("string").example("error"))
+          .addProperty("code", new ObjectSchema().type("integer").format("int32").example(404))
+          .addProperty("message", new ObjectSchema().type("string").example("Resource with name 'SomeName' not found")))
+          .addProperty("payload", new ObjectSchema().example(null));
+      });
+    return this;
   }
 }
