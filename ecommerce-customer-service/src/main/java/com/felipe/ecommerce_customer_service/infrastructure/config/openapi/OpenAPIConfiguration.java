@@ -31,7 +31,7 @@ import static com.felipe.openapi.OpenApiUtils.SCHEMAS_REF;
 @OpenAPIDefinition
 @Configuration
 public class OpenAPIConfiguration {
-  private final OpenApiUtils apiUtils = new OpenApiUtils();
+  private final OpenApiUtils apiUtils = OpenApiUtils.getInstance();
   public static final String BEARER_TOKEN_AUTH = "bearer_token_auth";
 
   @Bean
