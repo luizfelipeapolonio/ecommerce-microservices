@@ -15,6 +15,7 @@
         <module>ecommerce-gateway</module>
         <module>ecommerce-auth-server</module>
         <module>ecommerce-customer-service</module>
+        <module>ecommerce-inventory-service</module>
     </modules>
 
 </project>
