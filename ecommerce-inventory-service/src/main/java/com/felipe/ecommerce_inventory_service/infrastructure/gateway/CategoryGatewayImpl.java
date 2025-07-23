@@ -40,4 +40,11 @@ public class CategoryGatewayImpl implements CategoryGateway {
     subcategory.setParentCategory(this.entityMapper.toEntity(parentCategory));
     return this.entityMapper.toDomain(this.categoryRepository.save(subcategory));
   }
+
+  @Override
+  public Category updateCategory(Category category, String updatedName) {
+    CategoryEntity categoryEntity = this.entityMapper.toEntity(category);
+    categoryEntity.setName(updatedName);
+    return this.entityMapper.toDomain(this.categoryRepository.save(categoryEntity));
+  }
 }

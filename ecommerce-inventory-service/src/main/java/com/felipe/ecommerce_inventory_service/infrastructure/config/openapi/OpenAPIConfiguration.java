@@ -97,12 +97,18 @@ public class OpenAPIConfiguration {
         "Subcategoria '" + categoryWithParentCategory.name() + "' criada com sucesso",
         categoryWithParentCategory
       );
-
+      this.apiUtils.createExample(
+        "UpdateCategoryExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Category updated successfully",
+        categoryWithNoParentCategory
+      );
       this.apiUtils.createExample(
         "ExistingCategoryExample",
         ResponseType.ERROR,
         HttpStatus.CONFLICT,
-        "Category 'Hardware' already exists",
+        "Category 'hardware' already exists",
         null
       );
     };

@@ -3,8 +3,10 @@ package com.felipe.ecommerce_inventory_service.infrastructure.config.beans;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.CategoryGateway;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateSubcategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.UpdateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.CreateCategoryUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.CreateSubcategoryUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.UpdateCategoryUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,5 +26,10 @@ public class CategoryBeans {
   @Bean
   public CreateSubcategoryUseCase createSubcategoryUseCase() {
     return new CreateSubcategoryUseCaseImpl(categoryGateway);
+  }
+
+  @Bean
+  public UpdateCategoryUseCase updateCategoryUseCase() {
+    return new UpdateCategoryUseCaseImpl(categoryGateway);
   }
 }

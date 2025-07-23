@@ -1,11 +1,12 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.config.openapi;
 
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CategoryDTO;
-import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateCategoryDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateOrUpdateCategoryDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateSubcategoryDTO;
 import com.felipe.response.ResponsePayload;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -42,8 +44,8 @@ public interface CategoryApi {
     }
   )
   ResponsePayload<CategoryDTO> createCategory(
-    @Parameter(name = "CreateCategoryDTO", required = true)
-    @Valid @org.springframework.web.bind.annotation.RequestBody CreateCategoryDTO createCategoryDTO
+    @Parameter(name = "CreateOrUpdateCategoryDTO", required = true)
+    @Valid @org.springframework.web.bind.annotation.RequestBody CreateOrUpdateCategoryDTO createOrUpdateCategoryDTO
   );
 
   @Operation(
@@ -70,5 +72,33 @@ public interface CategoryApi {
   ResponsePayload<CategoryDTO> createSubcategory(
     @Parameter(name = "CreateSubcategoryDTO", required = true)
     @Valid @org.springframework.web.bind.annotation.RequestBody CreateSubcategoryDTO createSubcategoryDTO
+  );
+
+  @Operation(
+    operationId = "updateCategory",
+    summary = "Update a category",
+    description = "Update a category name",
+    requestBody = @RequestBody(description = "Request body to update a category name"),
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the updatedCategory", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<CategoryDTO>"), examples = {
+          @ExampleObject(name = "Success Response", ref = "UpdateCategoryExample")
+        })
+      }),
+      @ApiResponse(responseCode = "409", description = "Returns an error response if the given category name already exists", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
+          @ExampleObject(name = "Error response", ref = "ExistingCategoryExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "422", ref = "ValidationErrors"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<CategoryDTO> updateCategory(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Category id", schema = @Schema(type = "integer", format = "int64"), required = true)
+    @PathVariable Long id,
+    @Parameter(name = "CreateOrUpdatedCategoryDTO", required = true)
+    @Valid @org.springframework.web.bind.annotation.RequestBody CreateOrUpdateCategoryDTO createOrUpdateCategoryDTO
   );
 }

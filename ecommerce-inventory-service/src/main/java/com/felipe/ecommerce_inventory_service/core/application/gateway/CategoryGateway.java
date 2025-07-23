@@ -9,4 +9,5 @@ public interface CategoryGateway {
   Optional<Category> findCategoryByName(String name);
   Optional<Category> findCategoryById(Long id);
   Category createSubcategory(String subcategoryName, Category parentCategory);
+  Category updateCategory(Category category, String updatedName);
 }
