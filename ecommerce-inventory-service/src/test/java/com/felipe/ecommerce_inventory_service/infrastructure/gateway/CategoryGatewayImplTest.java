@@ -180,4 +180,34 @@ public class CategoryGatewayImplTest {
     verify(this.categoryRepository, times(1)).save(any(CategoryEntity.class));
     verify(this.categoryEntityMapper, times(1)).toDomain(subcategoryEntity);
   }
+
+  @Test
+  @DisplayName("updateCategorySuccess - Should successfully update a category")
+  void updateCategorySuccess() {
+    Category category = this.dataMock.getCategoriesDomain().getFirst();
+    CategoryEntity categoryEntity = this.dataMock.getCategoriesEntity().getFirst();
+    final String updatedCategoryName = "peripherals";
+    Category updatedCategoryDomain = Category.mutate(category).name(updatedCategoryName).build();
+
+    ArgumentCaptor<CategoryEntity> entityCaptor = ArgumentCaptor.forClass(CategoryEntity.class);
+
+    when(this.categoryEntityMapper.toEntity(category)).thenReturn(categoryEntity);
+    when(this.categoryRepository.save(entityCaptor.capture())).thenReturn(categoryEntity);
+    when(this.categoryEntityMapper.toDomain(categoryEntity)).thenReturn(updatedCategoryDomain);
+
+    Category updatedCategory = this.categoryGateway.updateCategory(category, updatedCategoryName);
+
+    // Argument captor assertion
+    assertThat(entityCaptor.getValue().getName()).isEqualTo(updatedCategoryName);
+    // updated category assertions
+    assertThat(updatedCategory.getId()).isEqualTo(updatedCategoryDomain.getId());
+    assertThat(updatedCategory.getName()).isEqualTo(updatedCategoryDomain.getName());
+    assertThat(updatedCategory.getCreatedAt()).isEqualTo(updatedCategoryDomain.getCreatedAt());
+    assertThat(updatedCategory.getUpdatedAt()).isEqualTo(updatedCategoryDomain.getUpdatedAt());
+    assertThat(updatedCategory.getParentCategory()).isEqualTo(updatedCategoryDomain.getParentCategory());
+
+    verify(this.categoryEntityMapper, times(1)).toEntity(category);
+    verify(this.categoryRepository, times(1)).save(categoryEntity);
+    verify(this.categoryEntityMapper, times(1)).toDomain(categoryEntity);
+  }
 }

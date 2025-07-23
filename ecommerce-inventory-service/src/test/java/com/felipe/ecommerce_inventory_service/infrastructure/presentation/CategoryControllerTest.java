@@ -5,9 +5,10 @@ import com.felipe.ecommerce_inventory_service.core.application.exceptions.Catego
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateSubcategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.UpdateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CategoryDTO;
-import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateCategoryDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateOrUpdateCategoryDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateSubcategoryDTO;
 import com.felipe.ecommerce_inventory_service.testutils.DataMock;
 import com.felipe.response.ResponseType;
@@ -25,6 +26,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,6 +52,9 @@ public class CategoryControllerTest {
   @MockitoBean
   CreateSubcategoryUseCase createSubcategoryUseCase;
 
+  @MockitoBean
+  UpdateCategoryUseCase updateCategoryUseCase;
+
   private DataMock dataMock;
   private static final String BASE_URL = "/api/v1/categories";
 
@@ -62,7 +67,7 @@ public class CategoryControllerTest {
   @DisplayName("createCategorySuccess - Should return a success ResponsePayload<CategoryDTO> response with the created category")
   void createCategorySuccess() throws Exception {
     Category category = this.dataMock.getCategoriesDomain().getFirst();
-    CreateCategoryDTO createCategoryDTO = new CreateCategoryDTO("Hardware");
+    CreateOrUpdateCategoryDTO createCategoryDTO = new CreateOrUpdateCategoryDTO("Hardware");
     String jsonRequestBody = this.objectMapper.writeValueAsString(createCategoryDTO);
 
     when(this.createCategoryUseCase.execute(createCategoryDTO.name())).thenReturn(category);
@@ -88,7 +93,7 @@ public class CategoryControllerTest {
   @Test
   @DisplayName("createCategoryFailsByCategoryAlreadyExistsException - Should return an error ResponsePayload<Void> response")
   void createCategoryFailsByCategoryAlreadyExistsException() throws Exception {
-    CreateCategoryDTO createCategoryDTO = new CreateCategoryDTO("Hardware");
+    CreateOrUpdateCategoryDTO createCategoryDTO = new CreateOrUpdateCategoryDTO("Hardware");
     String jsonRequestBody = this.objectMapper.writeValueAsString(createCategoryDTO);
 
     when(this.createCategoryUseCase.execute(createCategoryDTO.name()))
@@ -164,5 +169,36 @@ public class CategoryControllerTest {
 
     verify(this.createSubcategoryUseCase, times(1))
       .execute(subcategoryDTO.parentCategoryId(), subcategoryDTO.subcategoryName());
+  }
+
+  @Test
+  @DisplayName("updateCategorySuccess - Should return a success response with the updated category")
+  void updateCategorySuccess() throws Exception {
+    CreateOrUpdateCategoryDTO createOrUpdateCategoryDTO = new CreateOrUpdateCategoryDTO("peripherals");
+    String jsonRequestBody = this.objectMapper.writeValueAsString(createOrUpdateCategoryDTO);
+    Category category = Category.mutate(this.dataMock.getCategoriesDomain().getFirst())
+      .name(createOrUpdateCategoryDTO.name())
+      .build();
+    CategoryDTO categoryDTO = new CategoryDTO(category);
+
+    when(this.updateCategoryUseCase.execute(category.getId(), createOrUpdateCategoryDTO.name())).thenReturn(category);
+
+    this.mockMvc.perform(patch(BASE_URL + "/" + category.getId())
+      .contentType(APPLICATION_JSON).content(jsonRequestBody)
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("Categoria atualizada com sucesso"),
+        jsonPath("$.payload.id").value(categoryDTO.id()),
+        jsonPath("$.payload.name").value(categoryDTO.name()),
+        jsonPath("$.payload.createdAt").value(categoryDTO.createdAt()),
+        jsonPath("$.payload.updatedAt").value(categoryDTO.updatedAt()),
+        jsonPath("$.payload.parentCategory").hasJsonPath()
+      );
+
+    verify(this.updateCategoryUseCase, times(1))
+      .execute(category.getId(), createOrUpdateCategoryDTO.name());
   }
 }
