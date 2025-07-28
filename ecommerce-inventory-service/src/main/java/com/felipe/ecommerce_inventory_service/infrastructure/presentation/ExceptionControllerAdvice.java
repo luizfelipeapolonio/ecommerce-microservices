@@ -5,6 +5,7 @@ import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNo
 import com.felipe.response.CustomValidationErrors;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,6 +49,29 @@ public class ExceptionControllerAdvice {
     return new ResponsePayload.Builder<List<CustomValidationErrors>>()
       .type(ResponseType.ERROR)
       .code(HttpStatus.UNPROCESSABLE_ENTITY)
+      .message("Erros de validação")
+      .payload(errors)
+      .build();
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponsePayload<List<CustomValidationErrors>> handleConstraintViolationException(ConstraintViolationException ex) {
+    List<CustomValidationErrors> errors = ex.getConstraintViolations()
+      .stream()
+      .map(constraintViolation -> {
+        String field = constraintViolation.getPropertyPath().toString().split("\\.")[1];
+        CustomValidationErrors validationError = new CustomValidationErrors();
+        validationError.setField(field);
+        validationError.setRejectedValue(constraintViolation.getInvalidValue());
+        validationError.setCause(constraintViolation.getMessage());
+        return validationError;
+      })
+      .toList();
+
+    return new ResponsePayload.Builder<List<CustomValidationErrors>>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.BAD_REQUEST)
       .message("Erros de validação")
       .payload(errors)
       .build();

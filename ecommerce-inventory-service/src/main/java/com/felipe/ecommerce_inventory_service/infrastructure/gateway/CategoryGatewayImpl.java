@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.gateway;
 
+import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.CategoryGateway;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.infrastructure.mappers.CategoryEntityMapper;
@@ -7,6 +8,7 @@ import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entitie
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.repositories.CategoryRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -46,5 +48,20 @@ public class CategoryGatewayImpl implements CategoryGateway {
     CategoryEntity categoryEntity = this.entityMapper.toEntity(category);
     categoryEntity.setName(updatedName);
     return this.entityMapper.toDomain(this.categoryRepository.save(categoryEntity));
+  }
+
+  @Override
+  public List<CategoriesDTO> getAllCategories() {
+    return this.categoryRepository.findAll()
+      .stream()
+      .filter(category -> category.getParentCategory() == null)
+      .map(category -> {
+        Category parentCategory = this.entityMapper.toDomain(category);
+        List<Category> subcategories = category.getSubCategories() == null ?
+                                       List.of() :
+                                       category.getSubCategories().stream().map(this.entityMapper::toDomain).toList();
+        return new CategoriesDTO(parentCategory, subcategories);
+      })
+      .toList();
   }
 }

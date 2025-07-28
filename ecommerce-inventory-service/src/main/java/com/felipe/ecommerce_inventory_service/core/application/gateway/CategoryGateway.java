@@ -1,7 +1,9 @@
 package com.felipe.ecommerce_inventory_service.core.application.gateway;
 
+import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CategoryGateway {
@@ -10,4 +12,5 @@ public interface CategoryGateway {
   Optional<Category> findCategoryById(Long id);
   Category createSubcategory(String subcategoryName, Category parentCategory);
   Category updateCategory(Category category, String updatedName);
+  List<CategoriesDTO> getAllCategories();
 }
