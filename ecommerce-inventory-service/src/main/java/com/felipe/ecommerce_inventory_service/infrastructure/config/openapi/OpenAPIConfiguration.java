@@ -1,13 +1,18 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.config.openapi;
 
+import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
+import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CategoryDTO;
 import com.felipe.openapi.OpenApiUtils;
+import com.felipe.openapi.SchemaCustomizer;
+import com.felipe.response.CustomValidationErrors;
 import com.felipe.response.ResponseType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
@@ -17,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.felipe.openapi.OpenApiUtils.SCHEMAS_REF;
@@ -36,8 +42,8 @@ public class OpenAPIConfiguration {
         .description("This lists all the Inventory Service API calls.")
         .version("1.0.0"))
       .tags(List.of(new Tag()
-        .name("Inventory")
-        .description("All inventory operations")))
+        .name("Category")
+        .description("All category operations")))
       .components(new Components()
         .schemas(this.apiUtils.getSchemas())
         .responses(this.apiUtils.getResponses())
@@ -61,10 +67,32 @@ public class OpenAPIConfiguration {
           .addProperty("parentCategory", new ObjectSchema()
           .$ref(SCHEMAS_REF + "CategoryDTO"))
       );
+      this.apiUtils.createSchemaFromClass(
+        "CategoriesDTO",
+        modelConverterInstance,
+        CategoriesDTO.class,
+        SchemaCustomizer.withDefaults()
+      );
+      this.apiUtils.createSchema("CategoryDomainDTO", schema -> {
+        schema.addProperty("id", new ObjectSchema().type("integer").format("int64"));
+        schema.addProperty("name", new ObjectSchema().type("string"));
+        schema.addProperty("createdAt", new ObjectSchema().type("string"));
+        schema.addProperty("updatedAt", new ObjectSchema().type("string"));
+      });
       this.apiUtils.createSchema("ResponsePayload<CategoryDTO>", schema -> {
         schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
         schema.addAllOfItem(new ObjectSchema()
           .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "CategoryDTO")));
+      });
+      this.apiUtils.createSchema("ResponsePayload<List<CategoryDTO>>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema().addProperty("payload", new ArraySchema()
+            .items(new ObjectSchema().$ref(SCHEMAS_REF + "CategoryDTO"))));
+      });
+      this.apiUtils.createSchema("ResponsePayload<List<CategoriesDTO>>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema().addProperty("payload", new ArraySchema()
+          .items(new ObjectSchema().$ref(SCHEMAS_REF + "CategoriesDTO"))));
       });
 
       // Examples
@@ -82,6 +110,41 @@ public class OpenAPIConfiguration {
         "2025-07-18T21:12:28.978228256",
         categoryWithNoParentCategory
       );
+      Category category1 = Category.builder()
+        .id(1L)
+        .name("hardware")
+        .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+        .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+        .build();
+      Category subcategory1 = Category.builder()
+        .id(2L)
+        .name("motherboards")
+        .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+        .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+        .build();
+      Category subcategory2 = Category.builder()
+        .id(3L)
+        .name("cpus")
+        .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+        .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+        .build();
+      Category category2 = Category.builder()
+        .id(4L)
+        .name("peripherals")
+        .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+        .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+        .build();
+      Category subcategory3 = Category.builder()
+        .id(5L)
+        .name("mouse")
+        .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+        .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+        .build();
+
+      CustomValidationErrors validationErrors = new CustomValidationErrors();
+      validationErrors.setField("id");
+      validationErrors.setRejectedValue(-1);
+      validationErrors.setCause("id must not be zero or a negative number");
 
       this.apiUtils.createExample(
         "CategoryDTOWithNoSubcategoryExample",
@@ -94,7 +157,7 @@ public class OpenAPIConfiguration {
         "CreateSubcategoryExample",
         ResponseType.SUCCESS,
         HttpStatus.CREATED,
-        "Subcategoria '" + categoryWithParentCategory.name() + "' criada com sucesso",
+        "Subcategory '" + categoryWithParentCategory.name() + "' created successfully",
         categoryWithParentCategory
       );
       this.apiUtils.createExample(
@@ -110,6 +173,30 @@ public class OpenAPIConfiguration {
         HttpStatus.CONFLICT,
         "Category 'hardware' already exists",
         null
+      );
+      this.apiUtils.createExample(
+        "GetCategoryByIdExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Found category with id '" + categoryWithNoParentCategory.id() + "'",
+        categoryWithNoParentCategory
+      );
+      this.apiUtils.createExample(
+        "ConstraintViolationExample",
+        ResponseType.ERROR,
+        HttpStatus.BAD_REQUEST,
+        "Validation errors",
+        new CustomValidationErrors[] {validationErrors}
+      );
+      this.apiUtils.createExample(
+        "ListOfCategoriesExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "All categories",
+        List.of(
+          new CategoriesDTO(category1, List.of(subcategory1, subcategory2)),
+          new CategoriesDTO(category2, List.of(subcategory3))
+        )
       );
     };
   }

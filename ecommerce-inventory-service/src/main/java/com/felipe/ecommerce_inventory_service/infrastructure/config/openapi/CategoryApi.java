@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.config.openapi;
 
+import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CategoryDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateOrUpdateCategoryDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateSubcategoryDTO;
@@ -15,12 +16,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @SecurityRequirement(name = OpenAPIConfiguration.BEARER_TOKEN_AUTH)
-@Tag(name = "Inventory")
+@Tag(name = "Category")
 public interface CategoryApi {
 
   @Operation(
@@ -101,4 +105,43 @@ public interface CategoryApi {
     @Parameter(name = "CreateOrUpdatedCategoryDTO", required = true)
     @Valid @org.springframework.web.bind.annotation.RequestBody CreateOrUpdateCategoryDTO createOrUpdateCategoryDTO
   );
+
+  @Operation(
+    operationId = "getCategoryById",
+    summary = "Get a category",
+    description = "Get a specific category by id",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the found category", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<CategoryDTO"), examples = {
+          @ExampleObject(name = "Success response", ref = "GetCategoryByIdExample")
+        })
+      }),
+      @ApiResponse(responseCode = "400", description = "Returns an error response if the category id is zero or is not a positive number", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<List<CustomValidationErrors>>"), examples = {
+          @ExampleObject(name = "Error response", ref = "ConstraintViolationExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<CategoryDTO> getCategoryById(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Category id", schema = @Schema(type = "integer", format = "int64"), required = true)
+    @Positive(message = "O id da categoria não deve ser zero, nem valores negativos") @PathVariable Long id
+  );
+
+  @Operation(
+    operationId = "getAllCategories",
+    summary = "Get all categories",
+    description = "Get a list of all product categories",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the list of all product categories", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<List<CategoriesDTO>>"), examples = {
+          @ExampleObject(name = "Success response", ref = "ListOfCategoriesExample")
+        })
+      }),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<List<CategoriesDTO>> getAllCategories();
 }
