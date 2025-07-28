@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.gateway;
 
+import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.infrastructure.mappers.CategoryEntityMapper;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.CategoryEntity;
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -209,5 +211,43 @@ public class CategoryGatewayImplTest {
     verify(this.categoryEntityMapper, times(1)).toEntity(category);
     verify(this.categoryRepository, times(1)).save(categoryEntity);
     verify(this.categoryEntityMapper, times(1)).toDomain(categoryEntity);
+  }
+
+  @Test
+  @DisplayName("getAllCategoriesSuccess - Should successfully return a list of Category")
+  void getAllCategoriesSuccess() {
+    CategoryEntity category1 = this.dataMock.getCategoriesEntity().get(0);
+    CategoryEntity category2 = this.dataMock.getCategoriesEntity().get(1);
+    CategoryEntity category3 = this.dataMock.getCategoriesEntity().get(2);
+    CategoryEntity category4 = this.dataMock.getCategoriesEntity().get(3);
+    CategoryEntity category5 = this.dataMock.getCategoriesEntity().get(4);
+    List<Category> categoriesDomain = this.dataMock.getCategoriesDomain();
+
+    // Setting subcategories property
+    category1.setSubCategories(List.of(category2, category3));
+    category4.setSubCategories(List.of(category5));
+
+    List<CategoryEntity> categoriesEntity = List.of(category1, category2, category3, category4, category5);
+
+    when(this.categoryRepository.findAll()).thenReturn(categoriesEntity);
+    when(this.categoryEntityMapper.toDomain(categoriesEntity.get(0))).thenReturn(categoriesDomain.get(0));
+    when(this.categoryEntityMapper.toDomain(categoriesEntity.get(1))).thenReturn(categoriesDomain.get(1));
+    when(this.categoryEntityMapper.toDomain(categoriesEntity.get(2))).thenReturn(categoriesDomain.get(2));
+    when(this.categoryEntityMapper.toDomain(categoriesEntity.get(3))).thenReturn(categoriesDomain.get(3));
+    when(this.categoryEntityMapper.toDomain(categoriesEntity.get(4))).thenReturn(categoriesDomain.get(4));
+
+    List<CategoriesDTO> categories = this.categoryGateway.getAllCategories();
+
+    assertThat(categories.size()).isEqualTo(2);
+    assertThat(categories.get(0).subcategories().size()).isEqualTo(2);
+    assertThat(categories.get(1).subcategories().size()).isEqualTo(1);
+
+    verify(this.categoryRepository, times(1)).findAll();
+    verify(this.categoryEntityMapper, times(5)).toDomain(any(CategoryEntity.class));
+    verify(this.categoryEntityMapper, times(1)).toDomain(categoriesEntity.get(0));
+    verify(this.categoryEntityMapper, times(1)).toDomain(categoriesEntity.get(1));
+    verify(this.categoryEntityMapper, times(1)).toDomain(categoriesEntity.get(2));
+    verify(this.categoryEntityMapper, times(1)).toDomain(categoriesEntity.get(3));
+    verify(this.categoryEntityMapper, times(1)).toDomain(categoriesEntity.get(4));
   }
 }

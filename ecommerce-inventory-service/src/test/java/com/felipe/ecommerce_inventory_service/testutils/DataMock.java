@@ -40,8 +40,35 @@ public class DataMock {
       .parentCategory(category1)
       .build();
 
+    Category category3 = Category.builder()
+      .id(3L)
+      .name("cpus")
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .parentCategory(category1)
+      .build();
+
+    Category category4 = Category.builder()
+      .id(4L)
+      .name("peripherals")
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
+    Category category5 = Category.builder()
+      .id(5L)
+      .name("mouse")
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .parentCategory(category4)
+      .build();
+
+
     this.categoriesDomain.add(category1);
     this.categoriesDomain.add(category2);
+    this.categoriesDomain.add(category3);
+    this.categoriesDomain.add(category4);
+    this.categoriesDomain.add(category5);
   }
 
   private void createCategoriesEntityMock() {
@@ -58,7 +85,30 @@ public class DataMock {
     category2.setUpdatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"));
     category2.setParentCategory(category1);
 
+    CategoryEntity category3 = new CategoryEntity();
+    category3.setId(3L);
+    category3.setName("cpus");
+    category3.setCreatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"));
+    category3.setUpdatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"));
+    category3.setParentCategory(category1);
+
+    CategoryEntity category4 = new CategoryEntity();
+    category4.setId(4L);
+    category4.setName("peripherals");
+    category4.setCreatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"));
+    category4.setUpdatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"));
+
+    CategoryEntity category5 = new CategoryEntity();
+    category5.setId(5L);
+    category5.setName("mouse");
+    category5.setCreatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"));
+    category5.setUpdatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"));
+    category5.setParentCategory(category4);
+
     this.categoriesEntity.add(category1);
     this.categoriesEntity.add(category2);
+    this.categoriesEntity.add(category3);
+    this.categoriesEntity.add(category4);
+    this.categoriesEntity.add(category5);
   }
 }

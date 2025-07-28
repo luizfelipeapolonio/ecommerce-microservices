@@ -1,16 +1,20 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.CategoryAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateSubcategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.GetAllCategoriesUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.GetCategoryByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.UpdateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CategoryDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateOrUpdateCategoryDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateSubcategoryDTO;
 import com.felipe.ecommerce_inventory_service.testutils.DataMock;
+import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,9 +29,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
@@ -54,6 +62,12 @@ public class CategoryControllerTest {
 
   @MockitoBean
   UpdateCategoryUseCase updateCategoryUseCase;
+
+  @MockitoBean
+  GetCategoryByIdUseCase getCategoryByIdUseCase;
+
+  @MockitoBean
+  GetAllCategoriesUseCase getAllCategoriesUseCase;
 
   private DataMock dataMock;
   private static final String BASE_URL = "/api/v1/categories";
@@ -200,5 +214,57 @@ public class CategoryControllerTest {
 
     verify(this.updateCategoryUseCase, times(1))
       .execute(category.getId(), createOrUpdateCategoryDTO.name());
+  }
+
+  @Test
+  @DisplayName("getCategoryByIdSuccess - Should return a success response with the category")
+  void getCategoryByIdSuccess() throws Exception {
+    Category category = this.dataMock.getCategoriesDomain().getFirst();
+    CategoryDTO categoryDTO = new CategoryDTO(category);
+
+    when(this.getCategoryByIdUseCase.execute(category.getId())).thenReturn(category);
+
+    this.mockMvc.perform(get(BASE_URL + "/" + category.getId())
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("Categoria de id '" + category.getId() + "' encontrada"),
+        jsonPath("$.payload.id").value(categoryDTO.id()),
+        jsonPath("$.payload.name").value(categoryDTO.name()),
+        jsonPath("$.payload.createdAt").value(categoryDTO.createdAt()),
+        jsonPath("$.payload.updatedAt").value(categoryDTO.updatedAt()),
+        jsonPath("$.payload.parentCategory").hasJsonPath()
+      );
+
+    verify(this.getCategoryByIdUseCase, times(1)).execute(category.getId());
+  }
+
+  @Test
+  @DisplayName("getAllCategoriesSuccess - Should return a success response with a list of categories")
+  void getAllCategoriesSuccess() throws Exception {
+    List<Category> categoriesDomain = this.dataMock.getCategoriesDomain();
+    List<CategoriesDTO> categories = List.of(
+      new CategoriesDTO(categoriesDomain.get(0), List.of(categoriesDomain.get(1), categoriesDomain.get(2))),
+      new CategoriesDTO(categoriesDomain.get(3), List.of(categoriesDomain.get(4)))
+    );
+
+    ResponsePayload<List<CategoriesDTO>> response = new ResponsePayload.Builder<List<CategoriesDTO>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Todas as categorias")
+      .payload(categories)
+      .build();
+
+    String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.getAllCategoriesUseCase.execute()).thenReturn(categories);
+
+    this.mockMvc.perform(get(BASE_URL)
+      .accept(APPLICATION_JSON))
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.getAllCategoriesUseCase, times(1)).execute();
   }
 }
