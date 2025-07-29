@@ -64,4 +64,11 @@ public class CategoryGatewayImpl implements CategoryGateway {
       })
       .toList();
   }
+
+  @Override
+  public Category deleteCategory(Category category) {
+    CategoryEntity categoryEntity = this.entityMapper.toEntity(category);
+    this.categoryRepository.delete(categoryEntity);
+    return category;
+  }
 }

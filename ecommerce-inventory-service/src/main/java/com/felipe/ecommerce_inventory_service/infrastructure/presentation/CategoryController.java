@@ -3,6 +3,7 @@ package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateSubcategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.DeleteCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.GetAllCategoriesUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.GetCategoryByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.UpdateCategoryUseCase;
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,17 +39,20 @@ public class CategoryController implements CategoryApi {
   private final UpdateCategoryUseCase updateCategoryUseCase;
   private final GetCategoryByIdUseCase getCategoryByIdUseCase;
   private final GetAllCategoriesUseCase getAllCategoriesUseCase;
+  private final DeleteCategoryUseCase deleteCategoryUseCase;
 
   public CategoryController(CreateCategoryUseCase createCategoryUseCase,
                             CreateSubcategoryUseCase createSubcategoryUseCase,
                             UpdateCategoryUseCase updateCategoryUseCase,
                             GetCategoryByIdUseCase getCategoryByIdUseCase,
-                            GetAllCategoriesUseCase getAllCategoriesUseCase) {
+                            GetAllCategoriesUseCase getAllCategoriesUseCase,
+                            DeleteCategoryUseCase deleteCategoryUseCase) {
     this.createCategoryUseCase = createCategoryUseCase;
     this.createSubcategoryUseCase = createSubcategoryUseCase;
     this.updateCategoryUseCase = updateCategoryUseCase;
     this.getCategoryByIdUseCase = getCategoryByIdUseCase;
     this.getAllCategoriesUseCase = getAllCategoriesUseCase;
+    this.deleteCategoryUseCase = deleteCategoryUseCase;
   }
 
   @Override
@@ -80,7 +85,8 @@ public class CategoryController implements CategoryApi {
   @Override
   @PatchMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public ResponsePayload<CategoryDTO> updateCategory(@PathVariable Long id,
+  public ResponsePayload<CategoryDTO> updateCategory(@Positive(message = "O id da categoria não deve ser zero, nem valores negativos")
+                                                     @PathVariable Long id,
                                                      @Valid @RequestBody CreateOrUpdateCategoryDTO categoryDTO) {
     Category updatedCategory = this.updateCategoryUseCase.execute(id, categoryDTO.name());
     return new ResponsePayload.Builder<CategoryDTO>()
@@ -115,6 +121,20 @@ public class CategoryController implements CategoryApi {
       .code(HttpStatus.OK)
       .message("Todas as categorias")
       .payload(categories)
+      .build();
+  }
+
+  @Override
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<Void> deleteCategory(@Positive(message = "O id da categoria não deve ser zero, nem valores negativos")
+                                              @PathVariable Long id) {
+    Category deletedCategory = this.deleteCategoryUseCase.execute(id);
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Categoria '" + deletedCategory.getName() + "' excluída com sucesso")
+      .payload(null)
       .build();
   }
 }
