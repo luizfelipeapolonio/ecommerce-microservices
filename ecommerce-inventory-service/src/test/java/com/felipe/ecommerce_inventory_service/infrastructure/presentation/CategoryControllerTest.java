@@ -6,6 +6,7 @@ import com.felipe.ecommerce_inventory_service.core.application.exceptions.Catego
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateSubcategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.DeleteCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.GetAllCategoriesUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.GetCategoryByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.UpdateCategoryUseCase;
@@ -32,6 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -68,6 +70,9 @@ public class CategoryControllerTest {
 
   @MockitoBean
   GetAllCategoriesUseCase getAllCategoriesUseCase;
+
+  @MockitoBean
+  DeleteCategoryUseCase deleteCategoryUseCase;
 
   private DataMock dataMock;
   private static final String BASE_URL = "/api/v1/categories";
@@ -266,5 +271,25 @@ public class CategoryControllerTest {
       .andExpectAll(status().isOk(), content().json(jsonResponseBody));
 
     verify(this.getAllCategoriesUseCase, times(1)).execute();
+  }
+
+  @Test
+  @DisplayName("deleteCategorySuccess - Should return a success response with the deleted category name")
+  void deleteCategorySuccess() throws Exception {
+    Category category = this.dataMock.getCategoriesDomain().getFirst();
+
+    when(this.deleteCategoryUseCase.execute(category.getId())).thenReturn(category);
+
+    this.mockMvc.perform(delete(BASE_URL + "/" + category.getId())
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("Categoria '" + category.getName() + "' excluída com sucesso"),
+        jsonPath("$.payload").isEmpty()
+      );
+
+    verify(this.deleteCategoryUseCase, times(1)).execute(category.getId());
   }
 }

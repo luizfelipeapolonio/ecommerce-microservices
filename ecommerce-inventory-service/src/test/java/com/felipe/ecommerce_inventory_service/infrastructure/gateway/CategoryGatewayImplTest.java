@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -249,5 +250,34 @@ public class CategoryGatewayImplTest {
     verify(this.categoryEntityMapper, times(1)).toDomain(categoriesEntity.get(2));
     verify(this.categoryEntityMapper, times(1)).toDomain(categoriesEntity.get(3));
     verify(this.categoryEntityMapper, times(1)).toDomain(categoriesEntity.get(4));
+  }
+
+  @Test
+  @DisplayName("deleteCategorySuccess - Should successfully delete a category and return the deleted category")
+  void deleteCategorySuccess() {
+    Category categoryDomain = this.dataMock.getCategoriesDomain().getFirst();
+    CategoryEntity categoryEntity = this.dataMock.getCategoriesEntity().getFirst();
+    ArgumentCaptor<CategoryEntity> entityCaptor = ArgumentCaptor.forClass(CategoryEntity.class);
+
+    when(this.categoryEntityMapper.toEntity(categoryDomain)).thenReturn(categoryEntity);
+    doNothing().when(this.categoryRepository).delete(entityCaptor.capture());
+
+    Category deletedCategory = this.categoryGateway.deleteCategory(categoryDomain);
+
+    // argument captor assertions
+    assertThat(entityCaptor.getValue().getId()).isEqualTo(categoryEntity.getId());
+    assertThat(entityCaptor.getValue().getName()).isEqualTo(categoryEntity.getName());
+    assertThat(entityCaptor.getValue().getCreatedAt()).isEqualTo(categoryEntity.getCreatedAt());
+    assertThat(entityCaptor.getValue().getUpdatedAt()).isEqualTo(categoryEntity.getUpdatedAt());
+    assertThat(entityCaptor.getValue().getParentCategory()).isEqualTo(categoryEntity.getParentCategory());
+    // deleted category assertions
+    assertThat(deletedCategory.getId()).isEqualTo(categoryDomain.getId());
+    assertThat(deletedCategory.getName()).isEqualTo(categoryDomain.getName());
+    assertThat(deletedCategory.getCreatedAt()).isEqualTo(categoryDomain.getCreatedAt());
+    assertThat(deletedCategory.getUpdatedAt()).isEqualTo(categoryDomain.getUpdatedAt());
+    assertThat(deletedCategory.getParentCategory()).isEqualTo(categoryDomain.getParentCategory());
+
+    verify(this.categoryEntityMapper, times(1)).toEntity(categoryDomain);
+    verify(this.categoryRepository, times(1)).delete(categoryEntity);
   }
 }
