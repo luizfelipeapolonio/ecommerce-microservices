@@ -198,6 +198,13 @@ public class OpenAPIConfiguration {
           new CategoriesDTO(category2, List.of(subcategory3))
         )
       );
+      this.apiUtils.createExample(
+        "DeleteCategoryExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Category 'hardware' deleted successfully",
+        null
+      );
     };
   }
 }

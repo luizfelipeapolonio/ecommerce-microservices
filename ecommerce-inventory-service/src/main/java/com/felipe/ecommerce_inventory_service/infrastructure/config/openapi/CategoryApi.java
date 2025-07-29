@@ -94,6 +94,11 @@ public interface CategoryApi {
           @ExampleObject(name = "Error response", ref = "ExistingCategoryExample")
         })
       }),
+      @ApiResponse(responseCode = "400", description = "Returns an error response if the category id is zero or is not a positive number", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<List<CustomValidationErrors>>"), examples = {
+          @ExampleObject(name = "Error response", ref = "ConstraintViolationExample")
+        })
+      }),
       @ApiResponse(responseCode = "404", ref = "NotFound"),
       @ApiResponse(responseCode = "422", ref = "ValidationErrors"),
       @ApiResponse(responseCode = "500", ref = "InternalServerError")
@@ -101,7 +106,7 @@ public interface CategoryApi {
   )
   ResponsePayload<CategoryDTO> updateCategory(
     @Parameter(in = ParameterIn.PATH, name = "id", description = "Category id", schema = @Schema(type = "integer", format = "int64"), required = true)
-    @PathVariable Long id,
+    @Positive(message = "O id da categoria não deve ser zero, nem valores negativos") @PathVariable Long id,
     @Parameter(name = "CreateOrUpdatedCategoryDTO", required = true)
     @Valid @org.springframework.web.bind.annotation.RequestBody CreateOrUpdateCategoryDTO createOrUpdateCategoryDTO
   );
@@ -144,4 +149,28 @@ public interface CategoryApi {
     }
   )
   ResponsePayload<List<CategoriesDTO>> getAllCategories();
+
+  @Operation(
+    operationId = "deleteCategory",
+    summary = "Delete a category",
+    description = "Delete a product category",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the deleted category name", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
+          @ExampleObject(name = "Success response", ref = "DeleteCategoryExample")
+        })
+      }),
+      @ApiResponse(responseCode = "400", description = "Returns an error response if the category id is zero or is not a positive number", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<List<CustomValidationErrors>>"), examples = {
+          @ExampleObject(name = "Error response", ref = "ConstraintViolationExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<Void> deleteCategory(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Category id", schema = @Schema(type = "integer", format = "int64"), required = true)
+    @Positive(message = "O id da categoria não deve ser zero, nem valores negativos") @PathVariable Long id
+  );
 }
