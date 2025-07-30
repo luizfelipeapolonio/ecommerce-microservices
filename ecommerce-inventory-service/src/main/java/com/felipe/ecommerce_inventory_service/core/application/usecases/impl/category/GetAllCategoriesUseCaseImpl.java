@@ -1,8 +1,8 @@
-package com.felipe.ecommerce_inventory_service.core.application.usecases.impl;
+package com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.CategoryGateway;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.GetAllCategoriesUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetAllCategoriesUseCase;
 
 import java.util.List;
 

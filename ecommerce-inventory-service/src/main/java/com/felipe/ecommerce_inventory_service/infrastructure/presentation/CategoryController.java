@@ -1,12 +1,12 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateCategoryUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateSubcategoryUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.DeleteCategoryUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.GetAllCategoriesUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.GetCategoryByIdUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.UpdateCategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.CreateCategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.CreateSubcategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.DeleteCategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetAllCategoriesUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetCategoryByIdUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.UpdateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.infrastructure.config.openapi.CategoryApi;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CategoryDTO;

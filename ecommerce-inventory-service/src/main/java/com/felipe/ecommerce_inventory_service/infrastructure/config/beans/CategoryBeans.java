@@ -1,18 +1,18 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.config.beans;
 
 import com.felipe.ecommerce_inventory_service.core.application.gateway.CategoryGateway;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateCategoryUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.CreateSubcategoryUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.DeleteCategoryUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.GetAllCategoriesUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.GetCategoryByIdUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.UpdateCategoryUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.CreateCategoryUseCaseImpl;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.CreateSubcategoryUseCaseImpl;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.DeleteCategoryUseCaseImpl;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.GetAllCategoriesUseCaseImpl;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.GetCategoryByIdUseCaseImpl;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.UpdateCategoryUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.CreateCategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.CreateSubcategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.DeleteCategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetAllCategoriesUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetCategoryByIdUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.UpdateCategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category.CreateCategoryUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category.CreateSubcategoryUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category.DeleteCategoryUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category.GetAllCategoriesUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category.GetCategoryByIdUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category.UpdateCategoryUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

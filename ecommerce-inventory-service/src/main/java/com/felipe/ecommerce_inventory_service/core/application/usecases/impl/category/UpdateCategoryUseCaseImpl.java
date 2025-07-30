@@ -1,9 +1,9 @@
-package com.felipe.ecommerce_inventory_service.core.application.usecases.impl;
+package com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category;
 
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.CategoryAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.CategoryGateway;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.UpdateCategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.UpdateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 
 import java.util.Optional;

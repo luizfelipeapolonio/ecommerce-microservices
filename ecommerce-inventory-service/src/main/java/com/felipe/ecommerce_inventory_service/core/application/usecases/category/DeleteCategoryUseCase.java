@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_inventory_service.core.application.usecases;
+package com.felipe.ecommerce_inventory_service.core.application.usecases.category;
 
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 

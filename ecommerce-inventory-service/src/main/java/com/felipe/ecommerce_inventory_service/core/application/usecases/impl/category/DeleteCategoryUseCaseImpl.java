@@ -1,8 +1,8 @@
-package com.felipe.ecommerce_inventory_service.core.application.usecases.impl;
+package com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category;
 
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.CategoryGateway;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.DeleteCategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.DeleteCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 
 public class DeleteCategoryUseCaseImpl implements DeleteCategoryUseCase {
