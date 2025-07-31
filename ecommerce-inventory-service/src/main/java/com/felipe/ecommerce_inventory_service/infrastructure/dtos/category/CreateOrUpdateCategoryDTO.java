@@ -11,6 +11,8 @@ public record CreateOrUpdateCategoryDTO(
   String name
 ) {
   public CreateOrUpdateCategoryDTO {
-    name = name.toLowerCase();
+    if(name != null) {
+      name = name.toLowerCase();
+    }
   }
 }
