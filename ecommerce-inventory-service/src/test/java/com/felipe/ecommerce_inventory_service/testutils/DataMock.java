@@ -1,6 +1,8 @@
 package com.felipe.ecommerce_inventory_service.testutils;
 
+import com.felipe.ecommerce_inventory_service.core.domain.Brand;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
+import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.BrandEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.CategoryEntity;
 
 import java.time.LocalDateTime;
@@ -10,10 +12,14 @@ import java.util.List;
 public class DataMock {
   private final List<Category> categoriesDomain = new ArrayList<>();
   private final List<CategoryEntity> categoriesEntity = new ArrayList<>();
+  private final List<Brand> brandsDomain = new ArrayList<>();
+  private final List<BrandEntity> brandsEntity = new ArrayList<>();
 
   public DataMock() {
     this.createCategoriesDomainMock();
     this.createCategoriesEntityMock();
+    this.createBrandsDomainMock();
+    this.createBrandsEntityMock();
   }
 
   public List<Category> getCategoriesDomain() {
@@ -22,6 +28,14 @@ public class DataMock {
 
   public List<CategoryEntity> getCategoriesEntity() {
     return this.categoriesEntity;
+  }
+
+  public List<Brand> getBrandsDomain() {
+    return this.brandsDomain;
+  }
+
+  public List<BrandEntity> getBrandsEntity() {
+    return this.brandsEntity;
   }
 
   private void createCategoriesDomainMock() {
@@ -110,5 +124,29 @@ public class DataMock {
     this.categoriesEntity.add(category3);
     this.categoriesEntity.add(category4);
     this.categoriesEntity.add(category5);
+  }
+
+  private void createBrandsDomainMock() {
+    Brand brand1 = Brand.builder()
+      .id(1L)
+      .name("logitech")
+      .description("A great gamer brand")
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
+    this.brandsDomain.add(brand1);
+  }
+
+  private void createBrandsEntityMock() {
+    BrandEntity brand1 = BrandEntity.builder()
+      .id(1L)
+      .name("logitech")
+      .description("A great gamer brand")
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
+    this.brandsEntity.add(brand1);
   }
 }
