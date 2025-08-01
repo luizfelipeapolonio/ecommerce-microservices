@@ -2,7 +2,10 @@ package com.felipe.ecommerce_inventory_service.infrastructure.config.openapi;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.BrandDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.CreateOrUpdateBrandDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CategoryDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateOrUpdateCategoryDTO;
 import com.felipe.openapi.OpenApiUtils;
 import com.felipe.openapi.SchemaCustomizer;
 import com.felipe.response.CustomValidationErrors;
@@ -41,9 +44,10 @@ public class OpenAPIConfiguration {
         .title("Inventory Service API")
         .description("This lists all the Inventory Service API calls.")
         .version("1.0.0"))
-      .tags(List.of(new Tag()
-        .name("Category")
-        .description("All category operations")))
+      .tags(List.of(
+        new Tag().name("Category").description("All category operations"),
+        new Tag().name("Brand").description("All brand operations")
+      ))
       .components(new Components()
         .schemas(this.apiUtils.getSchemas())
         .responses(this.apiUtils.getResponses())
@@ -73,6 +77,18 @@ public class OpenAPIConfiguration {
         CategoriesDTO.class,
         SchemaCustomizer.withDefaults()
       );
+      this.apiUtils.createSchemaFromClass(
+        "CreateOrUpdateBrandDTO",
+        modelConverterInstance,
+        CreateOrUpdateBrandDTO.class,
+        SchemaCustomizer.withDefaults()
+      );
+      this.apiUtils.createSchemaFromClass(
+        "BrandDTO",
+        modelConverterInstance,
+        BrandDTO.class,
+        SchemaCustomizer.withDefaults()
+      );
       this.apiUtils.createSchema("CategoryDomainDTO", schema -> {
         schema.addProperty("id", new ObjectSchema().type("integer").format("int64"));
         schema.addProperty("name", new ObjectSchema().type("string"));
@@ -93,6 +109,11 @@ public class OpenAPIConfiguration {
         schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
         schema.addAllOfItem(new ObjectSchema().addProperty("payload", new ArraySchema()
           .items(new ObjectSchema().$ref(SCHEMAS_REF + "CategoriesDTO"))));
+      });
+      this.apiUtils.createSchema("ResponsePayload<BrandDTO>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema()
+          .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "BrandDTO")));
       });
 
       // Examples
@@ -145,6 +166,14 @@ public class OpenAPIConfiguration {
       validationErrors.setField("id");
       validationErrors.setRejectedValue(-1);
       validationErrors.setCause("id must not be zero or a negative number");
+
+      BrandDTO brandDTO = new BrandDTO(
+        1L,
+        "logitech",
+        "A great brand",
+        "2025-07-18T21:12:28.978228256",
+        "2025-07-18T21:12:28.978228256"
+      );
 
       this.apiUtils.createExample(
         "CategoryDTOWithNoSubcategoryExample",
@@ -203,6 +232,20 @@ public class OpenAPIConfiguration {
         ResponseType.SUCCESS,
         HttpStatus.OK,
         "Category 'hardware' deleted successfully",
+        null
+      );
+      this.apiUtils.createExample(
+        "CreateBrandExample",
+        ResponseType.SUCCESS,
+        HttpStatus.CREATED,
+        "Brand '" + brandDTO.name() + "' created successfully",
+        brandDTO
+      );
+      this.apiUtils.createExample(
+        "ExistingBrandExample",
+        ResponseType.ERROR,
+        HttpStatus.CONFLICT,
+        "Brand 'logitech' already exists",
         null
       );
     };
