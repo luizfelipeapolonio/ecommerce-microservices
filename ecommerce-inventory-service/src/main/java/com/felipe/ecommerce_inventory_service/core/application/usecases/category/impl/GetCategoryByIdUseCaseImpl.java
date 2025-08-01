@@ -1,21 +1,20 @@
-package com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category;
+package com.felipe.ecommerce_inventory_service.core.application.usecases.category.impl;
 
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.CategoryGateway;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.category.DeleteCategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetCategoryByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 
-public class DeleteCategoryUseCaseImpl implements DeleteCategoryUseCase {
+public class GetCategoryByIdUseCaseImpl implements GetCategoryByIdUseCase {
   private final CategoryGateway categoryGateway;
 
-  public DeleteCategoryUseCaseImpl(CategoryGateway categoryGateway) {
+  public GetCategoryByIdUseCaseImpl(CategoryGateway categoryGateway) {
     this.categoryGateway = categoryGateway;
   }
 
   @Override
   public Category execute(Long id) {
-    Category category = this.categoryGateway.findCategoryById(id)
+    return this.categoryGateway.findCategoryById(id)
       .orElseThrow(() -> new DataNotFoundException("Categoria de id '" + id + "' não encontrada"));
-    return this.categoryGateway.deleteCategory(category);
   }
 }

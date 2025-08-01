@@ -2,7 +2,7 @@ package com.felipe.ecommerce_inventory_service.core.application.usecases.brand;
 
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.BrandAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.BrandGateway;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.brand.CreateBrandUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl.CreateBrandUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.domain.Brand;
 import com.felipe.ecommerce_inventory_service.testutils.DataMock;
 import org.junit.jupiter.api.BeforeEach;

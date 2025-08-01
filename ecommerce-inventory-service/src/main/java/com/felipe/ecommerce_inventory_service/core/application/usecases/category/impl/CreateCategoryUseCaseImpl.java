@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category;
+package com.felipe.ecommerce_inventory_service.core.application.usecases.category.impl;
 
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.CategoryAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.CategoryGateway;

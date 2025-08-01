@@ -2,7 +2,7 @@ package com.felipe.ecommerce_inventory_service.core.application.usecases.categor
 
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.CategoryAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.CategoryGateway;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.category.CreateCategoryUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.impl.CreateCategoryUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.testutils.DataMock;
 import org.junit.jupiter.api.BeforeEach;

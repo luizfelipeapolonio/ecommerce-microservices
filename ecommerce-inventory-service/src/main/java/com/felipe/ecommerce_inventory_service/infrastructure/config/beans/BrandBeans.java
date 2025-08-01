@@ -2,7 +2,7 @@ package com.felipe.ecommerce_inventory_service.infrastructure.config.beans;
 
 import com.felipe.ecommerce_inventory_service.core.application.gateway.BrandGateway;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.CreateBrandUseCase;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.impl.brand.CreateBrandUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl.CreateBrandUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

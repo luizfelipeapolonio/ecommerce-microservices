@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_inventory_service.core.application.usecases.impl.brand;
+package com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl;
 
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.BrandAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.BrandGateway;
