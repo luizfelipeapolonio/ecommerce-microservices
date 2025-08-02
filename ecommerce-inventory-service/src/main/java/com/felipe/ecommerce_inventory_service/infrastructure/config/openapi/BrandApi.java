@@ -5,6 +5,7 @@ import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.CreateOr
 import com.felipe.response.ResponsePayload;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,6 +14,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -43,5 +48,39 @@ public interface BrandApi {
   ResponsePayload<BrandDTO> createBrand(
     @Parameter(name = "CreateOrUpdateBrandDTO", required = true)
     @Valid @org.springframework.web.bind.annotation.RequestBody CreateOrUpdateBrandDTO brandDTO
+  );
+
+  @Operation(
+    operationId = "getAllBrands",
+    summary = "Get all brands",
+    description = "Get a list of all product brands",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with a list of all product brands", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<List<BrandDTO>>"), examples = {
+          @ExampleObject(name = "Success response", ref = "GetAllBrandsExample")
+        })
+      }),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<List<BrandDTO>> getAllBrands();
+
+  @Operation(
+    operationId = "getBrandById",
+    summary = "Get a brand by id",
+    description = "Get a specific product brand by id",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the found brand", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<BrandDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "GetBrandByIdExample")
+        })
+      }),
+      @ApiResponse(responseCode = "400", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<BrandDTO> getBrandById(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Brand id", schema = @Schema(type = "integer", format = "int64"), required = true)
+    @Positive(message = "O id da categoria não deve ser zero, nem valores negativos") @PathVariable Long id
   );
 }

@@ -115,6 +115,11 @@ public class OpenAPIConfiguration {
         schema.addAllOfItem(new ObjectSchema()
           .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "BrandDTO")));
       });
+      this.apiUtils.createSchema("ResponsePayload<List<BrandDTO>>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema().addProperty("payload", new ArraySchema()
+          .items(new ObjectSchema().$ref(SCHEMAS_REF + "BrandDTO"))));
+      });
 
       // Examples
       CategoryDTO categoryWithNoParentCategory = new CategoryDTO(
@@ -167,9 +172,23 @@ public class OpenAPIConfiguration {
       validationErrors.setRejectedValue(-1);
       validationErrors.setCause("id must not be zero or a negative number");
 
-      BrandDTO brandDTO = new BrandDTO(
+      BrandDTO brand1 = new BrandDTO(
         1L,
         "logitech",
+        "A great brand",
+        "2025-07-18T21:12:28.978228256",
+        "2025-07-18T21:12:28.978228256"
+      );
+      BrandDTO brand2 = new BrandDTO(
+        2L,
+        "nvidia",
+        "A great brand",
+        "2025-07-18T21:12:28.978228256",
+        "2025-07-18T21:12:28.978228256"
+      );
+      BrandDTO brand3 = new BrandDTO(
+        3L,
+        "corsair",
         "A great brand",
         "2025-07-18T21:12:28.978228256",
         "2025-07-18T21:12:28.978228256"
@@ -238,8 +257,8 @@ public class OpenAPIConfiguration {
         "CreateBrandExample",
         ResponseType.SUCCESS,
         HttpStatus.CREATED,
-        "Brand '" + brandDTO.name() + "' created successfully",
-        brandDTO
+        "Brand '" + brand1.name() + "' created successfully",
+        brand1
       );
       this.apiUtils.createExample(
         "ExistingBrandExample",
@@ -247,6 +266,20 @@ public class OpenAPIConfiguration {
         HttpStatus.CONFLICT,
         "Brand 'logitech' already exists",
         null
+      );
+      this.apiUtils.createExample(
+        "GetAllBrandsExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "All brands",
+        List.of(brand1, brand2, brand3)
+      );
+      this.apiUtils.createExample(
+        "GetBrandByIdExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Found brand with id '" + brand1.id() + "'",
+        brand1
       );
     };
   }
