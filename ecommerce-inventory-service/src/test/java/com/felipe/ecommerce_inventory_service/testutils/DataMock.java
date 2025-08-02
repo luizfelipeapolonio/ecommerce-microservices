@@ -134,8 +134,24 @@ public class DataMock {
       .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
       .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
       .build();
+    Brand brand2 = Brand.builder()
+      .id(2L)
+      .name("nvidia")
+      .description("A great brand")
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+    Brand brand3 = Brand.builder()
+      .id(3L)
+      .name("corsair")
+      .description("A great brand")
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
 
     this.brandsDomain.add(brand1);
+    this.brandsDomain.add(brand2);
+    this.brandsDomain.add(brand3);
   }
 
   private void createBrandsEntityMock() {
@@ -146,7 +162,23 @@ public class DataMock {
       .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
       .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
       .build();
+    BrandEntity brand2 = BrandEntity.builder()
+      .id(2L)
+      .name("nvidia")
+      .description("A great brand")
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+    BrandEntity brand3 = BrandEntity.builder()
+      .id(3L)
+      .name("corsair")
+      .description("A great brand")
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
 
     this.brandsEntity.add(brand1);
+    this.brandsEntity.add(brand2);
+    this.brandsEntity.add(brand3);
   }
 }

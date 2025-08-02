@@ -14,6 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,5 +65,73 @@ public class BrandGatewayImplTest {
 
     verify(this.brandRepository, times(1)).save(any(BrandEntity.class));
     verify(this.brandEntityMapper, times(1)).toDomain(brandEntity);
+  }
+
+  @Test
+  @DisplayName("getBrandByNameSuccess - Should successfully find a brand by name and return an Optional of Brand")
+  void getBrandByNameSuccess() {
+    BrandEntity brandEntity = this.dataMock.getBrandsEntity().getFirst();
+    Brand brandDomain = this.dataMock.getBrandsDomain().getFirst();
+
+    when(this.brandRepository.findByName(brandEntity.getName())).thenReturn(Optional.of(brandEntity));
+    when(this.brandEntityMapper.toDomain(brandEntity)).thenReturn(brandDomain);
+
+    Optional<Brand> brand = this.brandGateway.findBrandByName(brandEntity.getName());
+
+    assertThat(brand).isPresent();
+    assertThat(brand.get().getId()).isEqualTo(brandDomain.getId());
+    assertThat(brand.get().getName()).isEqualTo(brandDomain.getName());
+    assertThat(brand.get().getDescription()).isEqualTo(brandDomain.getDescription());
+    assertThat(brand.get().getCreatedAt()).isEqualTo(brandDomain.getCreatedAt());
+    assertThat(brand.get().getUpdatedAt()).isEqualTo(brandDomain.getUpdatedAt());
+
+    verify(this.brandRepository, times(1)).findByName(brandEntity.getName());
+    verify(this.brandEntityMapper, times(1)).toDomain(brandEntity);
+  }
+
+  @Test
+  @DisplayName("getBrandByIdSuccess - Should successfully find a brand by id and return an Optional of Brand")
+  void getBrandByIdSuccess() {
+    BrandEntity brandEntity = this.dataMock.getBrandsEntity().getFirst();
+    Brand brandDomain = this.dataMock.getBrandsDomain().getFirst();
+
+    when(this.brandRepository.findById(brandEntity.getId())).thenReturn(Optional.of(brandEntity));
+    when(this.brandEntityMapper.toDomain(brandEntity)).thenReturn(brandDomain);
+
+    Optional<Brand> brand = this.brandGateway.findBrandById(brandEntity.getId());
+
+    assertThat(brand).isPresent();
+    assertThat(brand.get().getId()).isEqualTo(brandDomain.getId());
+    assertThat(brand.get().getName()).isEqualTo(brandDomain.getName());
+    assertThat(brand.get().getDescription()).isEqualTo(brandDomain.getDescription());
+    assertThat(brand.get().getCreatedAt()).isEqualTo(brandDomain.getCreatedAt());
+    assertThat(brand.get().getUpdatedAt()).isEqualTo(brandDomain.getUpdatedAt());
+
+    verify(this.brandRepository, times(1)).findById(brandEntity.getId());
+    verify(this.brandEntityMapper, times(1)).toDomain(brandEntity);
+  }
+
+  @Test
+  @DisplayName("getAllBrandsReturnsFilledList - Should successfully find all brands and return it")
+  void getAllBrandsReturnsFilledList() {
+    List<BrandEntity> brandEntities = this.dataMock.getBrandsEntity();
+    List<Brand> brandsDomain = this.dataMock.getBrandsDomain();
+
+    when(this.brandRepository.findAll()).thenReturn(brandEntities);
+    when(this.brandEntityMapper.toDomain(brandEntities.get(0))).thenReturn(brandsDomain.get(0));
+    when(this.brandEntityMapper.toDomain(brandEntities.get(1))).thenReturn(brandsDomain.get(1));
+    when(this.brandEntityMapper.toDomain(brandEntities.get(2))).thenReturn(brandsDomain.get(2));
+
+    List<Brand> brands = this.brandGateway.getAllBrands();
+
+    assertThat(brands.size()).isEqualTo(brandEntities.size());
+    assertThat(brands.stream().map(Brand::getId).toList())
+      .containsExactlyInAnyOrderElementsOf(brandsDomain.stream().map(Brand::getId).toList());
+
+    verify(this.brandRepository, times(1)).findAll();
+    verify(this.brandEntityMapper, times(3)).toDomain(any(BrandEntity.class));
+    verify(this.brandEntityMapper, times(1)).toDomain(brandEntities.get(0));
+    verify(this.brandEntityMapper, times(1)).toDomain(brandEntities.get(1));
+    verify(this.brandEntityMapper, times(1)).toDomain(brandEntities.get(2));
   }
 }
