@@ -134,4 +134,34 @@ public class BrandGatewayImplTest {
     verify(this.brandEntityMapper, times(1)).toDomain(brandEntities.get(1));
     verify(this.brandEntityMapper, times(1)).toDomain(brandEntities.get(2));
   }
+
+  @Test
+  @DisplayName("updateBrandSuccess - Should successfully update a brand and return it")
+  void updateBrandSuccess() {
+    Brand brandDomain = this.dataMock.getBrandsDomain().getFirst();
+    BrandEntity brandEntity = this.dataMock.getBrandsEntity().getFirst();
+    final String updatedName = "updated name";
+    final String updatedDescription = "updated description";
+    ArgumentCaptor<BrandEntity> entityCaptor = ArgumentCaptor.forClass(BrandEntity.class);
+
+    when(this.brandEntityMapper.toEntity(brandDomain)).thenReturn(brandEntity);
+    when(this.brandRepository.save(entityCaptor.capture())).thenReturn(brandEntity);
+    when(this.brandEntityMapper.toDomain(brandEntity)).thenReturn(brandDomain);
+
+    Brand updatedBrand = this.brandGateway.updateBrand(brandDomain, updatedName, updatedDescription);
+
+    // argument captor assertions
+    assertThat(entityCaptor.getValue().getName()).isEqualTo(updatedName);
+    assertThat(entityCaptor.getValue().getDescription()).isEqualTo(updatedDescription);
+    // updated brand assertions
+    assertThat(updatedBrand.getId()).isEqualTo(brandDomain.getId());
+    assertThat(updatedBrand.getName()).isEqualTo(brandDomain.getName());
+    assertThat(updatedBrand.getDescription()).isEqualTo(brandDomain.getDescription());
+    assertThat(updatedBrand.getCreatedAt()).isEqualTo(brandDomain.getCreatedAt());
+    assertThat(updatedBrand.getUpdatedAt()).isEqualTo(brandDomain.getUpdatedAt());
+
+    verify(this.brandEntityMapper, times(1)).toEntity(brandDomain);
+    verify(this.brandRepository, times(1)).save(any(BrandEntity.class));
+    verify(this.brandEntityMapper, times(1)).toDomain(brandEntity);
+  }
 }

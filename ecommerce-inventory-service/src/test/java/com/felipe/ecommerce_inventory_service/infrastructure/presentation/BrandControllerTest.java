@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.CreateBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetAllBrandsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetBrandByIdUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.UpdateBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Brand;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.BrandDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.CreateOrUpdateBrandDTO;
@@ -27,6 +28,7 @@ import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -55,6 +57,9 @@ public class BrandControllerTest {
 
   @MockitoBean
   GetAllBrandsUseCase getAllBrandsUseCase;
+
+  @MockitoBean
+  UpdateBrandUseCase updateBrandUseCase;
 
   private DataMock dataMock;
   private static final String BASE_URL = "/api/v1/brands";
@@ -137,5 +142,34 @@ public class BrandControllerTest {
       .andExpectAll(status().isOk(), content().json(jsonResponseBody));
 
     verify(this.getAllBrandsUseCase, times(1)).execute();
+  }
+
+  @Test
+  @DisplayName("updateBrandSuccess - Should return a success response with the updated brand")
+  void updateBrandSuccess() throws Exception {
+    Brand brand = this.dataMock.getBrandsDomain().getFirst();
+    CreateOrUpdateBrandDTO brandRequestDTO = new CreateOrUpdateBrandDTO("updated name", "updated description");
+    String jsonRequestBody = this.objectMapper.writeValueAsString(brandRequestDTO);
+    BrandDTO brandDTO = new BrandDTO(brand);
+
+    when(this.updateBrandUseCase.execute(brand.getId(), brandRequestDTO.name(), brandRequestDTO.description())).thenReturn(brand);
+
+    this.mockMvc.perform(patch(BASE_URL + "/" + brand.getId())
+      .contentType(APPLICATION_JSON).content(jsonRequestBody)
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("Marca atualizada com sucesso"),
+        jsonPath("$.payload.id").value(brandDTO.id()),
+        jsonPath("$.payload.name").value(brandDTO.name()),
+        jsonPath("$.payload.description").value(brandDTO.description()),
+        jsonPath("$.payload.createdAt").value(brandDTO.createdAt()),
+        jsonPath("$.payload.updatedAt").value(brandDTO.updatedAt())
+      );
+
+    verify(this.updateBrandUseCase, times(1))
+      .execute(brand.getId(), brandRequestDTO.name(), brandRequestDTO.description());
   }
 }
