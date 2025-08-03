@@ -4,9 +4,11 @@ import com.felipe.ecommerce_inventory_service.core.application.gateway.BrandGate
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.CreateBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetAllBrandsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetBrandByIdUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.UpdateBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl.CreateBrandUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl.GetAllBrandsUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl.GetBrandByIdUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl.UpdateBrandUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,5 +33,10 @@ public class BrandBeans {
   @Bean
   public GetAllBrandsUseCase getAllBrandsUseCase() {
     return new GetAllBrandsUseCaseImpl(brandGateway);
+  }
+
+  @Bean
+  public UpdateBrandUseCase updateBrandUseCase() {
+    return new UpdateBrandUseCaseImpl(brandGateway);
   }
 }

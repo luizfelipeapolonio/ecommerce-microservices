@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.validation;
+package com.felipe.ecommerce_inventory_service.infrastructure.dtos.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

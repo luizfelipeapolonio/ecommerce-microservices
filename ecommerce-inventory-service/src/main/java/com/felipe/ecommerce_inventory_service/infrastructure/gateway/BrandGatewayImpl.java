@@ -40,4 +40,17 @@ public class BrandGatewayImpl implements BrandGateway {
   public List<Brand> getAllBrands() {
     return this.brandRepository.findAll().stream().map(this.brandEntityMapper::toDomain).toList();
   }
+
+  @Override
+  public Brand updateBrand(Brand brand, String name, String description) {
+    BrandEntity.Builder brandBuilder = BrandEntity.mutate(this.brandEntityMapper.toEntity(brand));
+    if(name != null) {
+      brandBuilder.name(name);
+    }
+    if(description != null) {
+      brandBuilder.description(description);
+    }
+    BrandEntity updatedBrand = this.brandRepository.save(brandBuilder.build());
+    return this.brandEntityMapper.toDomain(updatedBrand);
+  }
 }
