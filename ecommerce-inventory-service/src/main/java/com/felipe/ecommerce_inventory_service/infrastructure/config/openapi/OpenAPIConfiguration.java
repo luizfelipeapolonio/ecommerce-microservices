@@ -281,6 +281,13 @@ public class OpenAPIConfiguration {
         "Found brand with id '" + brand1.id() + "'",
         brand1
       );
+      this.apiUtils.createExample(
+        "UpdateBrandExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Brand updated successfully",
+        brand1
+      );
     };
   }
 }
