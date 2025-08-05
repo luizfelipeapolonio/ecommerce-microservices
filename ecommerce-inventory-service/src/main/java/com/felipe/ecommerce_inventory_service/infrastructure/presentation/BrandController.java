@@ -1,6 +1,7 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.CreateBrandUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.DeleteBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetAllBrandsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetBrandByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.UpdateBrandUseCase;
@@ -15,6 +16,7 @@ import com.felipe.response.ResponseType;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,15 +35,18 @@ public class BrandController implements BrandApi {
   private final GetBrandByIdUseCase getBrandByIdUseCase;
   private final GetAllBrandsUseCase getAllBrandsUseCase;
   private final UpdateBrandUseCase updatedBrandUseCase;
+  private final DeleteBrandUseCase deleteBrandUseCase;
 
   public BrandController(CreateBrandUseCase createBrandUseCase,
                          GetBrandByIdUseCase getBrandByIdUseCase,
                          GetAllBrandsUseCase getAllBrandsUseCase,
-                         UpdateBrandUseCase updatedBrandUseCase) {
+                         UpdateBrandUseCase updatedBrandUseCase,
+                         DeleteBrandUseCase  deleteBrandUseCase) {
     this.createBrandUseCase = createBrandUseCase;
     this.getBrandByIdUseCase = getBrandByIdUseCase;
     this.getAllBrandsUseCase = getAllBrandsUseCase;
     this.updatedBrandUseCase = updatedBrandUseCase;
+    this.deleteBrandUseCase = deleteBrandUseCase;
   }
 
   @Override
@@ -97,6 +102,20 @@ public class BrandController implements BrandApi {
       .code(HttpStatus.OK)
       .message("Marca atualizada com sucesso")
       .payload(new BrandDTO(updatedBrand))
+      .build();
+  }
+
+  @Override
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<Void> deleteBrand(@Positive(message = "O id da marca não deve ser zero, nem valores negativos")
+                                           @PathVariable Long id) {
+    Brand deletedBrand = this.deleteBrandUseCase.execute(id);
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Marca '" + deletedBrand.getName() + "' excluída com sucesso")
+      .payload(null)
       .build();
   }
 }

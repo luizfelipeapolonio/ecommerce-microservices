@@ -53,4 +53,11 @@ public class BrandGatewayImpl implements BrandGateway {
     BrandEntity updatedBrand = this.brandRepository.save(brandBuilder.build());
     return this.brandEntityMapper.toDomain(updatedBrand);
   }
+
+  @Override
+  public Brand deleteBrand(Brand brand) {
+    BrandEntity brandEntity = this.brandEntityMapper.toEntity(brand);
+    this.brandRepository.delete(brandEntity);
+    return brand;
+  }
 }

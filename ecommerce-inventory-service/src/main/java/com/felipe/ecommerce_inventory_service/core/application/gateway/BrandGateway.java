@@ -11,4 +11,5 @@ public interface BrandGateway {
   Optional<Brand> findBrandById(Long id);
   List<Brand> getAllBrands();
   Brand updateBrand(Brand brand, String name, String description);
+  Brand deleteBrand(Brand brand);
 }

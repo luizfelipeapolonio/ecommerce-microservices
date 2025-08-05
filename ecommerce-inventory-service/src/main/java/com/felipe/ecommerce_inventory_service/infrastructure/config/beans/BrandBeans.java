@@ -2,10 +2,12 @@ package com.felipe.ecommerce_inventory_service.infrastructure.config.beans;
 
 import com.felipe.ecommerce_inventory_service.core.application.gateway.BrandGateway;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.CreateBrandUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.DeleteBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetAllBrandsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetBrandByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.UpdateBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl.CreateBrandUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl.DeleteBrandUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl.GetAllBrandsUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl.GetBrandByIdUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.impl.UpdateBrandUseCaseImpl;
@@ -38,5 +40,10 @@ public class BrandBeans {
   @Bean
   public UpdateBrandUseCase updateBrandUseCase() {
     return new UpdateBrandUseCaseImpl(brandGateway);
+  }
+
+  @Bean
+  public DeleteBrandUseCase deleteBrandUseCase() {
+    return new DeleteBrandUseCaseImpl(brandGateway);
   }
 }
