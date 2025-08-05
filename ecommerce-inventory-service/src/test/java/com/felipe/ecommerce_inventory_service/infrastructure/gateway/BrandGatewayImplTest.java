@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -163,5 +164,26 @@ public class BrandGatewayImplTest {
     verify(this.brandEntityMapper, times(1)).toEntity(brandDomain);
     verify(this.brandRepository, times(1)).save(any(BrandEntity.class));
     verify(this.brandEntityMapper, times(1)).toDomain(brandEntity);
+  }
+
+  @Test
+  @DisplayName("deleteBrandSuccess - Should successfully delete a brand and return the deleted brand")
+  void deleteBrandSuccess() {
+    Brand brandDomain = this.dataMock.getBrandsDomain().getFirst();
+    BrandEntity brandEntity = this.dataMock.getBrandsEntity().getFirst();
+
+    when(this.brandEntityMapper.toEntity(brandDomain)).thenReturn(brandEntity);
+    doNothing().when(this.brandRepository).delete(brandEntity);
+
+    Brand deletedBrand = this.brandGateway.deleteBrand(brandDomain);
+
+    assertThat(deletedBrand.getId()).isEqualTo(brandDomain.getId());
+    assertThat(deletedBrand.getName()).isEqualTo(brandDomain.getName());
+    assertThat(deletedBrand.getDescription()).isEqualTo(brandDomain.getDescription());
+    assertThat(deletedBrand.getCreatedAt()).isEqualTo(brandDomain.getCreatedAt());
+    assertThat(deletedBrand.getUpdatedAt()).isEqualTo(brandDomain.getUpdatedAt());
+
+    verify(this.brandEntityMapper,times(1)).toEntity(brandDomain);
+    verify(this.brandRepository, times(1)).delete(brandEntity);
   }
 }

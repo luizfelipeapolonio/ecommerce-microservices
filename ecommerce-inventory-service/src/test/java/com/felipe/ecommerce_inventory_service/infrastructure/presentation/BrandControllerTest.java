@@ -2,6 +2,7 @@ package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.CreateBrandUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.DeleteBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetAllBrandsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetBrandByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.UpdateBrandUseCase;
@@ -27,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -60,6 +62,9 @@ public class BrandControllerTest {
 
   @MockitoBean
   UpdateBrandUseCase updateBrandUseCase;
+
+  @MockitoBean
+  DeleteBrandUseCase deleteBrandUseCase;
 
   private DataMock dataMock;
   private static final String BASE_URL = "/api/v1/brands";
@@ -171,5 +176,25 @@ public class BrandControllerTest {
 
     verify(this.updateBrandUseCase, times(1))
       .execute(brand.getId(), brandRequestDTO.name(), brandRequestDTO.description());
+  }
+
+  @Test
+  @DisplayName("deleteBrandSuccess - Should return a success response with the deleted brand name")
+  void deleteBrandSuccess() throws Exception {
+    Brand brand = this.dataMock.getBrandsDomain().getFirst();
+
+    when(this.deleteBrandUseCase.execute(brand.getId())).thenReturn(brand);
+
+    this.mockMvc.perform(delete(BASE_URL + "/" + brand.getId())
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("Marca '" + brand.getName() + "' excluída com sucesso"),
+        jsonPath("$.payload").isEmpty()
+      );
+
+    verify(this.deleteBrandUseCase, times(1)).execute(brand.getId());
   }
 }
