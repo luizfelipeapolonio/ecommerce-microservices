@@ -122,4 +122,28 @@ public interface BrandApi {
     @Positive(message = "O id da marca não deve ser zero, nem valores negativos") @PathVariable Long id,
     @Validated(OnUpdate.class) @org.springframework.web.bind.annotation.RequestBody CreateOrUpdateBrandDTO brandDTO
   );
+
+  @Operation(
+    operationId = "deleteBrand",
+    summary = "Delete a brand",
+    description = "Delete a product brand",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the name of deleted brand", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
+          @ExampleObject(name = "Success response", ref = "DeleteBrandExample")
+        })
+      }),
+      @ApiResponse(responseCode = "400", description = "Returns an error response if the brand id is zero or is not a positive number", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<List<CustomValidationErrors>>"), examples = {
+          @ExampleObject(name = "Error response", ref = "ConstraintViolationExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<Void> deleteBrand(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Brand id", schema = @Schema(type = "integer", format = "int64"), required = true)
+    @Positive(message = "O id da marca não deve ser zero, nem valores negativos") @PathVariable Long id
+  );
 }

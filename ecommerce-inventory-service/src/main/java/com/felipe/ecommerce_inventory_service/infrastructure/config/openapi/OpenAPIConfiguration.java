@@ -288,6 +288,13 @@ public class OpenAPIConfiguration {
         "Brand updated successfully",
         brand1
       );
+      this.apiUtils.createExample(
+        "DeleteBrandExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Brand 'hardware' deleted successfully",
+        null
+      );
     };
   }
 }
