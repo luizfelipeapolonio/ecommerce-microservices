@@ -2,8 +2,10 @@ package com.felipe.ecommerce_inventory_service.testutils;
 
 import com.felipe.ecommerce_inventory_service.core.domain.Brand;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
+import com.felipe.ecommerce_inventory_service.core.domain.Model;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.BrandEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.CategoryEntity;
+import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ModelEntity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,12 +16,16 @@ public class DataMock {
   private final List<CategoryEntity> categoriesEntity = new ArrayList<>();
   private final List<Brand> brandsDomain = new ArrayList<>();
   private final List<BrandEntity> brandsEntity = new ArrayList<>();
+  private final List<Model> modelsDomain = new ArrayList<>();
+  private final List<ModelEntity> modelsEntity = new ArrayList<>();
 
   public DataMock() {
     this.createCategoriesDomainMock();
     this.createCategoriesEntityMock();
     this.createBrandsDomainMock();
     this.createBrandsEntityMock();
+    this.createModelsDomain();
+    this.createModelsEntity();
   }
 
   public List<Category> getCategoriesDomain() {
@@ -36,6 +42,14 @@ public class DataMock {
 
   public List<BrandEntity> getBrandsEntity() {
     return this.brandsEntity;
+  }
+
+  public List<Model> getModelsDomain() {
+    return this.modelsDomain;
+  }
+
+  public List<ModelEntity> getModelsEntity() {
+    return this.modelsEntity;
   }
 
   private void createCategoriesDomainMock() {
@@ -180,5 +194,51 @@ public class DataMock {
     this.brandsEntity.add(brand1);
     this.brandsEntity.add(brand2);
     this.brandsEntity.add(brand3);
+  }
+
+  private void createModelsDomain() {
+    Model model1 = Model.builder()
+      .id(1L)
+      .name("g pro")
+      .description("A great model")
+      .brand(this.getBrandsDomain().get(0))
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
+    Model model2 = Model.builder()
+      .id(2L)
+      .name("geforce rtx")
+      .description("A great model")
+      .brand(this.getBrandsDomain().get(1))
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
+    this.modelsDomain.add(model1);
+    this.modelsDomain.add(model2);
+  }
+
+  private void createModelsEntity() {
+    ModelEntity model1 = ModelEntity.builder()
+      .id(1L)
+      .name("g pro")
+      .description("A great model")
+      .brand(this.getBrandsEntity().get(0))
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
+    ModelEntity model2 = ModelEntity.builder()
+      .id(2L)
+      .name("geforce rtx")
+      .description("A great model")
+      .brand(this.getBrandsEntity().get(1))
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
+    this.modelsEntity.add(model1);
+    this.modelsEntity.add(model2);
   }
 }
