@@ -3,6 +3,7 @@ package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.BrandAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.CategoryAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
+import com.felipe.ecommerce_inventory_service.core.application.exceptions.ModelAlreadyExistsException;
 import com.felipe.response.CustomValidationErrors;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
@@ -18,7 +19,7 @@ import java.util.List;
 @RestControllerAdvice
 public class ExceptionControllerAdvice {
 
-  @ExceptionHandler({CategoryAlreadyExistsException.class, BrandAlreadyExistsException.class})
+  @ExceptionHandler({CategoryAlreadyExistsException.class, BrandAlreadyExistsException.class, ModelAlreadyExistsException.class})
   @ResponseStatus(HttpStatus.CONFLICT)
   public ResponsePayload<Void> handleResourceAlreadyExistsException(Exception ex) {
     return new ResponsePayload.Builder<Void>()
