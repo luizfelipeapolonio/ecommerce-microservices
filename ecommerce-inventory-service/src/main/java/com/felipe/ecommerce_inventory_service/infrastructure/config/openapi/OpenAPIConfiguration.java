@@ -6,6 +6,7 @@ import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.BrandDTO
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.CreateOrUpdateBrandDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CategoryDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateOrUpdateCategoryDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.ModelDTO;
 import com.felipe.openapi.OpenApiUtils;
 import com.felipe.openapi.SchemaCustomizer;
 import com.felipe.response.CustomValidationErrors;
@@ -46,7 +47,8 @@ public class OpenAPIConfiguration {
         .version("1.0.0"))
       .tags(List.of(
         new Tag().name("Category").description("All category operations"),
-        new Tag().name("Brand").description("All brand operations")
+        new Tag().name("Brand").description("All brand operations"),
+        new Tag().name("Model").description("All model operations")
       ))
       .components(new Components()
         .schemas(this.apiUtils.getSchemas())
@@ -89,6 +91,12 @@ public class OpenAPIConfiguration {
         BrandDTO.class,
         SchemaCustomizer.withDefaults()
       );
+      this.apiUtils.createSchemaFromClass(
+        "ModelDTO",
+        modelConverterInstance,
+        ModelDTO.class,
+        SchemaCustomizer.withDefaults()
+      );
       this.apiUtils.createSchema("CategoryDomainDTO", schema -> {
         schema.addProperty("id", new ObjectSchema().type("integer").format("int64"));
         schema.addProperty("name", new ObjectSchema().type("string"));
@@ -119,6 +127,11 @@ public class OpenAPIConfiguration {
         schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
         schema.addAllOfItem(new ObjectSchema().addProperty("payload", new ArraySchema()
           .items(new ObjectSchema().$ref(SCHEMAS_REF + "BrandDTO"))));
+      });
+      this.apiUtils.createSchema("ResponsePayload<ModelDTO>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema()
+          .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "ModelDTO")));
       });
 
       // Examples
@@ -192,6 +205,14 @@ public class OpenAPIConfiguration {
         "A great brand",
         "2025-07-18T21:12:28.978228256",
         "2025-07-18T21:12:28.978228256"
+      );
+      ModelDTO model1 = new ModelDTO(
+        1L,
+        "g pro",
+        "A great model",
+        "2025-07-18T21:12:28.978228256",
+        "2025-07-18T21:12:28.978228256",
+        brand1
       );
 
       this.apiUtils.createExample(
@@ -293,6 +314,20 @@ public class OpenAPIConfiguration {
         ResponseType.SUCCESS,
         HttpStatus.OK,
         "Brand 'hardware' deleted successfully",
+        null
+      );
+      this.apiUtils.createExample(
+        "CreateModelExample",
+        ResponseType.SUCCESS,
+        HttpStatus.CREATED,
+        "Model 'g pro' created successfully",
+        model1
+      );
+      this.apiUtils.createExample(
+        "ExistingModelExample",
+        ResponseType.ERROR,
+        HttpStatus.CONFLICT,
+        "Model 'g pro' already exists",
         null
       );
     };
