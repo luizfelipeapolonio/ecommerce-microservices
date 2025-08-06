@@ -133,6 +133,11 @@ public class OpenAPIConfiguration {
         schema.addAllOfItem(new ObjectSchema()
           .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "ModelDTO")));
       });
+      this.apiUtils.createSchema("ResponsePayload<List<ModelDTO>>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema().addProperty("payload", new ArraySchema()
+          .items(new ObjectSchema().$ref(SCHEMAS_REF + "ModelDTO"))));
+      });
 
       // Examples
       CategoryDTO categoryWithNoParentCategory = new CategoryDTO(
@@ -209,6 +214,14 @@ public class OpenAPIConfiguration {
       ModelDTO model1 = new ModelDTO(
         1L,
         "g pro",
+        "A great model",
+        "2025-07-18T21:12:28.978228256",
+        "2025-07-18T21:12:28.978228256",
+        brand1
+      );
+      ModelDTO model2 = new ModelDTO(
+        2L,
+        "g502 x",
         "A great model",
         "2025-07-18T21:12:28.978228256",
         "2025-07-18T21:12:28.978228256",
@@ -329,6 +342,20 @@ public class OpenAPIConfiguration {
         HttpStatus.CONFLICT,
         "Model 'g pro' already exists",
         null
+      );
+      this.apiUtils.createExample(
+        "AllModelsOfBrandExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "All models of brand with id '1'",
+        List.of(model1, model2)
+      );
+      this.apiUtils.createExample(
+        "GetModelByIdExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Found model with id '" + model1.id() + "'",
+        model1
       );
     };
   }
