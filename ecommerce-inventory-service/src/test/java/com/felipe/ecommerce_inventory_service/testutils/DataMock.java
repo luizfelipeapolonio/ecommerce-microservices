@@ -215,8 +215,28 @@ public class DataMock {
       .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
       .build();
 
+    Model model3 = Model.builder()
+      .id(3L)
+      .name("g502 x")
+      .description("A great model")
+      .brand(this.getBrandsDomain().get(0))
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
+    Model model4 = Model.builder()
+      .id(4L)
+      .name("pro x")
+      .description("A great model")
+      .brand(this.getBrandsDomain().get(0))
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
     this.modelsDomain.add(model1);
     this.modelsDomain.add(model2);
+    this.modelsDomain.add(model3);
+    this.modelsDomain.add(model4);
   }
 
   private void createModelsEntity() {
@@ -238,7 +258,27 @@ public class DataMock {
       .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
       .build();
 
+    ModelEntity model3 = ModelEntity.builder()
+      .id(3L)
+      .name("g502 x")
+      .description("A great model")
+      .brand(this.getBrandsEntity().get(0))
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
+    ModelEntity model4 = ModelEntity.builder()
+      .id(4L)
+      .name("pro x")
+      .description("A great model")
+      .brand(this.getBrandsEntity().get(0))
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
     this.modelsEntity.add(model1);
     this.modelsEntity.add(model2);
+    this.modelsEntity.add(model3);
+    this.modelsEntity.add(model4);
   }
 }
