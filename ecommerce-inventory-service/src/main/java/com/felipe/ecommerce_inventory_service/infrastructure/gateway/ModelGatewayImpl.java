@@ -7,6 +7,7 @@ import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entitie
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.repositories.ModelRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -35,5 +36,13 @@ public class ModelGatewayImpl implements ModelGateway {
   @Override
   public Optional<Model> findModelById(Long id) {
     return this.modelRepository.findById(id).map(this.modelEntityMapper::toDomain);
+  }
+
+  @Override
+  public List<Model> findAllModelsByBrandId(Long brandId) {
+    return this.modelRepository.findAllByBrandId(brandId)
+      .stream()
+      .map(this.modelEntityMapper::toDomain)
+      .toList();
   }
 }
