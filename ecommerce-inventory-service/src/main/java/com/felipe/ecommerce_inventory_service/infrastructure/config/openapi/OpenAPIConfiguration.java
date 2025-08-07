@@ -370,6 +370,13 @@ public class OpenAPIConfiguration {
         "Model updated successfully",
         model1
       );
+      this.apiUtils.createExample(
+        "DeleteModelExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Model 'g pro' deleted successfully",
+        null
+      );
     };
   }
 }

@@ -136,4 +136,29 @@ public interface ModelApi {
     @Parameter(name = "UpdateModelDTO", required = true)
     @Valid @org.springframework.web.bind.annotation.RequestBody UpdateModelDTO modelDTO
   );
+
+  @Operation(
+    operationId = "deleteModel",
+    summary = "Delete a model",
+    description = "Delete a product model",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the name of deleted model", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
+          @ExampleObject(name = "Success response", ref = "DeleteModelExample")
+        })
+      }),
+      @ApiResponse(responseCode = "400", description = "Returns an error response if the model id is zero or is not a positive number", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<List<CustomValidationErrors>>"), examples = {
+          @ExampleObject(name = "Error response", ref = "ConstraintViolationExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<Void> deleteModel(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Model id", schema = @Schema(type = "integer", format = "int64", example = "1"), required = true)
+    @Positive(message = "O id do modelo não deve ser zero, nem valores negativos")
+    @PathVariable Long id
+  );
 }
