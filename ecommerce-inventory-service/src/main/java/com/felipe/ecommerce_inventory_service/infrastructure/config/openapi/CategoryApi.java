@@ -117,7 +117,7 @@ public interface CategoryApi {
     description = "Get a specific category by id",
     responses = {
       @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the found category", content = {
-        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<CategoryDTO"), examples = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<CategoryDTO>"), examples = {
           @ExampleObject(name = "Success response", ref = "GetCategoryByIdExample")
         })
       }),
