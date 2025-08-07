@@ -5,8 +5,8 @@ import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.BrandDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.CreateOrUpdateBrandDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CategoryDTO;
-import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateOrUpdateCategoryDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.ModelDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.UpdateModelDTO;
 import com.felipe.openapi.OpenApiUtils;
 import com.felipe.openapi.SchemaCustomizer;
 import com.felipe.response.CustomValidationErrors;
@@ -95,6 +95,12 @@ public class OpenAPIConfiguration {
         "ModelDTO",
         modelConverterInstance,
         ModelDTO.class,
+        SchemaCustomizer.withDefaults()
+      );
+      this.apiUtils.createSchemaFromClass(
+        "UpdateModelDTO",
+        modelConverterInstance,
+        UpdateModelDTO.class,
         SchemaCustomizer.withDefaults()
       );
       this.apiUtils.createSchema("CategoryDomainDTO", schema -> {
@@ -355,6 +361,13 @@ public class OpenAPIConfiguration {
         ResponseType.SUCCESS,
         HttpStatus.OK,
         "Found model with id '" + model1.id() + "'",
+        model1
+      );
+      this.apiUtils.createExample(
+        "UpdateModelExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Model updated successfully",
         model1
       );
     };

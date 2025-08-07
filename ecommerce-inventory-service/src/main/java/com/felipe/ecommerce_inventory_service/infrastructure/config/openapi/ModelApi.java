@@ -2,6 +2,7 @@ package com.felipe.ecommerce_inventory_service.infrastructure.config.openapi;
 
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.CreateModelDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.ModelDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.UpdateModelDTO;
 import com.felipe.response.ResponsePayload;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -100,5 +101,39 @@ public interface ModelApi {
     @Parameter(in = ParameterIn.PATH, name = "id", description = "Model id", schema = @Schema(type = "integer", format = "int64", example = "1"), required = true)
     @Positive(message = "O id do modelo não deve ser zero, nem valores negativos")
     @PathVariable Long id
+  );
+
+  @Operation(
+    operationId = "updateModel",
+    summary = "Update a model",
+    description = "Update some product model information",
+    requestBody = @RequestBody(description = "Request body to update a model"),
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the updated model", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<ModelDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "UpdateModelExample")
+        })
+      }),
+      @ApiResponse(responseCode = "400", description = "Returns an error response if the model id is zero or is not a positive number", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<List<CustomValidationErrors>>"), examples = {
+          @ExampleObject(name = "Error response", ref = "ConstraintViolationExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "409", description = "Returns an error response if the given model already exists", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
+          @ExampleObject(name = "Error response", ref = "ExistingModelExample")
+        })
+      }),
+      @ApiResponse(responseCode = "422", ref = "ValidationErrors"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<ModelDTO> updateModel(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Model id", schema = @Schema(type = "integer", format = "int64", example = "1"), required = true)
+    @Positive(message = "O id do modelo não deve ser zero, nem valores negativos")
+    @PathVariable Long id,
+    @Parameter(name = "UpdateModelDTO", required = true)
+    @Valid @org.springframework.web.bind.annotation.RequestBody UpdateModelDTO modelDTO
   );
 }
