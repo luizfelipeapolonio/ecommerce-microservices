@@ -2,6 +2,7 @@ package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.CreateModelUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.model.DeleteModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetAllModelsOfBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetModelByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.UpdateModelUseCase;
@@ -28,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -61,6 +63,9 @@ public class ModelControllerTest {
 
   @MockitoBean
   UpdateModelUseCase updateModelUseCase;
+
+  @MockitoBean
+  DeleteModelUseCase deleteModelUseCase;
 
   private static final String BASE_URL = "/api/v1/models";
   private DataMock dataMock;
@@ -191,5 +196,25 @@ public class ModelControllerTest {
 
     verify(this.updateModelUseCase, times(1))
       .execute(model.getId(), updateModelDTO.name(), updateModelDTO.description());
+  }
+
+  @Test
+  @DisplayName("deleteModelSuccess - Should return a success response with the deleted model name")
+  void deleteModelSuccess() throws Exception {
+    Model model = this.dataMock.getModelsDomain().getFirst();
+
+    when(this.deleteModelUseCase.execute(model.getId())).thenReturn(model);
+
+    this.mockMvc.perform(delete(BASE_URL + "/{id}", model.getId())
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("Modelo '" + model.getName() + "' excluído com sucesso"),
+        jsonPath("$.payload").isEmpty()
+      );
+
+    verify(this.deleteModelUseCase, times(1)).execute(model.getId());
   }
 }

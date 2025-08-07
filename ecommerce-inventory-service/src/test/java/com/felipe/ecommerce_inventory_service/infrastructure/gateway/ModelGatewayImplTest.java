@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -143,5 +144,27 @@ public class ModelGatewayImplTest {
     verify(this.modelEntityMapper, times(1)).toEntity(modelDomain);
     verify(this.modelRepository, times(1)).save(any(ModelEntity.class));
     verify(this.modelEntityMapper, times(1)).toDomain(modelEntity);
+  }
+
+  @Test
+  @DisplayName("deleteModelSuccess - Should successfully delete a model and return the deleted model")
+  void deleteModelSuccess() {
+    Model modelDomain = this.dataMock.getModelsDomain().getFirst();
+    ModelEntity modelEntity = this.dataMock.getModelsEntity().getFirst();
+
+    when(this.modelEntityMapper.toEntity(modelDomain)).thenReturn(modelEntity);
+    doNothing().when(this.modelRepository).delete(modelEntity);
+
+    Model deletedModel = this.modelGateway.deleteModel(modelDomain);
+
+    assertThat(deletedModel.getId()).isEqualTo(modelDomain.getId());
+    assertThat(deletedModel.getName()).isEqualTo(modelDomain.getName());
+    assertThat(deletedModel.getDescription()).isEqualTo(modelDomain.getDescription());
+    assertThat(deletedModel.getCreatedAt()).isEqualTo(modelDomain.getCreatedAt());
+    assertThat(deletedModel.getUpdatedAt()).isEqualTo(modelDomain.getUpdatedAt());
+    assertThat(deletedModel.getBrand()).isEqualTo(modelDomain.getBrand());
+
+    verify(this.modelEntityMapper, times(1)).toEntity(modelDomain);
+    verify(this.modelRepository, times(1)).delete(modelEntity);
   }
 }
