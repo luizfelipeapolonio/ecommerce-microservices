@@ -10,4 +10,5 @@ public interface ModelGateway {
   Optional<Model> findModelByName(String name);
   Optional<Model> findModelById(Long id);
   List<Model> findAllModelsByBrandId(Long brandId);
+  Model updateModel(Model model, String name, String description);
 }

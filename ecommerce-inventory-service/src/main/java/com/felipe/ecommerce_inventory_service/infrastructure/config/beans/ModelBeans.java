@@ -5,9 +5,11 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.Ge
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.CreateModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetAllModelsOfBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetModelByIdUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.model.UpdateModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.impl.CreateModelUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.impl.GetAllModelsOfBrandUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.impl.GetModelByIdUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.model.impl.UpdateModelUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,5 +36,10 @@ public class ModelBeans {
   @Bean
   public GetAllModelsOfBrandUseCase getAllModelsOfBrandUseCase() {
     return new GetAllModelsOfBrandUseCaseImpl(modelGateway, getBrandByIdUseCase);
+  }
+
+  @Bean
+  public UpdateModelUseCase updateModelUseCase() {
+    return new UpdateModelUseCaseImpl(modelGateway);
   }
 }

@@ -3,10 +3,12 @@ package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.CreateModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetAllModelsOfBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetModelByIdUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.model.UpdateModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Model;
 import com.felipe.ecommerce_inventory_service.infrastructure.config.openapi.ModelApi;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.CreateModelDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.ModelDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.UpdateModelDTO;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
 import jakarta.validation.Valid;
@@ -14,6 +16,7 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,13 +34,16 @@ public class ModelController implements ModelApi {
   private final CreateModelUseCase createModelUseCase;
   private final GetModelByIdUseCase getModelByIdUseCase;
   private final GetAllModelsOfBrandUseCase getAllModelsOfBrandUseCase;
+  private final UpdateModelUseCase updateModelUseCase;
 
   public ModelController(CreateModelUseCase createModelUseCase,
                          GetModelByIdUseCase getModelByIdUseCase,
-                         GetAllModelsOfBrandUseCase getAllModelsOfBrandUseCase) {
+                         GetAllModelsOfBrandUseCase getAllModelsOfBrandUseCase,
+                         UpdateModelUseCase updateModelUseCase) {
     this.createModelUseCase = createModelUseCase;
     this.getModelByIdUseCase = getModelByIdUseCase;
     this.getAllModelsOfBrandUseCase = getAllModelsOfBrandUseCase;
+    this.updateModelUseCase = updateModelUseCase;
   }
 
   @Override
@@ -79,6 +85,21 @@ public class ModelController implements ModelApi {
       .code(HttpStatus.OK)
       .message("Modelo de id '" + model.getId() + "' encontrado")
       .payload(new ModelDTO(model))
+      .build();
+  }
+
+  @Override
+  @PatchMapping("/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<ModelDTO> updateModel(@Positive(message = "O id do modelo não deve ser zero, nem valores negativos")
+                                               @PathVariable Long id,
+                                               @Valid @RequestBody UpdateModelDTO modelDTO) {
+    Model updatedModel = this.updateModelUseCase.execute(id, modelDTO.name(), modelDTO.description());
+    return new ResponsePayload.Builder<ModelDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Modelo atualizado com sucesso")
+      .payload(new ModelDTO(updatedModel))
       .build();
   }
 }

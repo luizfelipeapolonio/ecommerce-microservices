@@ -45,4 +45,17 @@ public class ModelGatewayImpl implements ModelGateway {
       .map(this.modelEntityMapper::toDomain)
       .toList();
   }
+
+  @Override
+  public Model updateModel(Model model, String name, String description) {
+    ModelEntity.Builder modelBuilder = ModelEntity.mutate(this.modelEntityMapper.toEntity(model));
+    if(name != null) {
+      modelBuilder.name(name);
+    }
+    if(description != null) {
+      modelBuilder.description(description);
+    }
+    ModelEntity updatedModel = this.modelRepository.save(modelBuilder.build());
+    return this.modelEntityMapper.toDomain(updatedModel);
+  }
 }
