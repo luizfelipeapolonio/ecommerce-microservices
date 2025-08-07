@@ -58,4 +58,11 @@ public class ModelGatewayImpl implements ModelGateway {
     ModelEntity updatedModel = this.modelRepository.save(modelBuilder.build());
     return this.modelEntityMapper.toDomain(updatedModel);
   }
+
+  @Override
+  public Model deleteModel(Model model) {
+    ModelEntity modelEntity = this.modelEntityMapper.toEntity(model);
+    this.modelRepository.delete(modelEntity);
+    return model;
+  }
 }

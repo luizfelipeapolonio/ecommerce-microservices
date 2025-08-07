@@ -1,6 +1,7 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.CreateModelUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.model.DeleteModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetAllModelsOfBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetModelByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.UpdateModelUseCase;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,15 +37,18 @@ public class ModelController implements ModelApi {
   private final GetModelByIdUseCase getModelByIdUseCase;
   private final GetAllModelsOfBrandUseCase getAllModelsOfBrandUseCase;
   private final UpdateModelUseCase updateModelUseCase;
+  private final DeleteModelUseCase deleteModelUseCase;
 
   public ModelController(CreateModelUseCase createModelUseCase,
                          GetModelByIdUseCase getModelByIdUseCase,
                          GetAllModelsOfBrandUseCase getAllModelsOfBrandUseCase,
-                         UpdateModelUseCase updateModelUseCase) {
+                         UpdateModelUseCase updateModelUseCase,
+                         DeleteModelUseCase deleteModelUseCase) {
     this.createModelUseCase = createModelUseCase;
     this.getModelByIdUseCase = getModelByIdUseCase;
     this.getAllModelsOfBrandUseCase = getAllModelsOfBrandUseCase;
     this.updateModelUseCase = updateModelUseCase;
+    this.deleteModelUseCase = deleteModelUseCase;
   }
 
   @Override
@@ -100,6 +105,20 @@ public class ModelController implements ModelApi {
       .code(HttpStatus.OK)
       .message("Modelo atualizado com sucesso")
       .payload(new ModelDTO(updatedModel))
+      .build();
+  }
+
+  @Override
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<Void> deleteModel(@Positive(message = "O id do modelo não deve ser zero, nem valores negativos")
+                                           @PathVariable Long id) {
+    Model deletedModel = this.deleteModelUseCase.execute(id);
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Modelo '" + deletedModel.getName() + "' excluído com sucesso")
+      .payload(null)
       .build();
   }
 }

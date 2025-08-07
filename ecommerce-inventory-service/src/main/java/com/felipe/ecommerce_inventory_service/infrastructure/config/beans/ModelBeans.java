@@ -3,10 +3,12 @@ package com.felipe.ecommerce_inventory_service.infrastructure.config.beans;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.ModelGateway;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetBrandByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.CreateModelUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.model.DeleteModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetAllModelsOfBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetModelByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.UpdateModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.impl.CreateModelUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.model.impl.DeleteModelUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.impl.GetAllModelsOfBrandUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.impl.GetModelByIdUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.impl.UpdateModelUseCaseImpl;
@@ -41,5 +43,10 @@ public class ModelBeans {
   @Bean
   public UpdateModelUseCase updateModelUseCase() {
     return new UpdateModelUseCaseImpl(modelGateway);
+  }
+
+  @Bean
+  public DeleteModelUseCase deleteModelUseCase() {
+    return new DeleteModelUseCaseImpl(modelGateway);
   }
 }
