@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.CreateModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetAllModelsOfBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetModelByIdUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.model.UpdateModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Model;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.CreateModelDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.ModelDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.UpdateModelDTO;
 import com.felipe.ecommerce_inventory_service.testutils.DataMock;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
@@ -27,6 +29,7 @@ import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -55,6 +58,9 @@ public class ModelControllerTest {
 
   @MockitoBean
   GetAllModelsOfBrandUseCase getAllModelsOfBrandUseCase;
+
+  @MockitoBean
+  UpdateModelUseCase updateModelUseCase;
 
   private static final String BASE_URL = "/api/v1/models";
   private DataMock dataMock;
@@ -151,5 +157,39 @@ public class ModelControllerTest {
       .andExpectAll(status().isOk(), content().json(jsonResponseBody));
 
     verify(this.getAllModelsOfBrandUseCase, times(1)).execute(brandId);
+  }
+
+  @Test
+  @DisplayName("updateModelSuccess - Should return a success response with the updated model")
+  void updateModelSuccess() throws Exception {
+    UpdateModelDTO updateModelDTO = new UpdateModelDTO("updatedName", "updated description");
+    Model model = this.dataMock.getModelsDomain().getFirst();
+    ModelDTO modelDTO = new ModelDTO(model);
+    String jsonRequestBody = this.objectMapper.writeValueAsString(updateModelDTO);
+
+    when(this.updateModelUseCase.execute(model.getId(), updateModelDTO.name(), updateModelDTO.description())).thenReturn(model);
+
+    this.mockMvc.perform(patch(BASE_URL + "/{id}", model.getId())
+      .contentType(APPLICATION_JSON).content(jsonRequestBody)
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("Modelo atualizado com sucesso"),
+        jsonPath("$.payload.id").value(modelDTO.id()),
+        jsonPath("$.payload.name").value(modelDTO.name()),
+        jsonPath("$.payload.description").value(modelDTO.description()),
+        jsonPath("$.payload.createdAt").value(modelDTO.createdAt()),
+        jsonPath("$.payload.updatedAt").value(modelDTO.updatedAt()),
+        jsonPath("$.payload.brand.id").value(modelDTO.brand().id()),
+        jsonPath("$.payload.brand.name").value(modelDTO.brand().name()),
+        jsonPath("$.payload.brand.description").value(modelDTO.brand().description()),
+        jsonPath("$.payload.brand.createdAt").value(modelDTO.brand().createdAt()),
+        jsonPath("$.payload.brand.updatedAt").value(modelDTO.brand().updatedAt())
+      );
+
+    verify(this.updateModelUseCase, times(1))
+      .execute(model.getId(), updateModelDTO.name(), updateModelDTO.description());
   }
 }

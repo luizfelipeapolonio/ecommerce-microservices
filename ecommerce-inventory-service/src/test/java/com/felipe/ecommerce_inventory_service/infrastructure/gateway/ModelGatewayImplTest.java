@@ -113,4 +113,35 @@ public class ModelGatewayImplTest {
     verify(this.modelRepository, times(1)).findById(model.getId());
     verify(this.modelEntityMapper, times(1)).toDomain(modelEntity);
   }
+
+  @Test
+  @DisplayName("updateModelSuccess - Should successfully update a model and return it")
+  void updateModelSuccess() {
+    Model modelDomain = this.dataMock.getModelsDomain().getFirst();
+    ModelEntity modelEntity = this.dataMock.getModelsEntity().getFirst();
+    final String updatedName = "updatedName";
+    final String updatedDescription = "updatedDescription";
+    ArgumentCaptor<ModelEntity> entityCaptor = ArgumentCaptor.forClass(ModelEntity.class);
+
+    when(this.modelEntityMapper.toEntity(modelDomain)).thenReturn(modelEntity);
+    when(this.modelRepository.save(entityCaptor.capture())).thenReturn(modelEntity);
+    when(this.modelEntityMapper.toDomain(modelEntity)).thenReturn(modelDomain);
+
+    Model updatedModel = this.modelGateway.updateModel(modelDomain, updatedName, updatedDescription);
+
+    // argument captor assertions
+    assertThat(entityCaptor.getValue().getName()).isEqualTo(updatedName);
+    assertThat(entityCaptor.getValue().getDescription()).isEqualTo(updatedDescription);
+    // updated model assertions
+    assertThat(updatedModel.getId()).isEqualTo(modelDomain.getId());
+    assertThat(updatedModel.getName()).isEqualTo(modelDomain.getName());
+    assertThat(updatedModel.getDescription()).isEqualTo(modelDomain.getDescription());
+    assertThat(updatedModel.getCreatedAt()).isEqualTo(modelDomain.getCreatedAt());
+    assertThat(updatedModel.getUpdatedAt()).isEqualTo(modelDomain.getUpdatedAt());
+    assertThat(updatedModel.getBrand()).isEqualTo(modelDomain.getBrand());
+
+    verify(this.modelEntityMapper, times(1)).toEntity(modelDomain);
+    verify(this.modelRepository, times(1)).save(any(ModelEntity.class));
+    verify(this.modelEntityMapper, times(1)).toDomain(modelEntity);
+  }
 }
