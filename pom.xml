@@ -16,6 +16,7 @@
         <module>ecommerce-auth-server</module>
         <module>ecommerce-customer-service</module>
         <module>ecommerce-inventory-service</module>
+        <module>ecommerce-upload-service</module>
     </modules>
 
 </project>
