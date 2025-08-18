@@ -28,6 +28,9 @@ public class ClientRegistrationConfiguration {
   @Value("${auth.clients.customer-client.secret}")
   private String customerClientSecret;
 
+  @Value("${auth.clients.inventory-client.secret}")
+  private String inventoryClientSecret;
+
   public ClientRegistrationConfiguration(JpaRegisteredClientRepository jpaRegisteredClientRepository, PasswordEncoder passwordEncoder) {
     this.jpaRegisteredClientRepository = jpaRegisteredClientRepository;
     this.passwordEncoder = passwordEncoder;
@@ -65,8 +68,19 @@ public class ClientRegistrationConfiguration {
         .scope("write")
         .build();
 
+      RegisteredClient inventoryClient = RegisteredClient.withId(UUID.randomUUID().toString())
+        .clientId("ecommerce-inventory-service")
+        .clientSecret(passwordEncoder.encode(inventoryClientSecret))
+        .clientName("ecommerce-inventory-service")
+        .clientIdIssuedAt(Instant.now())
+        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+        .scope("admin")
+        .build();
+
       jpaRegisteredClientRepository.save(gatewayClient);
       jpaRegisteredClientRepository.save(customerClient);
+      jpaRegisteredClientRepository.save(inventoryClient);
     };
   }
 }
