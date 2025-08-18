@@ -35,7 +35,7 @@ public class UploadService {
     this.rootUploadPath = Paths.get(storageProperties.getUploadDir()).toAbsolutePath().normalize();
   }
 
-  public List<Image> save(ProductUploadDTO productData, MultipartFile[] images) {
+  public List<Image> saveAll(ProductUploadDTO productData, MultipartFile[] images) {
     if(!wrongFiles.isEmpty()) {
       this.logger.debug("=== Cleaning wrong files ===");
       this.wrongFiles.clear();

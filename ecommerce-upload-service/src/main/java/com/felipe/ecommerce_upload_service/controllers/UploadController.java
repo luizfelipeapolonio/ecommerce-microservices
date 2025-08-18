@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_upload_service.config.controllers;
+package com.felipe.ecommerce_upload_service.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,11 +34,11 @@ public class UploadController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public ResponsePayload<List<ImageDTO>> save(@RequestPart("productData") String jsonProductData,
+  public ResponsePayload<List<ImageDTO>> saveAll(@RequestPart("productData") String jsonProductData,
                                               @RequestPart("images") MultipartFile[] images) {
     try {
       ProductUploadDTO productDTO = this.objectMapper.readValue(jsonProductData, ProductUploadDTO.class);
-      List<ImageDTO> savedImages = this.uploadService.save(productDTO, images)
+      List<ImageDTO> savedImages = this.uploadService.saveAll(productDTO, images)
         .stream()
         .map(ImageDTO::new)
         .toList();

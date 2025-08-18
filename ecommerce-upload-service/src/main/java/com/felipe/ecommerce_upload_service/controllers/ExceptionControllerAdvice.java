@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_upload_service.config.controllers;
+package com.felipe.ecommerce_upload_service.controllers;
 
 import com.felipe.ecommerce_upload_service.dtos.WrongFileDTO;
 import com.felipe.ecommerce_upload_service.exceptions.InvalidFileTypeException;
