@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_inventory_service.core.application.dtos;
+package com.felipe.ecommerce_inventory_service.core.application.dtos.category;
 
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 

@@ -29,11 +29,8 @@ public class ProductEntity {
   @Column(nullable = false)
   private String description;
 
-  @Column(name = "image_url", nullable = false)
-  private String imageUrl;
-
-  @Column(name = "price_unity", nullable = false)
-  private BigDecimal priceUnity;
+  @Column(name = "unit_price", nullable = false)
+  private BigDecimal unitPrice;
 
   @Column(nullable = false)
   private long quantity;
@@ -73,12 +70,8 @@ public class ProductEntity {
     return this.description;
   }
 
-  public String getImageUrl() {
-    return this.imageUrl;
-  }
-
-  public BigDecimal getPriceUnity() {
-    return this.priceUnity;
+  public BigDecimal getUnitPrice() {
+    return this.unitPrice;
   }
 
   public long getQuantity() {
@@ -117,8 +110,7 @@ public class ProductEntity {
     this.id = builder.id;
     this.name = builder.name;
     this.description = builder.description;
-    this.imageUrl = builder.imageUrl;
-    this.priceUnity = builder.priceUnity;
+    this.unitPrice = builder.unitPrice;
     this.quantity = builder.quantity;
     this.createdAt = builder.createdAt;
     this.updatedAt = builder.updatedAt;
@@ -131,8 +123,7 @@ public class ProductEntity {
     private UUID id;
     private String name;
     private String description;
-    private String imageUrl;
-    private BigDecimal priceUnity;
+    private BigDecimal unitPrice;
     private long quantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -147,8 +138,7 @@ public class ProductEntity {
       this.id = product.getId();
       this.name = product.getName();
       this.description = product.getDescription();
-      this.imageUrl = product.getImageUrl();
-      this.priceUnity = product.getPriceUnity();
+      this.unitPrice = product.getUnitPrice();
       this.quantity = product.getQuantity();
       this.createdAt = product.getCreatedAt();
       this.updatedAt = product.getUpdatedAt();
@@ -172,13 +162,8 @@ public class ProductEntity {
       return this;
     }
 
-    public Builder imageUrl(String imageUrl) {
-      this.imageUrl = imageUrl;
-      return this;
-    }
-
-    public Builder priceUnity(BigDecimal priceUnity) {
-      this.priceUnity = priceUnity;
+    public Builder unitPrice(BigDecimal unitPrice) {
+      this.unitPrice = unitPrice;
       return this;
     }
 

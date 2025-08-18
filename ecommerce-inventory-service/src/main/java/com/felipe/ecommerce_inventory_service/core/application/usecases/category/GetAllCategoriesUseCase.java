@@ -1,6 +1,6 @@
 package com.felipe.ecommerce_inventory_service.core.application.usecases.category;
 
-import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.category.CategoriesDTO;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.config.openapi;
 
-import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.category.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.BrandDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.CreateOrUpdateBrandDTO;

@@ -3,6 +3,10 @@ server:
 spring:
   application.name: ecommerce-inventory-service
   output.ansi.enabled: ALWAYS
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
 
 # === OAuth2 ====
   security:
@@ -10,6 +14,20 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8180
+
+      client:
+        registration:
+          ecommerce-inventory-service:
+            provider: spring
+            client-id: ecommerce-inventory-service
+            client-secret: inventory-client-secret
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: client_credentials
+            scope: admin
+        provider:
+          spring:
+            issuer-uri: http://localhost:8180
+            authorization-uri: http://localhost:8180/oauth2/authorize
 
   # === Database ===
   datasource:
@@ -36,3 +54,5 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /inventory-service/swagger-ui.html
+
+uploadService.url: http://localhost:8085/api/internal/uploads

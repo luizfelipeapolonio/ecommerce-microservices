@@ -1,6 +1,6 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 
-import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.category.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.CreateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.CreateSubcategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.DeleteCategoryUseCase;

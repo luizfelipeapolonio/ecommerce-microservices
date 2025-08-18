@@ -8,8 +8,7 @@ public class Product {
   private final UUID id;
   private final String name;
   private final String description;
-  private final String imageUrl;
-  private final BigDecimal priceUnity;
+  private final BigDecimal unitPrice;
   private final long quantity;
   private final LocalDateTime createdAt;
   private final LocalDateTime updatedAt;
@@ -29,12 +28,8 @@ public class Product {
     return this.description;
   }
 
-  public String getImageUrl() {
-    return this.imageUrl;
-  }
-
-  public BigDecimal getPriceUnity() {
-    return this.priceUnity;
+  public BigDecimal getUnitPrice() {
+    return this.unitPrice;
   }
 
   public long getQuantity() {
@@ -73,8 +68,7 @@ public class Product {
     this.id = builder.id;
     this.name = builder.name;
     this.description =  builder.description;
-    this.imageUrl = builder.imageUrl;
-    this.priceUnity = builder.priceUnity;
+    this.unitPrice = builder.unitPrice;
     this.quantity = builder.quantity;
     this.createdAt = builder.createdAt;
     this.updatedAt = builder.updatedAt;
@@ -87,8 +81,7 @@ public class Product {
     private UUID id;
     private String name;
     private String description;
-    private String imageUrl;
-    private BigDecimal priceUnity;
+    private BigDecimal unitPrice;
     private long quantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -103,8 +96,7 @@ public class Product {
       this.id = product.getId();
       this.name = product.getName();
       this.description = product.getDescription();
-      this.imageUrl = product.getImageUrl();
-      this.priceUnity = product.getPriceUnity();
+      this.unitPrice = product.getUnitPrice();
       this.quantity = product.getQuantity();
       this.createdAt = product.getCreatedAt();
       this.updatedAt = product.getUpdatedAt();
@@ -128,13 +120,8 @@ public class Product {
       return this;
     }
 
-    public Builder imageUrl(String imageUrl) {
-      this.imageUrl = imageUrl;
-      return this;
-    }
-
-    public Builder priceUnity(BigDecimal priceUnity) {
-      this.priceUnity = priceUnity;
+    public Builder unitPrice(BigDecimal unitPrice) {
+      this.unitPrice = unitPrice;
       return this;
     }
 
@@ -163,7 +150,7 @@ public class Product {
       return this;
     }
 
-    public Builder Model(Model model) {
+    public Builder model(Model model) {
       this.model = model;
       return this;
     }

@@ -4,6 +4,9 @@ import com.felipe.ecommerce_inventory_service.core.application.exceptions.BrandA
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.CategoryAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.ModelAlreadyExistsException;
+import com.felipe.ecommerce_inventory_service.core.application.exceptions.ProductAlreadyExistsException;
+import com.felipe.ecommerce_inventory_service.infrastructure.exceptions.MappingFailureException;
+import com.felipe.ecommerce_inventory_service.infrastructure.exceptions.UnprocessableJsonException;
 import com.felipe.response.CustomValidationErrors;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
@@ -19,7 +22,12 @@ import java.util.List;
 @RestControllerAdvice
 public class ExceptionControllerAdvice {
 
-  @ExceptionHandler({CategoryAlreadyExistsException.class, BrandAlreadyExistsException.class, ModelAlreadyExistsException.class})
+  @ExceptionHandler({
+    CategoryAlreadyExistsException.class,
+    BrandAlreadyExistsException.class,
+    ModelAlreadyExistsException.class,
+    ProductAlreadyExistsException.class
+  })
   @ResponseStatus(HttpStatus.CONFLICT)
   public ResponsePayload<Void> handleResourceAlreadyExistsException(Exception ex) {
     return new ResponsePayload.Builder<Void>()
@@ -62,7 +70,8 @@ public class ExceptionControllerAdvice {
     List<CustomValidationErrors> errors = ex.getConstraintViolations()
       .stream()
       .map(constraintViolation -> {
-        String field = constraintViolation.getPropertyPath().toString().split("\\.")[1];
+        String field = constraintViolation.getPropertyPath().toString();
+        field = field.contains(".") ? field.split("\\.")[1] : field;
         CustomValidationErrors validationError = new CustomValidationErrors();
         validationError.setField(field);
         validationError.setRejectedValue(constraintViolation.getInvalidValue());
@@ -76,6 +85,26 @@ public class ExceptionControllerAdvice {
       .code(HttpStatus.BAD_REQUEST)
       .message("Erros de validação")
       .payload(errors)
+      .build();
+  }
+
+  @ExceptionHandler(UnprocessableJsonException.class)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  public ResponsePayload<Void> handleUnprocessableJsonException(UnprocessableJsonException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.UNPROCESSABLE_ENTITY)
+      .message(ex.getMessage())
+      .build();
+  }
+
+  @ExceptionHandler(MappingFailureException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleMappingFailureException(MappingFailureException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message(ex.getMessage())
       .build();
   }
 }

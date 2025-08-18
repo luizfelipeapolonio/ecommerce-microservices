@@ -1,6 +1,6 @@
 package com.felipe.ecommerce_inventory_service.core.application.usecases.category;
 
-import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.category.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.CategoryGateway;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.impl.GetAllCategoriesUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;

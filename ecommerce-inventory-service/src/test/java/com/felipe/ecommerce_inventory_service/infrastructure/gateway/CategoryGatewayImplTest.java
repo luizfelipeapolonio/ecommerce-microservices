@@ -1,6 +1,6 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.gateway;
 
-import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.category.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.infrastructure.mappers.CategoryEntityMapper;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.CategoryEntity;

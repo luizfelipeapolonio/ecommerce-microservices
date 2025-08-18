@@ -1,7 +1,7 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.felipe.ecommerce_inventory_service.core.application.dtos.CategoriesDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.category.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.CategoryAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.CreateCategoryUseCase;
