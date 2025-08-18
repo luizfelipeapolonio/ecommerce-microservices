@@ -1,5 +1,7 @@
 package com.felipe.response;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum ResponseType {
   SUCCESS("success"),
   ERROR("error");
@@ -10,6 +12,7 @@ public enum ResponseType {
     this.text = text;
   }
 
+  @JsonValue
   public String getText() {
     return this.text;
   }

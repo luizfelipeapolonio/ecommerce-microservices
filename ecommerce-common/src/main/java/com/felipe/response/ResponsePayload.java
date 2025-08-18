@@ -1,5 +1,7 @@
 package com.felipe.response;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
@@ -25,6 +27,7 @@ import org.springframework.lang.Nullable;
  *
  * @param <T> the payload type
  */
+@JsonDeserialize(builder = ResponsePayload.Builder.class)
 public class ResponsePayload<T> {
   private final String type;
   private final int code;
@@ -86,6 +89,7 @@ public class ResponsePayload<T> {
   // This T type declaration is from static context (static class Builder<T>)
   // It's not the same from outer class (class ResponsePayload<T>)
   // They just have the same name T (T stands for Type)
+  @JsonPOJOBuilder(withPrefix = "")
   public static class Builder<T> {
     private String type;
     private int code;
@@ -111,6 +115,7 @@ public class ResponsePayload<T> {
      * @param code the HTTP status code
      * @return the created builder
      */
+    @JsonDeserialize(using = HttpStatusDeserializer.class)
     public Builder<T> code(HttpStatus code) {
       this.code = code.value();
       return this;
