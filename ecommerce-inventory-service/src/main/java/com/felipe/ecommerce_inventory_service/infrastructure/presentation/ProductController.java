@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
+import com.felipe.ecommerce_inventory_service.infrastructure.config.openapi.ProductApi;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.CreateProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.exceptions.UnprocessableJsonException;
 import com.felipe.ecommerce_inventory_service.infrastructure.mappers.UploadFileMapper;
@@ -28,7 +29,7 @@ import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/v1/products")
-public class ProductController {
+public class ProductController implements ProductApi {
   private final CreateProductUseCase createProductUseCase;
   private final UploadFileMapper uploadFileMapper;
   private final ObjectMapper objectMapper;
@@ -44,7 +45,8 @@ public class ProductController {
     this.objectMapper = objectMapper;
     this.validator = validator;
   }
-  
+
+  @Override
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public ResponsePayload<CreateProductResponseDTO> createProduct(@RequestPart("productDTO") String jsonProductDTO,
