@@ -10,6 +10,7 @@ import com.felipe.ecommerce_inventory_service.core.domain.Brand;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.BrandDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.CreateOrUpdateBrandDTO;
 import com.felipe.ecommerce_inventory_service.testutils.DataMock;
+import com.felipe.ecommerce_inventory_service.testutils.OAuth2TestMockConfiguration;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -43,6 +45,7 @@ import static org.mockito.Mockito.times;
 @ActiveProfiles(value = "test")
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc(addFilters = false)
+@Import({OAuth2TestMockConfiguration.class})
 public class BrandControllerTest {
 
   @Autowired

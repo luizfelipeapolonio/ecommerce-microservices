@@ -3,13 +3,17 @@ package com.felipe.ecommerce_inventory_service.testutils;
 import com.felipe.ecommerce_inventory_service.core.domain.Brand;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.core.domain.Model;
+import com.felipe.ecommerce_inventory_service.core.domain.Product;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.BrandEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.CategoryEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ModelEntity;
+import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ProductEntity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class DataMock {
   private final List<Category> categoriesDomain = new ArrayList<>();
@@ -18,14 +22,18 @@ public class DataMock {
   private final List<BrandEntity> brandsEntity = new ArrayList<>();
   private final List<Model> modelsDomain = new ArrayList<>();
   private final List<ModelEntity> modelsEntity = new ArrayList<>();
+  private final List<Product> productsDomain = new ArrayList<>();
+  private final List<ProductEntity> productsEntity = new ArrayList<>();
 
   public DataMock() {
     this.createCategoriesDomainMock();
     this.createCategoriesEntityMock();
     this.createBrandsDomainMock();
     this.createBrandsEntityMock();
-    this.createModelsDomain();
-    this.createModelsEntity();
+    this.createModelsDomainMock();
+    this.createModelsEntityMock();
+    this.createProductsDomainMock();
+    this.createProductsEntityMock();
   }
 
   public List<Category> getCategoriesDomain() {
@@ -50,6 +58,14 @@ public class DataMock {
 
   public List<ModelEntity> getModelsEntity() {
     return this.modelsEntity;
+  }
+
+  public List<Product> getProductsDomain() {
+    return this.productsDomain;
+  }
+
+  public List<ProductEntity> getProductsEntity() {
+    return this.productsEntity;
   }
 
   private void createCategoriesDomainMock() {
@@ -196,7 +212,7 @@ public class DataMock {
     this.brandsEntity.add(brand3);
   }
 
-  private void createModelsDomain() {
+  private void createModelsDomainMock() {
     Model model1 = Model.builder()
       .id(1L)
       .name("g pro")
@@ -239,7 +255,7 @@ public class DataMock {
     this.modelsDomain.add(model4);
   }
 
-  private void createModelsEntity() {
+  private void createModelsEntityMock() {
     ModelEntity model1 = ModelEntity.builder()
       .id(1L)
       .name("g pro")
@@ -280,5 +296,39 @@ public class DataMock {
     this.modelsEntity.add(model2);
     this.modelsEntity.add(model3);
     this.modelsEntity.add(model4);
+  }
+
+  private void createProductsDomainMock() {
+    Product product1 = Product.builder()
+      .id(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .name("Mouse wireless Logitech G PRO")
+      .description("A technical and descriptive text about the product")
+      .unitPrice(new BigDecimal("120.00"))
+      .quantity(50)
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .category(this.getCategoriesDomain().get(4))
+      .brand(this.getBrandsDomain().get(0))
+      .model(this.getModelsDomain().get(0))
+      .build();
+
+    this.productsDomain.add(product1);
+  }
+
+  private void createProductsEntityMock() {
+    ProductEntity product1 = ProductEntity.builder()
+      .id(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .name("Mouse wireless Logitech G PRO")
+      .description("A technical and descriptive text about the product")
+      .unitPrice(new BigDecimal("120.00"))
+      .quantity(50)
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .category(this.getCategoriesEntity().get(4))
+      .brand(this.getBrandsEntity().get(0))
+      .model(this.getModelsEntity().get(0))
+      .build();
+
+    this.productsEntity.add(product1);
   }
 }

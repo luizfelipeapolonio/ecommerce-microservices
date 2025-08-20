@@ -15,6 +15,7 @@ import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.Categ
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateOrUpdateCategoryDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.category.CreateSubcategoryDTO;
 import com.felipe.ecommerce_inventory_service.testutils.DataMock;
+import com.felipe.ecommerce_inventory_service.testutils.OAuth2TestMockConfiguration;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -48,6 +50,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles(value = "test")
 @AutoConfigureMockMvc(addFilters = false)
+@Import({OAuth2TestMockConfiguration.class})
 public class CategoryControllerTest {
 
   @Autowired
