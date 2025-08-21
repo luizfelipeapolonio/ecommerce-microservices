@@ -5,7 +5,9 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.Ge
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetCategoryByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetModelByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.CreateProductUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.UpdateProductUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,5 +31,10 @@ public class ProductBeans {
   @Bean
   public CreateProductUseCase createProductUseCase() {
     return new CreateProductUseCaseImpl(productGateway, getCategoryByIdUseCase, getBrandByIdUseCase, getModelByIdUseCase);
+  }
+
+  @Bean
+  public UpdateProductUseCase updateProductUseCase() {
+    return new UpdateProductUseCaseImpl(productGateway);
   }
 }

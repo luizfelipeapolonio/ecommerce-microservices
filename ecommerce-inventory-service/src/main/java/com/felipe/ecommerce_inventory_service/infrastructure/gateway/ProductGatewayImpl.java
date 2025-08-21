@@ -2,6 +2,7 @@ package com.felipe.ecommerce_inventory_service.infrastructure.gateway;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.UpdateProductDomainDTO;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.ProductGateway;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
@@ -17,8 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Component
@@ -65,5 +68,30 @@ public class ProductGatewayImpl implements ProductGateway {
   @Override
   public Optional<Product> findProductByName(String name) {
     return this.productRepository.findByName(name).map(this.productEntityMapper::toDomain);
+  }
+
+  @Override
+  public Optional<Product> findProductById(UUID id) {
+    return this.productRepository.findById(id).map(this.productEntityMapper::toDomain);
+  }
+
+  @Override
+  public Product updateProduct(Product product, UpdateProductDomainDTO productDTO) {
+    ProductEntity.Builder productEntityBuilder = ProductEntity.mutate(this.productEntityMapper.toEntity(product));
+
+    if(productDTO.name() != null) {
+      productEntityBuilder.name(productDTO.name());
+    }
+    if(productDTO.description() != null) {
+      productEntityBuilder.description(productDTO.description());
+    }
+    if(productDTO.unitPrice() != null) {
+      productEntityBuilder.unitPrice(new BigDecimal(productDTO.unitPrice()));
+    }
+    if(productDTO.quantity() != null) {
+      productEntityBuilder.quantity(productDTO.quantity());
+    }
+
+    return this.productEntityMapper.toDomain(this.productRepository.save(productEntityBuilder.build()));
   }
 }
