@@ -13,6 +13,7 @@ import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.ModelDTO
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.UpdateModelDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.CreateProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductResponseDTO;
 import com.felipe.openapi.OpenApiUtils;
 import com.felipe.openapi.SchemaCustomizer;
 import com.felipe.response.CustomValidationErrors;
@@ -126,6 +127,12 @@ public class OpenAPIConfiguration {
         SchemaCustomizer.withDefaults()
       );
       this.apiUtils.createSchemaFromClass(
+        "UpdateProductResponseDTO",
+        modelConverterInstance,
+        UpdateProductResponseDTO.class,
+        SchemaCustomizer.withDefaults()
+      );
+      this.apiUtils.createSchemaFromClass(
         "CreateProductDTO",
         modelConverterInstance,
         CreateProductDTO.class,
@@ -180,6 +187,11 @@ public class OpenAPIConfiguration {
         schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
         schema.addAllOfItem(new ObjectSchema()
           .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "CreateProductResponseDTO")));
+      });
+      this.apiUtils.createSchema("ResponsePayload<UpdateProductResponseDTO>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema()
+          .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "UpdateProductResponseDTO")));
       });
 
       // Examples
@@ -316,6 +328,7 @@ public class OpenAPIConfiguration {
         "2025-07-18T21:12:28.978228256"
       );
       ProductDTO productDTO = new ProductDTO(product, List.of(image1));
+      UpdateProductResponseDTO updateProductResponseDTO = new UpdateProductResponseDTO(product);
 
       this.apiUtils.createExample(
         "CategoryDTOWithNoSubcategoryExample",
@@ -480,6 +493,13 @@ public class OpenAPIConfiguration {
         HttpStatus.BAD_REQUEST,
         "Validation errors",
         List.of(validationErrors2)
+      );
+      this.apiUtils.createExample(
+        "UpdateProductExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Product updated successfully",
+        updateProductResponseDTO
       );
     };
   }

@@ -1,8 +1,12 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.config.openapi;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductResponseDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductResponseDTO;
 import com.felipe.response.ResponsePayload;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,8 +14,12 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
@@ -52,5 +60,33 @@ public interface ProductApi {
   ResponsePayload<CreateProductResponseDTO> createProduct(
     @RequestPart("productDTO") String jsonProductDTO,
     @RequestPart("images") MultipartFile[] images
+  );
+
+  @Operation(
+    operationId = "updateProduct",
+    summary = "Update a product",
+    description = "Update some product information",
+    requestBody = @RequestBody(description = "Request body to update product information"),
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the updated product", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<UpdateProductResponseDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "UpdateProductExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "409", description = "Returns an error response if the given product already exists", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
+          @ExampleObject(name = "Error response", ref = "ExistingProductExample")
+        })
+      }),
+      @ApiResponse(responseCode = "422", ref = "ValidationErrors"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<UpdateProductResponseDTO> updateProduct(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Product id", required = true, schema = @Schema(type = "string", example = "da4dd8a3-a821-4350-9af2-c5b8f3801330"))
+    @PathVariable UUID id,
+    @Parameter(name = "UpdateProductDTO", required = true)
+    @Valid @org.springframework.web.bind.annotation.RequestBody UpdateProductDTO productDTO
   );
 }
