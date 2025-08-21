@@ -5,12 +5,14 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.category
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.CreateSubcategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.DeleteCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetAllCategoriesUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetAllSubcategoriesUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetCategoryByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.UpdateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.impl.CreateCategoryUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.impl.CreateSubcategoryUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.impl.DeleteCategoryUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.impl.GetAllCategoriesUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.impl.GetAllSubcategoriesUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.impl.GetCategoryByIdUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.impl.UpdateCategoryUseCaseImpl;
 import org.springframework.context.annotation.Bean;
@@ -52,5 +54,10 @@ public class CategoryBeans {
   @Bean
   public DeleteCategoryUseCase deleteCategoryUseCase() {
     return new DeleteCategoryUseCaseImpl(categoryGateway);
+  }
+
+  @Bean
+  public GetAllSubcategoriesUseCase getAllSubcategoriesUseCase() {
+    return new GetAllSubcategoriesUseCaseImpl(categoryGateway);
   }
 }

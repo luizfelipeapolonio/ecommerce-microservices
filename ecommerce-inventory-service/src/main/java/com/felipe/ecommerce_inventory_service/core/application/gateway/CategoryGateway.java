@@ -14,4 +14,5 @@ public interface CategoryGateway {
   Category updateCategory(Category category, String updatedName);
   List<CategoriesDTO> getAllCategories();
   Category deleteCategory(Category category);
+  List<Category> getAllSubcategories();
 }

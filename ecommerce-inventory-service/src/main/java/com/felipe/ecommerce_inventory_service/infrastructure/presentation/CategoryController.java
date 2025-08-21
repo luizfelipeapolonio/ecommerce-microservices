@@ -5,6 +5,7 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.category
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.CreateSubcategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.DeleteCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetAllCategoriesUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetAllSubcategoriesUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetCategoryByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.UpdateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
@@ -40,19 +41,22 @@ public class CategoryController implements CategoryApi {
   private final GetCategoryByIdUseCase getCategoryByIdUseCase;
   private final GetAllCategoriesUseCase getAllCategoriesUseCase;
   private final DeleteCategoryUseCase deleteCategoryUseCase;
+  private final GetAllSubcategoriesUseCase getAllSubcategoriesUseCase;
 
   public CategoryController(CreateCategoryUseCase createCategoryUseCase,
                             CreateSubcategoryUseCase createSubcategoryUseCase,
                             UpdateCategoryUseCase updateCategoryUseCase,
                             GetCategoryByIdUseCase getCategoryByIdUseCase,
                             GetAllCategoriesUseCase getAllCategoriesUseCase,
-                            DeleteCategoryUseCase deleteCategoryUseCase) {
+                            DeleteCategoryUseCase deleteCategoryUseCase,
+                            GetAllSubcategoriesUseCase getAllSubcategoriesUseCase) {
     this.createCategoryUseCase = createCategoryUseCase;
     this.createSubcategoryUseCase = createSubcategoryUseCase;
     this.updateCategoryUseCase = updateCategoryUseCase;
     this.getCategoryByIdUseCase = getCategoryByIdUseCase;
     this.getAllCategoriesUseCase = getAllCategoriesUseCase;
     this.deleteCategoryUseCase = deleteCategoryUseCase;
+    this.getAllSubcategoriesUseCase = getAllSubcategoriesUseCase;
   }
 
   @Override
@@ -69,7 +73,7 @@ public class CategoryController implements CategoryApi {
   }
 
   @Override
-  @PostMapping("/subcategory")
+  @PostMapping("/subcategories")
   @ResponseStatus(HttpStatus.CREATED)
   public ResponsePayload<CategoryDTO> createSubcategory(@Valid @RequestBody CreateSubcategoryDTO createSubcategoryDTO) {
     Category createdSubcategory = this.createSubcategoryUseCase.execute(createSubcategoryDTO.parentCategoryId(),
@@ -79,6 +83,23 @@ public class CategoryController implements CategoryApi {
       .code(HttpStatus.CREATED)
       .message("Subcategoria '" + createdSubcategory.getName() + "' criada com sucesso")
       .payload(new CategoryDTO(createdSubcategory))
+      .build();
+  }
+
+  @Override
+  @GetMapping("/subcategories")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<List<CategoryDTO>> getAllSubcategories() {
+    List<CategoryDTO> subcategories = this.getAllSubcategoriesUseCase.execute()
+      .stream()
+      .map(CategoryDTO::new)
+      .toList();
+
+    return new ResponsePayload.Builder<List<CategoryDTO>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Todas as subcategorias")
+      .payload(subcategories)
       .build();
   }
 

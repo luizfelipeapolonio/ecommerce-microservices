@@ -71,4 +71,11 @@ public class CategoryGatewayImpl implements CategoryGateway {
     this.categoryRepository.delete(categoryEntity);
     return category;
   }
+
+  @Override
+  public List<Category> getAllSubcategories() {
+    return this.categoryRepository.findAllSubcategories().stream()
+      .map(this.entityMapper::toDomain)
+      .toList();
+  }
 }
