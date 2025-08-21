@@ -79,6 +79,21 @@ public interface CategoryApi {
   );
 
   @Operation(
+    operationId = "getAllSubcategories",
+    summary = "Get a all subcategories",
+    description = "Get a list of all subcategories",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with a list containing all product subcategories", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<List<CategoryDTO>>"), examples = {
+          @ExampleObject(name = "Success response", ref = "AllSubcategoriesExample")
+        })
+      }),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<List<CategoryDTO>> getAllSubcategories();
+
+  @Operation(
     operationId = "updateCategory",
     summary = "Update a category",
     description = "Update a category name",

@@ -238,6 +238,7 @@ public class OpenAPIConfiguration {
         .name("mouse")
         .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
         .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+        .parentCategory(category2)
         .build();
 
       CustomValidationErrors validationErrors = new CustomValidationErrors();
@@ -381,6 +382,13 @@ public class OpenAPIConfiguration {
           new CategoriesDTO(category1, List.of(subcategory1, subcategory2)),
           new CategoriesDTO(category2, List.of(subcategory3))
         )
+      );
+      this.apiUtils.createExample(
+        "AllSubcategoriesExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "All subcategories",
+        List.of(subcategory3)
       );
       this.apiUtils.createExample(
         "DeleteCategoryExample",
