@@ -2,10 +2,12 @@ package com.felipe.ecommerce_inventory_service.infrastructure.gateway;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.UpdateProductDomainDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.UploadFileImpl;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.external.UploadService;
 import com.felipe.ecommerce_inventory_service.infrastructure.mappers.ProductEntityMapper;
 import com.felipe.ecommerce_inventory_service.infrastructure.mappers.UploadFileMapper;
@@ -149,6 +151,74 @@ public class ProductGatewayImplTest {
     assertThat(foundProduct.get().getModel().getId()).isEqualTo(product.getModel().getId());
 
     verify(this.productRepository, times(1)).findByName(productEntity.getName());
+    verify(this.productEntityMapper, times(1)).toDomain(productEntity);
+  }
+
+  @Test
+  @DisplayName("findProductByIdReturnsOptionalOfProduct - Should successfully find a product with the given id and return an Optional of Product")
+  void findProductByIdReturnsOptionalOfProduct() {
+    ProductEntity productEntity = this.dataMock.getProductsEntity().getFirst();
+    Product product = this.dataMock.getProductsDomain().getFirst();
+
+    when(this.productRepository.findById(productEntity.getId())).thenReturn(Optional.of(productEntity));
+    when(this.productEntityMapper.toDomain(productEntity)).thenReturn(product);
+
+    Optional<Product> foundProduct = this.productGateway.findProductById(productEntity.getId());
+
+    assertThat(foundProduct.isPresent()).isTrue();
+    assertThat(foundProduct.get().getId()).isEqualTo(product.getId());
+    assertThat(foundProduct.get().getName()).isEqualTo(product.getName());
+    assertThat(foundProduct.get().getDescription()).isEqualTo(product.getDescription());
+    assertThat(foundProduct.get().getQuantity()).isEqualTo(product.getQuantity());
+    assertThat(foundProduct.get().getUnitPrice()).isEqualTo(product.getUnitPrice());
+    assertThat(foundProduct.get().getCreatedAt()).isEqualTo(product.getCreatedAt());
+    assertThat(foundProduct.get().getUpdatedAt()).isEqualTo(product.getUpdatedAt());
+    assertThat(foundProduct.get().getCategory()).usingRecursiveComparison().isEqualTo(product.getCategory());
+    assertThat(foundProduct.get().getBrand()).usingRecursiveComparison().isEqualTo(product.getBrand());
+    assertThat(foundProduct.get().getModel()).usingRecursiveComparison().isEqualTo(product.getModel());
+
+    verify(this.productRepository, times(1)).findById(productEntity.getId());
+    verify(this.productEntityMapper, times(1)).toDomain(productEntity);
+  }
+
+  @Test
+  @DisplayName("updateProductSuccess - Should successfully update a product and return it")
+  void updateProductSuccess() {
+    Product product = this.dataMock.getProductsDomain().getFirst();
+    ProductEntity productEntity = this.dataMock.getProductsEntity().getFirst();
+    UpdateProductDomainDTO productDTO = new UpdateProductDTO(
+      "Updated name",
+      "Updated description",
+      "100.00",
+      10L
+    );
+    ArgumentCaptor<ProductEntity> entityCaptor = ArgumentCaptor.forClass(ProductEntity.class);
+
+    when(this.productEntityMapper.toEntity(product)).thenReturn(productEntity);
+    when(this.productRepository.save(entityCaptor.capture())).thenReturn(productEntity);
+    when(this.productEntityMapper.toDomain(productEntity)).thenReturn(product);
+
+    Product updatedProduct = this.productGateway.updateProduct(product, productDTO);
+
+    // Argument captor assertion
+    assertThat(entityCaptor.getValue().getName()).isEqualTo(productDTO.name());
+    assertThat(entityCaptor.getValue().getDescription()).isEqualTo(productDTO.description());
+    assertThat(entityCaptor.getValue().getUnitPrice().toString()).isEqualTo(productDTO.unitPrice());
+    assertThat(entityCaptor.getValue().getQuantity()).isEqualTo(productDTO.quantity());
+    // Updated product assertion
+    assertThat(updatedProduct.getId()).isEqualTo(product.getId());
+    assertThat(updatedProduct.getName()).isEqualTo(product.getName());
+    assertThat(updatedProduct.getDescription()).isEqualTo(product.getDescription());
+    assertThat(updatedProduct.getUnitPrice().toString()).isEqualTo(product.getUnitPrice().toString());
+    assertThat(updatedProduct.getQuantity()).isEqualTo(product.getQuantity());
+    assertThat(updatedProduct.getCreatedAt()).isEqualTo(product.getCreatedAt());
+    assertThat(updatedProduct.getUpdatedAt()).isEqualTo(product.getUpdatedAt());
+    assertThat(updatedProduct.getCategory()).usingRecursiveComparison().isEqualTo(product.getCategory());
+    assertThat(updatedProduct.getBrand()).usingRecursiveComparison().isEqualTo(product.getBrand());
+    assertThat(updatedProduct.getModel()).usingRecursiveComparison().isEqualTo(product.getModel());
+
+    verify(this.productEntityMapper, times(1)).toEntity(product);
+    verify(this.productRepository, times(1)).save(any(ProductEntity.class));
     verify(this.productEntityMapper, times(1)).toDomain(productEntity);
   }
 }

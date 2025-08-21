@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.UploadFileImpl;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.CreateProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.mappers.UploadFileMapper;
 import com.felipe.ecommerce_inventory_service.testutils.DataMock;
 import com.felipe.ecommerce_inventory_service.testutils.OAuth2TestMockConfiguration;
@@ -43,6 +46,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,6 +65,9 @@ public class ProductControllerTest {
 
   @MockitoBean
   CreateProductUseCase createProductUseCase;
+
+  @MockitoBean
+  UpdateProductUseCase updateProductUseCase;
 
   @MockitoBean
   UploadFileMapper uploadFileMapper;
@@ -146,5 +153,35 @@ public class ProductControllerTest {
     verify(this.createProductUseCase, times(1)).execute(eq(productDTO), any(UploadFile[].class));
     verify(this.objectMapper, times(2)).readValue(jsonRequestBody, CreateProductDTO.class);
     verify(this.validator, times(1)).validate(productDTO);
+  }
+
+  @Test
+  @DisplayName("updateProductSuccess - Should return a success response with the updated product")
+  void updateProductSuccess() throws Exception {
+    Product product = this.dataMock.getProductsDomain().getFirst();
+    UpdateProductDTO updateProductDTO = new UpdateProductDTO(
+      "Updated name",
+      "Updated description",
+      "100.00",
+      10L
+    );
+    String jsonRequestBody = this.objectMapper.writeValueAsString(updateProductDTO);
+
+    ResponsePayload<UpdateProductResponseDTO> response = new ResponsePayload.Builder<UpdateProductResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Produto atualizado com sucesso")
+      .payload(new UpdateProductResponseDTO(product))
+      .build();
+    String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.updateProductUseCase.execute(product.getId(), updateProductDTO)).thenReturn(product);
+
+    this.mockMvc.perform(patch(BASE_URL + "/{id}", product.getId())
+      .contentType(APPLICATION_JSON).content(jsonRequestBody)
+      .accept(APPLICATION_JSON))
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.updateProductUseCase, times(1)).execute(product.getId(), updateProductDTO);
   }
 }
