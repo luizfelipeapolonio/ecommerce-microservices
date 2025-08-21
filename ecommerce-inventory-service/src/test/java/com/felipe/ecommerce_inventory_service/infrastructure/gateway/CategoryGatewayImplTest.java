@@ -280,4 +280,37 @@ public class CategoryGatewayImplTest {
     verify(this.categoryEntityMapper, times(1)).toEntity(categoryDomain);
     verify(this.categoryRepository, times(1)).delete(categoryEntity);
   }
+
+  @Test
+  @DisplayName("getAllSubcategoriesSuccess - Should successfully return a list with all found subcategories")
+  void getAllSubcategoriesSuccess() {
+    final List<CategoryEntity> allCategoriesEntity = this.dataMock.getCategoriesEntity();
+    final List<Category> allCategoriesDomain = this.dataMock.getCategoriesDomain();
+    List<CategoryEntity> subcategoriesEntity = List.of(
+      allCategoriesEntity.get(1),
+      allCategoriesEntity.get(2),
+      allCategoriesEntity.get(4)
+    );
+    List<Category> subcategoriesDomain = List.of(
+      allCategoriesDomain.get(1),
+      allCategoriesDomain.get(2),
+      allCategoriesDomain.get(4)
+    );
+
+    when(this.categoryRepository.findAllSubcategories()).thenReturn(subcategoriesEntity);
+    when(this.categoryEntityMapper.toDomain(subcategoriesEntity.get(0))).thenReturn(subcategoriesDomain.get(0));
+    when(this.categoryEntityMapper.toDomain(subcategoriesEntity.get(1))).thenReturn(subcategoriesDomain.get(1));
+    when(this.categoryEntityMapper.toDomain(subcategoriesEntity.get(2))).thenReturn(subcategoriesDomain.get(2));
+
+    List<Category> allSubcategories = this.categoryGateway.getAllSubcategories();
+
+    assertThat(allSubcategories.size()).isEqualTo(subcategoriesEntity.size());
+    assertThat(allSubcategories)
+      .allSatisfy(subcategory -> assertThat(subcategory.getParentCategory()).isNotNull());
+
+    verify(this.categoryRepository, times(1)).findAllSubcategories();
+    verify(this.categoryEntityMapper, times(1)).toDomain(subcategoriesEntity.get(0));
+    verify(this.categoryEntityMapper, times(1)).toDomain(subcategoriesEntity.get(1));
+    verify(this.categoryEntityMapper, times(1)).toDomain(subcategoriesEntity.get(2));
+  }
 }

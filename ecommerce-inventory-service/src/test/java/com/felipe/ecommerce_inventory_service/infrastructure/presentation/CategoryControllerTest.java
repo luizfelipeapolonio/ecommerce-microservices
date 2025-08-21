@@ -8,6 +8,7 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.category
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.CreateSubcategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.DeleteCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetAllCategoriesUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetAllSubcategoriesUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetCategoryByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.UpdateCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
@@ -76,6 +77,9 @@ public class CategoryControllerTest {
 
   @MockitoBean
   DeleteCategoryUseCase deleteCategoryUseCase;
+
+  @MockitoBean
+  GetAllSubcategoriesUseCase getAllSubcategoriesUseCase;
 
   private DataMock dataMock;
   private static final String BASE_URL = "/api/v1/categories";
@@ -146,7 +150,7 @@ public class CategoryControllerTest {
     when(this.createSubcategoryUseCase.execute(subcategoryDTO.parentCategoryId(), subcategoryDTO.subcategoryName()))
       .thenReturn(createdSubcategory);
 
-    this.mockMvc.perform(post(BASE_URL + "/subcategory")
+    this.mockMvc.perform(post(BASE_URL + "/subcategories")
       .contentType(APPLICATION_JSON).content(jsonRequestBody)
       .accept(APPLICATION_JSON))
       .andExpectAll(
@@ -178,7 +182,7 @@ public class CategoryControllerTest {
     when(this.createSubcategoryUseCase.execute(subcategoryDTO.parentCategoryId(), subcategoryDTO.subcategoryName()))
       .thenThrow(new DataNotFoundException("Categoria de id '" + subcategoryDTO.parentCategoryId() + "' não encontrada"));
 
-    this.mockMvc.perform(post(BASE_URL + "/subcategory")
+    this.mockMvc.perform(post(BASE_URL + "/subcategories")
       .contentType(APPLICATION_JSON).content(jsonRequestBody)
       .accept(APPLICATION_JSON))
       .andExpectAll(
@@ -294,5 +298,29 @@ public class CategoryControllerTest {
       );
 
     verify(this.deleteCategoryUseCase, times(1)).execute(category.getId());
+  }
+
+  @Test
+  @DisplayName("getAllSubcategoriesSuccess - Should return a success response with all subcategories")
+  void getAllSubcategoriesSuccess() throws Exception {
+    List<Category> subcategories = this.dataMock.getCategoriesDomain()
+      .stream()
+      .filter(category -> category.getParentCategory() != null)
+      .toList();
+    List<CategoryDTO> subcategoriesDTO = subcategories.stream().map(CategoryDTO::new).toList();
+
+    ResponsePayload<List<CategoryDTO>> response = new ResponsePayload.Builder<List<CategoryDTO>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Todas as subcategorias")
+      .payload(subcategoriesDTO)
+      .build();
+    String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.getAllSubcategoriesUseCase.execute()).thenReturn(subcategories);
+
+    this.mockMvc.perform(get(BASE_URL + "/subcategories")
+      .accept(APPLICATION_JSON))
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
   }
 }
