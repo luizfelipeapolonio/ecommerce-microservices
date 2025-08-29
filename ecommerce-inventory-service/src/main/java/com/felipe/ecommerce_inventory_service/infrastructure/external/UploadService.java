@@ -2,17 +2,21 @@ package com.felipe.ecommerce_inventory_service.infrastructure.external;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
 import com.felipe.response.ResponsePayload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
 import static org.springframework.security.oauth2.client.web.client.RequestAttributeClientRegistrationIdResolver.clientRegistrationId;
 
@@ -22,6 +26,8 @@ public class UploadService {
 
   @Value("${uploadService.url}")
   private String uploadServiceUrl;
+  private static final String CLIENT_REGISTRATION_ID = "ecommerce-inventory-service";
+  private final Logger logger = LoggerFactory.getLogger(UploadService.class);
 
   public UploadService(RestClient restClient) {
     this.restClient = restClient;
@@ -38,9 +44,23 @@ public class UploadService {
     return this.restClient
       .post()
       .uri(URI.create(this.uploadServiceUrl))
-      .attributes(clientRegistrationId("ecommerce-inventory-service"))
+      .attributes(clientRegistrationId(CLIENT_REGISTRATION_ID))
       .contentType(MediaType.MULTIPART_FORM_DATA)
       .body(parts)
+      .retrieve()
+      .body(new ParameterizedTypeReference<>() {});
+  }
+
+  public ResponsePayload<List<ImageResponse>> getProductImages(Set<String> productIdsList)  {
+    final String productIds = StringUtils.collectionToCommaDelimitedString(productIdsList);
+    this.logger.info("Get product images for productIds: {}", productIds);
+
+    return this.restClient
+      .get()
+      .uri(URI.create(this.uploadServiceUrl))
+      .header("productIds", productIds)
+      .attributes(clientRegistrationId(CLIENT_REGISTRATION_ID))
+      .accept(MediaType.APPLICATION_JSON)
       .retrieve()
       .body(new ParameterizedTypeReference<>() {});
   }
@@ -60,6 +80,24 @@ public class UploadService {
 
     public String getProductId() {
       return this.productId;
+    }
+  }
+
+  public static class ImageResponse {
+    private final String productId;
+    private final List<ImageFileDTO> images;
+
+    public ImageResponse(String productId, List<ImageFileDTO> images) {
+      this.productId = productId;
+      this.images = images;
+    }
+
+    public String getProductId() {
+      return this.productId;
+    }
+
+    public List<ImageFileDTO> getImages() {
+      return this.images;
     }
   }
 }

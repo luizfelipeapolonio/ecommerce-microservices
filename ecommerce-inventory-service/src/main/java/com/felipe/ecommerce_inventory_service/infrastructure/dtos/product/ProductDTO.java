@@ -1,6 +1,6 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.dtos.product;
 
-import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.brand.BrandDTO;
@@ -19,7 +19,7 @@ public record ProductDTO(String id,
                          CategoryDTO category,
                          BrandDTO brand,
                          ModelDTO model,
-                         List<ImageFileDTO> images) implements CreateProductResponseDTO {
+                         List<ImageFileDTO> images) implements ProductResponseDTO {
   public ProductDTO(Product product, List<ImageFileDTO> images) {
     this(
       product.getId().toString(),

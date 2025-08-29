@@ -2,7 +2,7 @@ package com.felipe.ecommerce_inventory_service.core.application.dtos.product;
 
 import java.util.List;
 
-public interface CreateProductResponseDTO {
+public interface ProductResponseDTO {
   String id();
   String name();
   String description();

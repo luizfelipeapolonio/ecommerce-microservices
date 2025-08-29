@@ -2,8 +2,10 @@ package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
@@ -22,11 +24,13 @@ import jakarta.validation.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +45,7 @@ import java.util.stream.Stream;
 public class ProductController implements ProductApi {
   private final CreateProductUseCase createProductUseCase;
   private final UpdateProductUseCase updateProductUseCase;
+  private final GetProductsByCategoryUseCase getProductsByCategoryUseCase;
   private final UploadFileMapper uploadFileMapper;
   private final ObjectMapper objectMapper;
   private final Validator validator;
@@ -48,11 +53,13 @@ public class ProductController implements ProductApi {
   
   public ProductController(CreateProductUseCase createProductUseCase,
                            UpdateProductUseCase updateProductUseCase,
+                           GetProductsByCategoryUseCase getProductsByCategoryUseCase,
                            UploadFileMapper uploadFileMapper,
                            ObjectMapper objectMapper,
                            Validator validator) {
     this.createProductUseCase = createProductUseCase;
     this.updateProductUseCase = updateProductUseCase;
+    this.getProductsByCategoryUseCase = getProductsByCategoryUseCase;
     this.uploadFileMapper = uploadFileMapper;
     this.objectMapper = objectMapper;
     this.validator = validator;
@@ -61,16 +68,16 @@ public class ProductController implements ProductApi {
   @Override
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public ResponsePayload<CreateProductResponseDTO> createProduct(@RequestPart("productDTO") String jsonProductDTO,
-                                                                 @RequestPart("images") MultipartFile[] images) {
+  public ResponsePayload<ProductResponseDTO> createProduct(@RequestPart("productDTO") String jsonProductDTO,
+                                                           @RequestPart("images") MultipartFile[] images) {
     CreateProductDTO productDTO = convertJsonToCreateProductDTO(jsonProductDTO);
     UploadFile[] files = Stream.of(images)
       .map(this.uploadFileMapper::toUploadFile)
       .toArray(UploadFile[]::new);
 
-    CreateProductResponseDTO product = this.createProductUseCase.execute(productDTO, files);
+    ProductResponseDTO product = this.createProductUseCase.execute(productDTO, files);
 
-    return new ResponsePayload.Builder<CreateProductResponseDTO>()
+    return new ResponsePayload.Builder<ProductResponseDTO>()
       .type(ResponseType.SUCCESS)
       .code(HttpStatus.CREATED)
       .message("Produto '" + product.name() + "' inserido com sucesso")
@@ -89,6 +96,21 @@ public class ProductController implements ProductApi {
       .code(HttpStatus.OK)
       .message("Produto atualizado com sucesso")
       .payload(new UpdateProductResponseDTO(updatedProduct))
+      .build();
+  }
+
+  @Override
+  @GetMapping("/category/{categoryName}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<PageResponseDTO> getProductsByCategory(@PathVariable String categoryName,
+                                                                @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                @RequestParam(name = "pageSize", defaultValue = "10") int size) {
+    PageResponseDTO productsPage = this.getProductsByCategoryUseCase.execute(categoryName, page, size);
+    return new ResponsePayload.Builder<PageResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Produtos da categoria '" + categoryName + "'")
+      .payload(productsPage)
       .build();
   }
 

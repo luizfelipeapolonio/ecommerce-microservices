@@ -1,7 +1,7 @@
 package com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductDomainDTO;
-import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.ProductAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.ProductGateway;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.GetBrandByIdUseCase;
@@ -34,7 +34,7 @@ public class CreateProductUseCaseImpl implements CreateProductUseCase {
   }
 
   @Override
-  public CreateProductResponseDTO execute(CreateProductDomainDTO productDTO, UploadFile[] files) {
+  public ProductResponseDTO execute(CreateProductDomainDTO productDTO, UploadFile[] files) {
     Optional<Product> existingProduct = this.productGateway.findProductByName(productDTO.name());
     if(existingProduct.isPresent()) {
       throw new ProductAlreadyExistsException(productDTO.name());
