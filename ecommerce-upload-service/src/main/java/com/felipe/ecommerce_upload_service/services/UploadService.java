@@ -1,6 +1,8 @@
 package com.felipe.ecommerce_upload_service.services;
 
 import com.felipe.ecommerce_upload_service.config.storage.StorageProperties;
+import com.felipe.ecommerce_upload_service.dtos.ImageDTO;
+import com.felipe.ecommerce_upload_service.dtos.ImageResponseDTO;
 import com.felipe.ecommerce_upload_service.dtos.ProductUploadDTO;
 import com.felipe.ecommerce_upload_service.exceptions.InvalidFileTypeException;
 import com.felipe.ecommerce_upload_service.exceptions.UploadFailureException;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -22,6 +25,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class UploadService {
@@ -82,6 +87,23 @@ public class UploadService {
       }
     }
     return savedImages;
+  }
+
+  public List<ImageResponseDTO> getProductImages(String productIds) {
+    final Set<String> productIdsSet = StringUtils.commaDelimitedListToSet(productIds);
+    final List<ImageResponseDTO> productImages = new ArrayList<>(productIdsSet.size());
+
+    productIdsSet.forEach(productId -> {
+      this.logger.info("Getting images of product with Id: {}", productId);
+      final List<ImageDTO> images = this.imageRepository.findAllByProductId(UUID.fromString(productId))
+        .stream()
+        .map(ImageDTO::new)
+        .toList();
+
+      this.logger.info("Found {} images of product with Id \"{}\"", images.size(), productId);
+      productImages.add(new ImageResponseDTO(productId, images));
+    });
+    return productImages;
   }
 
   private String generateImageName(String productName, MultipartFile file) {

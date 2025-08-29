@@ -3,6 +3,7 @@ package com.felipe.ecommerce_upload_service.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_upload_service.dtos.ImageDTO;
+import com.felipe.ecommerce_upload_service.dtos.ImageResponseDTO;
 import com.felipe.ecommerce_upload_service.dtos.ProductUploadDTO;
 import com.felipe.ecommerce_upload_service.exceptions.UnprocessableJsonException;
 import com.felipe.ecommerce_upload_service.services.UploadService;
@@ -11,7 +12,9 @@ import com.felipe.response.ResponseType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -54,5 +57,19 @@ public class UploadController {
       this.logger.error("Error on convert JSON 'productData' to ProductUploadDTO: {}", ex.getMessage(), ex);
       throw new UnprocessableJsonException("Não foi possível converter JSON para objeto", ex);
     }
+  }
+
+  @GetMapping
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<List<ImageResponseDTO>> getProductImages(@RequestHeader(name = "productIds") String productIds) {
+    this.logger.info("Header: productIds - value: {}", productIds);
+    final List<ImageResponseDTO> images = this.uploadService.getProductImages(productIds);
+
+    return new ResponsePayload.Builder<List<ImageResponseDTO>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Imagens dos produtos")
+      .payload(images)
+      .build();
   }
 }
