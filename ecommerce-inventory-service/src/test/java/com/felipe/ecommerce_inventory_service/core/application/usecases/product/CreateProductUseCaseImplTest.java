@@ -1,7 +1,7 @@
 package com.felipe.ecommerce_inventory_service.core.application.usecases.product;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductDomainDTO;
-import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.ProductAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.ProductGateway;
@@ -91,7 +91,7 @@ public class CreateProductUseCaseImplTest {
       "anything",
       "anything"
     );
-    CreateProductResponseDTO createdProductDTO = new CreatedProductDTO(product, List.of(image1));
+    ProductResponseDTO createdProductDTO = new CreatedProductDTO(product, List.of(image1));
     ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
 
     when(this.productGateway.findProductByName(productDTO.name())).thenReturn(Optional.empty());
@@ -100,7 +100,7 @@ public class CreateProductUseCaseImplTest {
     when(this.getModelByIdUseCase.execute(productDTO.modelId())).thenReturn(model);
     when(this.productGateway.createProduct(productCaptor.capture(), eq(files))).thenReturn(createdProductDTO);
 
-    CreateProductResponseDTO productResponse = this.createProductUseCase.execute(productDTO, files);
+    ProductResponseDTO productResponse = this.createProductUseCase.execute(productDTO, files);
 
     // Argument captor assertions
     assertThat(productCaptor.getValue().getName()).isEqualTo(productDTO.name());
@@ -181,7 +181,7 @@ public class CreateProductUseCaseImplTest {
                                    CategoryDTO category,
                                    BrandDTO brand,
                                    ModelDTO model,
-                                   List<ImageFileDTO> images) implements CreateProductResponseDTO {
+                                   List<ImageFileDTO> images) implements ProductResponseDTO {
     public CreatedProductDTO(Product product, List<ImageFileDTO> images) {
       this(
         product.getId().toString(),

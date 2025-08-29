@@ -107,12 +107,21 @@ public class DataMock {
       .parentCategory(category4)
       .build();
 
+    Category category6 = Category.builder()
+      .id(6L)
+      .name("ram")
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .parentCategory(category1)
+      .build();
+
 
     this.categoriesDomain.add(category1);
     this.categoriesDomain.add(category2);
     this.categoriesDomain.add(category3);
     this.categoriesDomain.add(category4);
     this.categoriesDomain.add(category5);
+    this.categoriesDomain.add(category6);
   }
 
   private void createCategoriesEntityMock() {
@@ -149,11 +158,19 @@ public class DataMock {
     category5.setUpdatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"));
     category5.setParentCategory(category4);
 
+    CategoryEntity category6 = new CategoryEntity();
+    category6.setId(6L);
+    category6.setName("ram");
+    category6.setCreatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"));
+    category6.setUpdatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"));
+    category6.setParentCategory(category1);
+
     this.categoriesEntity.add(category1);
     this.categoriesEntity.add(category2);
     this.categoriesEntity.add(category3);
     this.categoriesEntity.add(category4);
     this.categoriesEntity.add(category5);
+    this.categoriesEntity.add(category6);
   }
 
   private void createBrandsDomainMock() {
@@ -249,10 +266,20 @@ public class DataMock {
       .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
       .build();
 
+    Model model5 = Model.builder()
+      .id(5L)
+      .name("vengeance")
+      .description("A great model")
+      .brand(this.getBrandsDomain().get(2))
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
     this.modelsDomain.add(model1);
     this.modelsDomain.add(model2);
     this.modelsDomain.add(model3);
     this.modelsDomain.add(model4);
+    this.modelsDomain.add(model5);
   }
 
   private void createModelsEntityMock() {
@@ -292,10 +319,20 @@ public class DataMock {
       .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
       .build();
 
+    ModelEntity model5 = ModelEntity.builder()
+      .id(5L)
+      .name("vengeance")
+      .description("A great model")
+      .brand(this.getBrandsEntity().get(2))
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .build();
+
     this.modelsEntity.add(model1);
     this.modelsEntity.add(model2);
     this.modelsEntity.add(model3);
     this.modelsEntity.add(model4);
+    this.modelsEntity.add(model5);
   }
 
   private void createProductsDomainMock() {
@@ -312,7 +349,35 @@ public class DataMock {
       .model(this.getModelsDomain().get(0))
       .build();
 
+    Product product2 = Product.builder()
+      .id(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .name("Mouse wireless Logitech M280")
+      .description("A technical and descriptive text about the product")
+      .unitPrice(new BigDecimal("80.00"))
+      .quantity(50)
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .category(this.getCategoriesDomain().get(4))
+      .brand(this.getBrandsDomain().get(0))
+      .model(this.getModelsDomain().get(0))
+      .build();
+
+    Product product3 = Product.builder()
+      .id(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .name("Corsair RAM memory 16GB 3200MHz")
+      .description("A technical and descriptive text about the product")
+      .unitPrice(new BigDecimal("200.00"))
+      .quantity(50)
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .category(this.getCategoriesDomain().get(5))
+      .brand(this.getBrandsDomain().get(2))
+      .model(this.getModelsDomain().get(4))
+      .build();
+
     this.productsDomain.add(product1);
+    this.productsDomain.add(product2);
+    this.productsDomain.add(product3);
   }
 
   private void createProductsEntityMock() {
@@ -329,6 +394,34 @@ public class DataMock {
       .model(this.getModelsEntity().get(0))
       .build();
 
+    ProductEntity product2 = ProductEntity.builder()
+      .id(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .name("Mouse wireless Logitech M280")
+      .description("A technical and descriptive text about the product")
+      .unitPrice(new BigDecimal("80.00"))
+      .quantity(50)
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .category(this.getCategoriesEntity().get(4))
+      .brand(this.getBrandsEntity().get(0))
+      .model(this.getModelsEntity().get(0))
+      .build();
+
+    ProductEntity product3 = ProductEntity.builder()
+      .id(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .name("Corsair RAM memory 16GB 3200MHz")
+      .description("A technical and descriptive text about the product")
+      .unitPrice(new BigDecimal("200.00"))
+      .quantity(50)
+      .createdAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
+      .category(this.getCategoriesEntity().get(5))
+      .brand(this.getBrandsEntity().get(2))
+      .model(this.getModelsEntity().get(4))
+      .build();
+
     this.productsEntity.add(product1);
+    this.productsEntity.add(product2);
+    this.productsEntity.add(product3);
   }
 }
