@@ -1,6 +1,7 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.config.openapi;
 
-import com.felipe.ecommerce_inventory_service.core.application.dtos.product.CreateProductResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductResponseDTO;
 import com.felipe.response.ResponsePayload;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,7 +41,7 @@ public interface ProductApi {
     }),
     responses = {
       @ApiResponse(responseCode = "201", description = "Returns a ResponsePayload with the created product", content = {
-        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<CreateProductResponseDTO>"), examples = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<ProductDTO>"), examples = {
           @ExampleObject(name = "Success response", ref = "CreateProductExample")
         })
       }),
@@ -57,7 +59,7 @@ public interface ProductApi {
       @ApiResponse(responseCode = "500", ref = "InternalServerError")
     }
   )
-  ResponsePayload<CreateProductResponseDTO> createProduct(
+  ResponsePayload<ProductResponseDTO> createProduct(
     @RequestPart("productDTO") String jsonProductDTO,
     @RequestPart("images") MultipartFile[] images
   );
@@ -88,5 +90,28 @@ public interface ProductApi {
     @PathVariable UUID id,
     @Parameter(name = "UpdateProductDTO", required = true)
     @Valid @org.springframework.web.bind.annotation.RequestBody UpdateProductDTO productDTO
+  );
+
+  @Operation(
+    operationId = "getProductsByCategory",
+    summary = "Get products by category",
+    description = "Get products page of the given category",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with a page of products", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<ProductPageResponseDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "GetProductsByCategoryExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<PageResponseDTO> getProductsByCategory(
+    @Parameter(in = ParameterIn.PATH, name = "categoryName", description = "Category name", required = true, schema = @Schema(type = "string", example = "mouse"))
+    @PathVariable String categoryName,
+    @Parameter(in = ParameterIn.QUERY, name = "page", description = "The page number", schema = @Schema(type = "integer", format = "int32", example = "1"))
+    @RequestParam(name = "page") int page,
+    @Parameter(in = ParameterIn.QUERY, name = "pageSize", description = "The number of elements on the page", schema = @Schema(type = "integer", format = "int32", example = "10"))
+    @RequestParam(name = "pageSize") int size
   );
 }

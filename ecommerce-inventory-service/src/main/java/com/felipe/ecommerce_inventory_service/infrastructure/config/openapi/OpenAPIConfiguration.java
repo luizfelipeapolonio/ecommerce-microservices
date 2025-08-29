@@ -13,6 +13,7 @@ import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.ModelDTO
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.UpdateModelDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.CreateProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductPageResponseDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductResponseDTO;
 import com.felipe.openapi.OpenApiUtils;
 import com.felipe.openapi.SchemaCustomizer;
@@ -32,7 +33,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -115,7 +115,7 @@ public class OpenAPIConfiguration {
         SchemaCustomizer.withDefaults()
       );
       this.apiUtils.createSchemaFromClass(
-        "CreateProductResponseDTO",
+        "ProductDTO",
         modelConverterInstance,
         ProductDTO.class,
         SchemaCustomizer.withDefaults()
@@ -130,6 +130,12 @@ public class OpenAPIConfiguration {
         "UpdateProductResponseDTO",
         modelConverterInstance,
         UpdateProductResponseDTO.class,
+        SchemaCustomizer.withDefaults()
+      );
+      this.apiUtils.createSchemaFromClass(
+        "ProductPageResponseDTO",
+        modelConverterInstance,
+        ProductPageResponseDTO.class,
         SchemaCustomizer.withDefaults()
       );
       this.apiUtils.createSchemaFromClass(
@@ -183,15 +189,20 @@ public class OpenAPIConfiguration {
         schema.addAllOfItem(new ObjectSchema().addProperty("payload", new ArraySchema()
           .items(new ObjectSchema().$ref(SCHEMAS_REF + "ModelDTO"))));
       });
-      this.apiUtils.createSchema("ResponsePayload<CreateProductResponseDTO>", schema -> {
+      this.apiUtils.createSchema("ResponsePayload<ProductDTO>", schema -> {
         schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
         schema.addAllOfItem(new ObjectSchema()
-          .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "CreateProductResponseDTO")));
+          .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "ProductDTO")));
       });
       this.apiUtils.createSchema("ResponsePayload<UpdateProductResponseDTO>", schema -> {
         schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
         schema.addAllOfItem(new ObjectSchema()
           .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "UpdateProductResponseDTO")));
+      });
+      this.apiUtils.createSchema("ResponsePayload<ProductPageResponseDTO>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema()
+          .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "ProductPageResponseDTO")));
       });
 
       // Examples
@@ -330,6 +341,7 @@ public class OpenAPIConfiguration {
       );
       ProductDTO productDTO = new ProductDTO(product, List.of(image1));
       UpdateProductResponseDTO updateProductResponseDTO = new UpdateProductResponseDTO(product);
+      var productPageResponseDTO = new ProductPageResponseDTO(0, 1, 1, 1, List.of(productDTO));
 
       this.apiUtils.createExample(
         "CategoryDTOWithNoSubcategoryExample",
@@ -508,6 +520,13 @@ public class OpenAPIConfiguration {
         HttpStatus.OK,
         "Product updated successfully",
         updateProductResponseDTO
+      );
+      this.apiUtils.createExample(
+        "GetProductsByCategoryExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Products of 'mouse' category",
+        productPageResponseDTO
       );
     };
   }
