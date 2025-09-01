@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
@@ -46,6 +47,7 @@ public class ProductController implements ProductApi {
   private final CreateProductUseCase createProductUseCase;
   private final UpdateProductUseCase updateProductUseCase;
   private final GetProductsByCategoryUseCase getProductsByCategoryUseCase;
+  private final GetProductsByBrandUseCase getProductsByBrandUseCase;
   private final UploadFileMapper uploadFileMapper;
   private final ObjectMapper objectMapper;
   private final Validator validator;
@@ -54,12 +56,14 @@ public class ProductController implements ProductApi {
   public ProductController(CreateProductUseCase createProductUseCase,
                            UpdateProductUseCase updateProductUseCase,
                            GetProductsByCategoryUseCase getProductsByCategoryUseCase,
+                           GetProductsByBrandUseCase getProductsByBrandUseCase,
                            UploadFileMapper uploadFileMapper,
                            ObjectMapper objectMapper,
                            Validator validator) {
     this.createProductUseCase = createProductUseCase;
     this.updateProductUseCase = updateProductUseCase;
     this.getProductsByCategoryUseCase = getProductsByCategoryUseCase;
+    this.getProductsByBrandUseCase = getProductsByBrandUseCase;
     this.uploadFileMapper = uploadFileMapper;
     this.objectMapper = objectMapper;
     this.validator = validator;
@@ -111,6 +115,21 @@ public class ProductController implements ProductApi {
       .code(HttpStatus.OK)
       .message("Produtos da categoria '" + categoryName + "'")
       .payload(productsPage)
+      .build();
+  }
+
+  @Override
+  @GetMapping("/brand/{brandName}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<PageResponseDTO> getProductsByBrand(@PathVariable String brandName,
+                                                             @RequestParam(name = "page") int page,
+                                                             @RequestParam(name = "pageSize") int size) {
+    PageResponseDTO products = this.getProductsByBrandUseCase.execute(brandName, page, size);
+    return new ResponsePayload.Builder<PageResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Produtos da marca '" + brandName + "'")
+      .payload(products)
       .build();
   }
 

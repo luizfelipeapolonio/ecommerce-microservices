@@ -15,4 +15,5 @@ public interface ProductGateway {
   Optional<Product> findProductById(UUID id);
   Product updateProduct(Product product, UpdateProductDomainDTO productDTO);
   PageResponseDTO getProductsByCategory(String categoryName, int page, int elementsQuantity);
+  PageResponseDTO getProductsByBrand(String brandName, int page, int elementsQuantity);
 }
