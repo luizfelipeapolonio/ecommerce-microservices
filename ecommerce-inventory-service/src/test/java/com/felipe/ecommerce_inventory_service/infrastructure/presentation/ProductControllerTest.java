@@ -5,6 +5,7 @@ import com.felipe.ecommerce_inventory_service.core.application.dtos.product.Page
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
@@ -75,6 +76,9 @@ public class ProductControllerTest {
 
   @MockitoBean
   GetProductsByCategoryUseCase getProductsByCategoryUseCase;
+
+  @MockitoBean
+  GetProductsByBrandUseCase getProductsByBrandUseCase;
 
   @MockitoBean
   UploadFileMapper uploadFileMapper;
@@ -232,5 +236,47 @@ public class ProductControllerTest {
     .andExpectAll(status().isOk(), content().json(jsonResponseBody));
 
     verify(this.getProductsByCategoryUseCase, times(1)).execute(categoryName, 0, 10);
+  }
+
+  @Test
+  @DisplayName("getProductsByBrandSuccess - Should return a success response with a page of products")
+  void getProductsByBrandSuccess() throws Exception {
+    Product product1 = this.dataMock.getProductsDomain().get(0);
+    Product product2 = this.dataMock.getProductsDomain().get(1);
+
+    ImageFileDTO image1 = new ImageFileDTO(
+      "01",
+      "image1",
+      "imagePath",
+      "image/png",
+      "123456",
+      "image1",
+      "thumbnail",
+      "01",
+      "anything",
+      "anything"
+    );
+    ProductDTO product1DTO = new ProductDTO(product1, List.of(image1));
+    ProductDTO product2DTO = new ProductDTO(product2, List.of(image1));
+    PageResponseDTO products = new ProductPageResponseDTO(0, 2, 1, 2, List.of(product1DTO, product2DTO));
+    final String brandName = "logitech";
+
+    ResponsePayload<PageResponseDTO> response = new ResponsePayload.Builder<PageResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Produtos da marca '" + brandName + "'")
+      .payload(products)
+      .build();
+    String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.getProductsByBrandUseCase.execute(brandName, 0, 10)).thenReturn(products);
+
+    this.mockMvc.perform(get(
+        BASE_URL + "/brand/{brandName}?page={page}&pageSize={pageSize}",
+        brandName, 0, 10).accept(APPLICATION_JSON)
+      )
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.getProductsByBrandUseCase, times(1)).execute(brandName, 0, 10);
   }
 }

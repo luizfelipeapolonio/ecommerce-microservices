@@ -312,4 +312,88 @@ public class ProductGatewayImplTest {
     verify(this.productEntityMapper, times(1)).toDomain(productsEntity.get(1));
     verify(this.uploadService, times(1)).getProductImages(productIds);
   }
+
+  @Test
+  @DisplayName("getProductsByBrandSuccess - Should successfully get products of the given brand")
+  void getProductsByBrandSuccess() {
+    final String brandName = "logitech";
+    final ProductEntity product2 = ProductEntity.mutate(this.dataMock.getProductsEntity().get(1))
+      .id(UUID.fromString("8c4f1419-8ef8-47e9-9e18-0e9cc993debc"))
+      .build();
+    final List<ProductEntity> productsEntity = List.of(this.dataMock.getProductsEntity().get(0), product2);
+    final List<Product> productsDomain = List.of(this.dataMock.getProductsDomain().get(0), this.dataMock.getProductsDomain().get(1));
+
+    final Pageable pagination = PageRequest.of(0, 10, Sort.by("name"));
+    final Page<ProductEntity> productsPage = new PageImpl<>(productsEntity);
+    final Set<String> productIds = Set.of(productsPage.getContent().get(0).getId().toString(), productsPage.getContent().get(1).getId().toString());
+
+    ImageFileDTO image1 = new ImageFileDTO(
+      "01",
+      "image1",
+      "imagePath",
+      "image/png",
+      "123456",
+      "image1",
+      "thumbnail",
+      "01",
+      "anything",
+      "anything"
+    );
+    final UploadService.ImageResponse product1Image = new UploadService.ImageResponse(
+      productsEntity.get(0).getId().toString(),
+      List.of(image1)
+    );
+    final UploadService.ImageResponse product2Image = new UploadService.ImageResponse(
+      productsEntity.get(1).getId().toString(),
+      List.of(image1)
+    );
+    final var uploadResponse = new ResponsePayload.Builder<List<UploadService.ImageResponse>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Imagens dos produtos")
+      .payload(List.of(product1Image, product2Image))
+      .build();
+
+    when(this.productRepository.findByBrandName(brandName, pagination)).thenReturn(productsPage);
+    when(this.productEntityMapper.toDomain(productsPage.getContent().get(0))).thenReturn(productsDomain.get(0));
+    when(this.productEntityMapper.toDomain(productsPage.getContent().get(1))).thenReturn(productsDomain.get(1));
+    when(this.uploadService.getProductImages(productIds)).thenReturn(uploadResponse);
+
+    PageResponseDTO foundProductsPage = this.productGateway.getProductsByBrand(brandName, 0, 10);
+
+    assertThat(foundProductsPage.currentPage()).isEqualTo(0);
+    assertThat(foundProductsPage.currentElements()).isEqualTo(2);
+    assertThat(foundProductsPage.totalPages()).isEqualTo(1);
+    assertThat(foundProductsPage.totalElements()).isEqualTo(2L);
+    assertThat(foundProductsPage.content().size()).isEqualTo(productsPage.getTotalElements());
+    assertThat(foundProductsPage.content().get(0).id()).isEqualTo(productsDomain.get(0).getId().toString());
+    assertThat(foundProductsPage.content().get(0).name()).isEqualTo(productsDomain.get(0).getName());
+    assertThat(foundProductsPage.content().get(0).description()).isEqualTo(productsDomain.get(0).getDescription());
+    assertThat(foundProductsPage.content().get(0).unitPrice()).isEqualTo(productsDomain.get(0).getUnitPrice().toString());
+    assertThat(foundProductsPage.content().get(0).quantity()).isEqualTo(productsDomain.get(0).getQuantity());
+    assertThat(foundProductsPage.content().get(0).createdAt()).isEqualTo(productsDomain.get(0).getCreatedAt().toString());
+    assertThat(foundProductsPage.content().get(0).updatedAt()).isEqualTo(productsDomain.get(0).getUpdatedAt().toString());
+    // Product 2 assertions
+    assertThat(foundProductsPage.content().get(1).id()).isEqualTo(productsDomain.get(1).getId().toString());
+    assertThat(foundProductsPage.content().get(1).name()).isEqualTo(productsDomain.get(1).getName());
+    assertThat(foundProductsPage.content().get(1).description()).isEqualTo(productsDomain.get(1).getDescription());
+    assertThat(foundProductsPage.content().get(1).unitPrice()).isEqualTo(productsDomain.get(1).getUnitPrice().toString());
+    assertThat(foundProductsPage.content().get(1).quantity()).isEqualTo(productsDomain.get(1).getQuantity());
+    assertThat(foundProductsPage.content().get(1).createdAt()).isEqualTo(productsDomain.get(1).getCreatedAt().toString());
+    assertThat(foundProductsPage.content().get(1).updatedAt()).isEqualTo(productsDomain.get(1).getUpdatedAt().toString());
+    // Product found images quantity assertion
+    assertThat(foundProductsPage.content().get(0).images().size()).isEqualTo(1);
+    assertThat(foundProductsPage.content().get(1).images().size()).isEqualTo(1);
+    // Images of product 1 assertion
+    assertThat(foundProductsPage.content().get(0).images().get(0)).usingRecursiveComparison()
+      .isEqualTo(uploadResponse.getPayload().get(0).getImages().get(0));
+    // Images of product 2 assertion
+    assertThat(foundProductsPage.content().get(1).images().get(0)).usingRecursiveComparison()
+      .isEqualTo(uploadResponse.getPayload().get(1).getImages().get(0));
+
+    verify(this.productRepository, times(1)).findByBrandName(brandName, pagination);
+    verify(this.productEntityMapper, times(1)).toDomain(productsEntity.get(0));
+    verify(this.productEntityMapper, times(1)).toDomain(productsEntity.get(1));
+    verify(this.uploadService, times(1)).getProductImages(productIds);
+  }
 }
