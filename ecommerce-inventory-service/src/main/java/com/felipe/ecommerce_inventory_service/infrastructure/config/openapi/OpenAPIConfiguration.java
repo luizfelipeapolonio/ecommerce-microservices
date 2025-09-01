@@ -528,6 +528,13 @@ public class OpenAPIConfiguration {
         "Products of 'mouse' category",
         productPageResponseDTO
       );
+      this.apiUtils.createExample(
+        "GetProductsByBrandExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Products of 'logitech' brand",
+        productPageResponseDTO
+      );
     };
   }
 }
