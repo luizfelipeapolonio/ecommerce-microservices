@@ -7,6 +7,7 @@ import com.felipe.ecommerce_inventory_service.core.application.dtos.product.Prod
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
@@ -48,6 +49,7 @@ public class ProductController implements ProductApi {
   private final UpdateProductUseCase updateProductUseCase;
   private final GetProductsByCategoryUseCase getProductsByCategoryUseCase;
   private final GetProductsByBrandUseCase getProductsByBrandUseCase;
+  private final GetProductsByModelUseCase getProductsByModelUseCase;
   private final UploadFileMapper uploadFileMapper;
   private final ObjectMapper objectMapper;
   private final Validator validator;
@@ -57,6 +59,7 @@ public class ProductController implements ProductApi {
                            UpdateProductUseCase updateProductUseCase,
                            GetProductsByCategoryUseCase getProductsByCategoryUseCase,
                            GetProductsByBrandUseCase getProductsByBrandUseCase,
+                           GetProductsByModelUseCase getProductsByModelUseCase,
                            UploadFileMapper uploadFileMapper,
                            ObjectMapper objectMapper,
                            Validator validator) {
@@ -64,6 +67,7 @@ public class ProductController implements ProductApi {
     this.updateProductUseCase = updateProductUseCase;
     this.getProductsByCategoryUseCase = getProductsByCategoryUseCase;
     this.getProductsByBrandUseCase = getProductsByBrandUseCase;
+    this.getProductsByModelUseCase = getProductsByModelUseCase;
     this.uploadFileMapper = uploadFileMapper;
     this.objectMapper = objectMapper;
     this.validator = validator;
@@ -129,6 +133,22 @@ public class ProductController implements ProductApi {
       .type(ResponseType.SUCCESS)
       .code(HttpStatus.OK)
       .message("Produtos da marca '" + brandName + "'")
+      .payload(products)
+      .build();
+  }
+
+  @Override
+  @GetMapping("/model/{modelName}/{brandName}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<PageResponseDTO> getProductsByModel(@PathVariable String modelName,
+                                                             @PathVariable String brandName,
+                                                             @RequestParam(name = "page") int page,
+                                                             @RequestParam(name = "pageSize") int size) {
+    PageResponseDTO products = this.getProductsByModelUseCase.execute(modelName, brandName, page, size);
+    return new ResponsePayload.Builder<PageResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Produtos do modelo '" + modelName + "' da marca '" + brandName + "'")
       .payload(products)
       .build();
   }

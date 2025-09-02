@@ -39,6 +39,11 @@ public class ModelGatewayImpl implements ModelGateway {
   }
 
   @Override
+  public Optional<Model> findModelByNameAndBrandName(String modelName, String brandName) {
+    return this.modelRepository.findByNameAndBrandName(modelName, brandName).map(this.modelEntityMapper::toDomain);
+  }
+
+  @Override
   public List<Model> findAllModelsByBrandId(Long brandId) {
     return this.modelRepository.findAllByBrandId(brandId)
       .stream()

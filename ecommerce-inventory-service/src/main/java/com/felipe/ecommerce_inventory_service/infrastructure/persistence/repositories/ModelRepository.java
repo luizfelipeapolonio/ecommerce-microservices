@@ -11,6 +11,9 @@ import java.util.Optional;
 public interface ModelRepository extends JpaRepository<ModelEntity, Long> {
   Optional<ModelEntity> findByName(String name);
 
+  @Query("SELECT m FROM ModelEntity m JOIN m.brand b WHERE m.name = :modelName AND b.name = :brandName")
+  Optional<ModelEntity> findByNameAndBrandName(@Param("modelName") String modelName, @Param("brandName") String brandName);
+
   @Query("SELECT m FROM ModelEntity m JOIN m.brand b WHERE b.id = :brandId")
   List<ModelEntity> findAllByBrandId(@Param("brandId") Long brandId);
 }

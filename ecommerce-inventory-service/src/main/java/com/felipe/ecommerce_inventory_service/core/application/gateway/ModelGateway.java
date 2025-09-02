@@ -9,6 +9,7 @@ public interface ModelGateway {
   Model createModel(Model model);
   Optional<Model> findModelByName(String name);
   Optional<Model> findModelById(Long id);
+  Optional<Model> findModelByNameAndBrandName(String modelName, String brandName);
   List<Model> findAllModelsByBrandId(Long brandId);
   Model updateModel(Model model, String name, String description);
   Model deleteModel(Model model);

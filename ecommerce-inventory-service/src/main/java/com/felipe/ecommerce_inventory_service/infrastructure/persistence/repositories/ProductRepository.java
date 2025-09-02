@@ -18,4 +18,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
 
   @Query("SELECT p FROM ProductEntity p JOIN p.brand b WHERE b.name = :name")
   Page<ProductEntity> findByBrandName(@Param("name") String name, Pageable pageable);
+
+  @Query("SELECT p FROM ProductEntity p JOIN p.model m JOIN p.brand b WHERE m.name = :modelName AND b.name = :brandName")
+  Page<ProductEntity> findByModelNameAndBrandName(@Param("modelName") String modelName, @Param("brandName") String brandName, Pageable pageable);
 }
