@@ -131,7 +131,32 @@ public interface ProductApi {
   )
   ResponsePayload<PageResponseDTO> getProductsByBrand(
     @Parameter(in = ParameterIn.PATH, name = "brandName", description = "Brand name", required = true, schema = @Schema(type = "string", example = "logitech"))
-    @PathVariable String categoryName,
+    @PathVariable String brandName,
+    @Parameter(in = ParameterIn.QUERY, name = "page", description = "The page number", schema = @Schema(type = "integer", format = "int32", example = "1"))
+    @RequestParam(name = "page") int page,
+    @Parameter(in = ParameterIn.QUERY, name = "pageSize", description = "The number of elements on the page", schema = @Schema(type = "integer", format = "int32", example = "10"))
+    @RequestParam(name = "pageSize") int size
+  );
+
+  @Operation(
+    operationId = "getProductsByModel",
+    summary = "Get products by model",
+    description = "Get products page of the given model and brand",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with a page of products", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<ProductPageResponseDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "GetProductsByModelExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<PageResponseDTO> getProductsByModel(
+    @Parameter(in = ParameterIn.PATH, name = "modelName", description = "Model name", required = true, schema = @Schema(type = "string", example = "g pro"))
+    @PathVariable String modelName,
+    @Parameter(in = ParameterIn.PATH, name = "brandName", description = "Brand name", required = true, schema = @Schema(type = "string", example = "logitech"))
+    @PathVariable String brandName,
     @Parameter(in = ParameterIn.QUERY, name = "page", description = "The page number", schema = @Schema(type = "integer", format = "int32", example = "1"))
     @RequestParam(name = "page") int page,
     @Parameter(in = ParameterIn.QUERY, name = "pageSize", description = "The number of elements on the page", schema = @Schema(type = "integer", format = "int32", example = "10"))
