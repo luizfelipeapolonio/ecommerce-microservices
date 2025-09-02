@@ -351,7 +351,7 @@ public class DataMock {
 
     Product product2 = Product.builder()
       .id(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
-      .name("Mouse wireless Logitech M280")
+      .name("Mouse wireless Logitech G502 X")
       .description("A technical and descriptive text about the product")
       .unitPrice(new BigDecimal("80.00"))
       .quantity(50)
@@ -359,7 +359,7 @@ public class DataMock {
       .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
       .category(this.getCategoriesDomain().get(4))
       .brand(this.getBrandsDomain().get(0))
-      .model(this.getModelsDomain().get(0))
+      .model(this.getModelsDomain().get(2))
       .build();
 
     Product product3 = Product.builder()
@@ -396,7 +396,7 @@ public class DataMock {
 
     ProductEntity product2 = ProductEntity.builder()
       .id(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
-      .name("Mouse wireless Logitech M280")
+      .name("Mouse wireless Logitech G502 X")
       .description("A technical and descriptive text about the product")
       .unitPrice(new BigDecimal("80.00"))
       .quantity(50)
@@ -404,7 +404,7 @@ public class DataMock {
       .updatedAt(LocalDateTime.parse("2025-07-18T21:12:28.978228256"))
       .category(this.getCategoriesEntity().get(4))
       .brand(this.getBrandsEntity().get(0))
-      .model(this.getModelsEntity().get(0))
+      .model(this.getModelsEntity().get(2))
       .build();
 
     ProductEntity product3 = ProductEntity.builder()

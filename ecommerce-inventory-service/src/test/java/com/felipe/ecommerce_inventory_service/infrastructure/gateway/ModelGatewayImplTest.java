@@ -116,6 +116,30 @@ public class ModelGatewayImplTest {
   }
 
   @Test
+  @DisplayName("findModelByNameAndBrandNameSuccess - Should successfully find a model with the given name and brand name and return an Optional of Model")
+  void findModelByNameAndBrandNameSuccess() {
+    final ModelEntity modelEntity = this.dataMock.getModelsEntity().getFirst();
+    final Model modelDomain = this.dataMock.getModelsDomain().getFirst();
+    final String modelName = "g pro";
+    final String brandName = "logitech";
+
+    when(this.modelRepository.findByNameAndBrandName(modelName, brandName)).thenReturn(Optional.of(modelEntity));
+    when(this.modelEntityMapper.toDomain(modelEntity)).thenReturn(modelDomain);
+
+    Optional<Model> foundModel = this.modelGateway.findModelByNameAndBrandName(modelName, brandName);
+
+    assertThat(foundModel.isPresent()).isTrue();
+    assertThat(foundModel.get().getId()).isEqualTo(modelDomain.getId());
+    assertThat(foundModel.get().getName()).isEqualTo(modelDomain.getName());
+    assertThat(foundModel.get().getDescription()).isEqualTo(modelDomain.getDescription());
+    assertThat(foundModel.get().getCreatedAt()).isEqualTo(modelDomain.getCreatedAt());
+    assertThat(foundModel.get().getUpdatedAt()).isEqualTo(modelDomain.getUpdatedAt());
+
+    verify(this.modelRepository, times(1)).findByNameAndBrandName(modelName, brandName);
+    verify(this.modelEntityMapper, times(1)).toDomain(modelEntity);
+  }
+
+  @Test
   @DisplayName("updateModelSuccess - Should successfully update a model and return it")
   void updateModelSuccess() {
     Model modelDomain = this.dataMock.getModelsDomain().getFirst();

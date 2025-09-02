@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,20 +42,85 @@ public class ModelRepositoryTest {
       .map(entity -> BrandEntity.mutate(entity).id(null).build())
       .toList();
 
-    List<ModelEntity> models = this.dataMock.getModelsEntity()
+    final List<ModelEntity.Builder> modelsBuilder = this.dataMock.getModelsEntity()
       .stream()
-      .map(entity -> ModelEntity.mutate(entity).id(null).build())
+      .map(model -> ModelEntity.mutate(model).id(null))
       .toList();
+    // Setting model's brand with null ids
+    final List<ModelEntity> models = List.of(
+      modelsBuilder.get(0).brand(brands.get(0)).build(),
+      modelsBuilder.get(1).brand(brands.get(1)).build(),
+      modelsBuilder.get(2).brand(brands.get(0)).build(),
+      modelsBuilder.get(3).brand(brands.get(0)).build(),
+      modelsBuilder.get(4).brand(brands.get(2)).build()
+    );
 
     // Persisting the entities in the test database
     brands.forEach(this.entityManager::persist);
     models.forEach(this.entityManager::persist);
 
-    final Long brandId = 1L; // 'logitech' brand id
+    final Long brandId = brands.get(0).getId(); // 'logitech' brand id
 
     List<ModelEntity> allModels = this.modelRepository.findAllByBrandId(brandId);
 
     assertThat(allModels.size()).isEqualTo(3);
     assertThat(allModels.stream().map(model -> model.getBrand().getId()).toList()).containsOnly(brandId);
+  }
+
+  @Test
+  @DisplayName("findByNameAndBrandNameReturnsOptionalOfProduct - Should successfully find and return a product with the given model and brand name")
+  void findByNameAndBrandNameReturnsOptionalOfProduct() {
+    final List<ModelEntity> models = this.dataMock.getModelsEntity()
+      .stream()
+      .map(model -> ModelEntity.mutate(model).id(null).build())
+      .toList();
+    final List<BrandEntity> brands = this.dataMock.getBrandsEntity()
+      .stream()
+      .map(brand -> BrandEntity.mutate(brand).id(null).build())
+      .toList();
+
+    brands.forEach(this.entityManager::persist);
+    models.forEach(this.entityManager::persist);
+
+    final String modelName = "g pro";
+    final String brandName = "logitech";
+
+    Optional<ModelEntity> existingModel = this.modelRepository.findByNameAndBrandName(modelName, brandName);
+
+    assertThat(existingModel.isPresent()).isTrue();
+    assertThat(existingModel.get().getName()).isEqualTo(modelName);
+    assertThat(existingModel.get().getBrand().getName()).isEqualTo(brandName);
+  }
+
+  @Test
+  @DisplayName("findByNameAndBrandNameReturnsOptionalEmpty - Should return and optional empty the model with the given name and brand name is not found")
+  void findByNameAndBrandNameReturnsOptionalEmpty() {
+    final List<BrandEntity> brands = this.dataMock.getBrandsEntity()
+      .stream()
+      .map(brand -> BrandEntity.mutate(brand).id(null).build())
+      .toList();
+
+    final List<ModelEntity.Builder> modelsBuilder = this.dataMock.getModelsEntity()
+      .stream()
+      .map(model -> ModelEntity.mutate(model).id(null))
+      .toList();
+    // Setting model's brand with null ids
+    final List<ModelEntity> models = List.of(
+      modelsBuilder.get(0).brand(brands.get(0)).build(),
+      modelsBuilder.get(1).brand(brands.get(1)).build(),
+      modelsBuilder.get(2).brand(brands.get(0)).build(),
+      modelsBuilder.get(3).brand(brands.get(0)).build(),
+      modelsBuilder.get(4).brand(brands.get(2)).build()
+    );
+
+    brands.forEach(this.entityManager::persist);
+    models.forEach(this.entityManager::persist);
+
+    final String modelName = "g pro";
+    final String brandName = "corsair";
+
+    Optional<ModelEntity> existingModel = this.modelRepository.findByNameAndBrandName(modelName, brandName);
+
+    assertThat(existingModel.isEmpty()).isTrue();
   }
 }
