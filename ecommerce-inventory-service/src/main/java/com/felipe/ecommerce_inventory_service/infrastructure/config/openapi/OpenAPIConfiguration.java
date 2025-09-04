@@ -542,6 +542,13 @@ public class OpenAPIConfiguration {
         "Products of 'g pro' model and 'logitech' brand",
         productPageResponseDTO
       );
+      this.apiUtils.createExample(
+        "GetProductsExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Products of category: 'mouse' - brand: 'logitech' - model: 'g pro'",
+        productPageResponseDTO
+      );
     };
   }
 }

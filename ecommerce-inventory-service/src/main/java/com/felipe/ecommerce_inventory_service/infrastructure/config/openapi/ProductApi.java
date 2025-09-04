@@ -93,6 +93,33 @@ public interface ProductApi {
   );
 
   @Operation(
+    operationId = "getProducts",
+    summary = "Get products by parameters",
+    description = "Get products page of the given category, brand and model",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with a page of products", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<ProductPageResponseDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "GetProductsExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<PageResponseDTO> getProducts(
+    @Parameter(in = ParameterIn.QUERY, name = "category", description = "The product category name", schema = @Schema(type = "string", example = "mouse"))
+    @RequestParam(name = "category") String categoryName,
+    @Parameter(in = ParameterIn.QUERY, name = "brand", description = "The product brand name", schema = @Schema(type = "string", example = "logitech"))
+    @RequestParam(name = "brand") String brandName,
+    @Parameter(in = ParameterIn.QUERY, name = "model", description = "The product model name", schema = @Schema(type = "string", example = "g pro"))
+    @RequestParam(name = "model") String modelName,
+    @Parameter(in = ParameterIn.QUERY, name = "page", description = "The page number", schema = @Schema(type = "integer", format = "int32", example = "1"))
+    @RequestParam(name = "page") int page,
+    @Parameter(in = ParameterIn.QUERY, name = "pageSize", description = "The number of elements on the page", schema = @Schema(type = "integer", format = "int32", example = "10"))
+    @RequestParam(name = "pageSize") int size
+  );
+
+  @Operation(
     operationId = "getProductsByCategory",
     summary = "Get products by category",
     description = "Get products page of the given category",
