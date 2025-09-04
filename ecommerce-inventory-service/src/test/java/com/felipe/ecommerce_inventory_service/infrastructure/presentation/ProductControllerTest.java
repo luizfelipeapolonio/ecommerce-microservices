@@ -8,6 +8,7 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.product.
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.UploadFileImpl;
@@ -74,6 +75,9 @@ public class ProductControllerTest {
 
   @MockitoBean
   UpdateProductUseCase updateProductUseCase;
+
+  @MockitoBean
+  GetProductsUseCase getProductsUseCase;
 
   @MockitoBean
   GetProductsByCategoryUseCase getProductsByCategoryUseCase;
@@ -198,6 +202,48 @@ public class ProductControllerTest {
       .andExpectAll(status().isOk(), content().json(jsonResponseBody));
 
     verify(this.updateProductUseCase, times(1)).execute(product.getId(), updateProductDTO);
+  }
+
+  @Test
+  @DisplayName("getProductsSuccess - Should return a success response with a page of products")
+  void getProductsSuccess() throws Exception {
+    Product product1 = this.dataMock.getProductsDomain().getFirst();
+
+    ImageFileDTO image1 = new ImageFileDTO(
+      "01",
+      "image1",
+      "imagePath",
+      "image/png",
+      "123456",
+      "image1",
+      "thumbnail",
+      "01",
+      "anything",
+      "anything"
+    );
+    ProductDTO product1DTO = new ProductDTO(product1, List.of(image1));
+    PageResponseDTO products = new ProductPageResponseDTO(0, 2, 1, 2, List.of(product1DTO));
+    final String categoryName = "mouse";
+    final String brandName = "logitech";
+    final String modelName = "g pro";
+
+    ResponsePayload<PageResponseDTO> response = new ResponsePayload.Builder<PageResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Produtos da categoria: '" + categoryName + "' - marca: '" + brandName + "' - modelo: '" + modelName + "'")
+      .payload(products)
+      .build();
+    String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.getProductsUseCase.execute(categoryName, brandName, modelName, 0, 10)).thenReturn(products);
+
+    this.mockMvc.perform(get(
+        BASE_URL + "?category={categoryName}&brand={brandName}&model={modelName}&page={page}&pageSize={pageSize}",
+        categoryName, brandName, modelName, 0, 10).accept(APPLICATION_JSON)
+      )
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.getProductsUseCase, times(1)).execute( categoryName, brandName, modelName, 0, 10);
   }
 
   @Test
