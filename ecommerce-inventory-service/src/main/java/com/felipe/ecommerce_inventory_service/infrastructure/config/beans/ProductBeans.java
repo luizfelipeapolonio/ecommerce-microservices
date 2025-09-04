@@ -11,11 +11,13 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.product.
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.CreateProductUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetProductsByBrandUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetProductsByCategoryUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetProductsByModelUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetProductsUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.UpdateProductUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -69,5 +71,10 @@ public class ProductBeans {
   @Bean
   public GetProductsByModelUseCase getProductsByModelUseCase() {
     return new GetProductsByModelUseCaseImpl(productGateway, modelGateway);
+  }
+
+  @Bean
+  public GetProductsUseCase getProductsUseCase() {
+    return new GetProductsUseCaseImpl(productGateway);
   }
 }

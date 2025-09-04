@@ -8,6 +8,7 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.product.
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
@@ -47,6 +48,7 @@ import java.util.stream.Stream;
 public class ProductController implements ProductApi {
   private final CreateProductUseCase createProductUseCase;
   private final UpdateProductUseCase updateProductUseCase;
+  private final GetProductsUseCase getProductsUseCase;
   private final GetProductsByCategoryUseCase getProductsByCategoryUseCase;
   private final GetProductsByBrandUseCase getProductsByBrandUseCase;
   private final GetProductsByModelUseCase getProductsByModelUseCase;
@@ -57,6 +59,7 @@ public class ProductController implements ProductApi {
   
   public ProductController(CreateProductUseCase createProductUseCase,
                            UpdateProductUseCase updateProductUseCase,
+                           GetProductsUseCase getProductsUseCase,
                            GetProductsByCategoryUseCase getProductsByCategoryUseCase,
                            GetProductsByBrandUseCase getProductsByBrandUseCase,
                            GetProductsByModelUseCase getProductsByModelUseCase,
@@ -65,6 +68,7 @@ public class ProductController implements ProductApi {
                            Validator validator) {
     this.createProductUseCase = createProductUseCase;
     this.updateProductUseCase = updateProductUseCase;
+    this.getProductsUseCase = getProductsUseCase;
     this.getProductsByCategoryUseCase = getProductsByCategoryUseCase;
     this.getProductsByBrandUseCase = getProductsByBrandUseCase;
     this.getProductsByModelUseCase = getProductsByModelUseCase;
@@ -90,6 +94,29 @@ public class ProductController implements ProductApi {
       .code(HttpStatus.CREATED)
       .message("Produto '" + product.name() + "' inserido com sucesso")
       .payload(product)
+      .build();
+  }
+
+  @Override
+  @GetMapping
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<PageResponseDTO> getProducts(@RequestParam(name = "category", required = false) String categoryName,
+                                                      @RequestParam(name = "brand", required = false) String brandName,
+                                                      @RequestParam(name = "model", required = false) String modelName,
+                                                      @RequestParam(name = "page", defaultValue = "0") int page,
+                                                      @RequestParam(name = "pageSize", defaultValue = "10") int size) {
+    PageResponseDTO products = this.getProductsUseCase.execute(categoryName, brandName, modelName, page, size);
+    final String message = String.format(
+      "Produtos da categoria: '%s' - marca: '%s' - modelo: '%s'",
+      categoryName == null ? "N/A" : categoryName,
+      brandName == null ? "N/A" : brandName,
+      modelName == null ? "N/A" : modelName
+    );
+    return new ResponsePayload.Builder<PageResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message(message)
+      .payload(products)
       .build();
   }
 
