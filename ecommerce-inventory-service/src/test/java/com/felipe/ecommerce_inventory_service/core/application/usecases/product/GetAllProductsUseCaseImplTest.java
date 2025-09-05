@@ -4,7 +4,7 @@ import com.felipe.ecommerce_inventory_service.core.application.dtos.product.Imag
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.ProductGateway;
-import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetProductsUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetAllProductsUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
 import com.felipe.ecommerce_inventory_service.testutils.DataMock;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,32 +22,33 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
-public class GetProductsUseCaseImplTest {
+public class GetAllProductsUseCaseImplTest {
 
   @Mock
   private ProductGateway productGateway;
 
-  private GetProductsUseCaseImpl getProductsUseCase;
+  private GetAllProductsUseCaseImpl getAllProductsUseCase;
   private List<Product> productsDomain;
 
   @BeforeEach
   void setUp() {
-    this.getProductsUseCase = new GetProductsUseCaseImpl(this.productGateway);
+    this.getAllProductsUseCase = new GetAllProductsUseCaseImpl(this.productGateway);
     this.productsDomain = new DataMock().getProductsDomain();
   }
 
   @Test
-  @DisplayName("getProductsSuccess - Should successfully get the products with the given parameters")
-  void getProductsSuccess() {
-    final String categoryName = "mouse";
-    final String brandName = "logitech";
-    final String modelName = "g pro";
-    final List<ProductDTO> productDTOs = List.of(new ProductDTO(this.productsDomain.getFirst(), List.of()));
+  @DisplayName("getAllProductsSuccess - Should successfully get all products")
+  void getAllProductsSuccess() {
+    final List<ProductDTO> productDTOs = List.of(
+      new ProductDTO(this.productsDomain.get(0), List.of()),
+      new ProductDTO(this.productsDomain.get(1), List.of()),
+      new ProductDTO(this.productsDomain.get(2), List.of())
+    );
     final PageResponseDTO productResponse = new ProductPageResponseDTO(0, 1, 1, 1, productDTOs);
 
-    when(this.productGateway.getProducts(categoryName, brandName, modelName, 0, 10)).thenReturn(productResponse);
+    when(this.productGateway.getAllProducts(0, 10)).thenReturn(productResponse);
 
-    PageResponseDTO productsPage = this.getProductsUseCase.execute(categoryName, brandName, modelName, 0, 10);
+    PageResponseDTO productsPage = this.getAllProductsUseCase.execute(0, 10);
 
     assertThat(productsPage.currentPage()).isEqualTo(productResponse.currentPage());
     assertThat(productsPage.currentElements()).isEqualTo(productResponse.currentElements());
@@ -55,8 +56,10 @@ public class GetProductsUseCaseImplTest {
     assertThat(productsPage.totalElements()).isEqualTo(productResponse.totalElements());
     assertThat(productsPage.content().size()).isEqualTo(productResponse.content().size());
     assertThat(productsPage.content().get(0)).usingRecursiveComparison().isEqualTo(productResponse.content().get(0));
+    assertThat(productsPage.content().get(1)).usingRecursiveComparison().isEqualTo(productResponse.content().get(1));
+    assertThat(productsPage.content().get(2)).usingRecursiveComparison().isEqualTo(productResponse.content().get(2));
 
-    verify(this.productGateway, times(1)).getProducts(categoryName, brandName, modelName, 0, 10);
+    verify(this.productGateway, times(1)).getAllProducts(0, 10);
   }
 
   private record ProductPageResponseDTO(int currentPage,

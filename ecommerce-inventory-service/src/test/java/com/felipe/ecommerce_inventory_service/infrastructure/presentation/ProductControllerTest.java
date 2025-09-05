@@ -5,6 +5,7 @@ import com.felipe.ecommerce_inventory_service.core.application.dtos.product.Page
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetAllProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
@@ -78,6 +79,9 @@ public class ProductControllerTest {
 
   @MockitoBean
   GetProductsUseCase getProductsUseCase;
+
+  @MockitoBean
+  GetAllProductsUseCase getAllProductsUseCase;
 
   @MockitoBean
   GetProductsByCategoryUseCase getProductsByCategoryUseCase;
@@ -244,6 +248,45 @@ public class ProductControllerTest {
       .andExpectAll(status().isOk(), content().json(jsonResponseBody));
 
     verify(this.getProductsUseCase, times(1)).execute( categoryName, brandName, modelName, 0, 10);
+  }
+
+  @Test
+  @DisplayName("getAllProductsSuccess - Should return a success response with a page of products")
+  void getAllProductsSuccess() throws Exception {
+    Product product1 = this.dataMock.getProductsDomain().getFirst();
+
+    ImageFileDTO image1 = new ImageFileDTO(
+      "01",
+      "image1",
+      "imagePath",
+      "image/png",
+      "123456",
+      "image1",
+      "thumbnail",
+      "01",
+      "anything",
+      "anything"
+    );
+    ProductDTO product1DTO = new ProductDTO(product1, List.of(image1));
+    PageResponseDTO products = new ProductPageResponseDTO(0, 2, 1, 2, List.of(product1DTO));
+
+    ResponsePayload<PageResponseDTO> response = new ResponsePayload.Builder<PageResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Todos os produtos - página: 0 - quantidade de produtos: " + products.currentElements())
+      .payload(products)
+      .build();
+    String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.getAllProductsUseCase.execute(0, 10)).thenReturn(products);
+
+    this.mockMvc.perform(get(
+        BASE_URL + "/all?page={page}&pageSize={pageSize}",
+        0, 10).accept(APPLICATION_JSON)
+      )
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.getAllProductsUseCase, times(1)).execute( 0, 10);
   }
 
   @Test
