@@ -8,12 +8,14 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.Ge
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetCategoryByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetModelByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetAllProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.CreateProductUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetAllProductsUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetProductsByBrandUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetProductsByCategoryUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetProductsByModelUseCaseImpl;
@@ -76,5 +78,10 @@ public class ProductBeans {
   @Bean
   public GetProductsUseCase getProductsUseCase() {
     return new GetProductsUseCaseImpl(productGateway);
+  }
+
+  @Bean
+  public GetAllProductsUseCase getAllProductsUseCase() {
+    return new GetAllProductsUseCaseImpl(productGateway);
   }
 }

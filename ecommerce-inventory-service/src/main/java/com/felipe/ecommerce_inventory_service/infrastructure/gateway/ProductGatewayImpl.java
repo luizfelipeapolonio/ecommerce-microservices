@@ -117,6 +117,18 @@ public class ProductGatewayImpl implements ProductGateway {
   }
 
   @Override
+  public PageResponseDTO getAllProducts(int page, int elementsQuantity) {
+    final Pageable pagination = PageRequest.of(page, elementsQuantity, Sort.by("name"));
+    final Page<ProductEntity> productsPage = this.productRepository.findAll(pagination);
+    final List<Product> productsDomain = productsPage.get().map(this.productEntityMapper::toDomain).toList();
+
+    final ResponsePayload<List<UploadService.ImageResponse>> productImages = extractIdsAndFindImages(productsPage.get());
+    final List<ProductDTO> productDTOs = convertToProductDTOList(productsDomain, productImages.getPayload());
+
+    return new ProductPageResponseDTO(productsPage, productDTOs);
+  }
+
+  @Override
   public PageResponseDTO getProductsByCategory(String categoryName, int page, int elementsQuantity) {
     final Pageable pagination = PageRequest.of(page, elementsQuantity, Sort.by("name"));
     final Page<ProductEntity> productsPage = this.productRepository.findByCategoryName(categoryName, pagination);

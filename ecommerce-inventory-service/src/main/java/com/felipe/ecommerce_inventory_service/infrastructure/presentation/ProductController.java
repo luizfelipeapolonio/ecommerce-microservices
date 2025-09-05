@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetAllProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
@@ -49,6 +50,7 @@ public class ProductController implements ProductApi {
   private final CreateProductUseCase createProductUseCase;
   private final UpdateProductUseCase updateProductUseCase;
   private final GetProductsUseCase getProductsUseCase;
+  private final GetAllProductsUseCase getAllProductsUseCase;
   private final GetProductsByCategoryUseCase getProductsByCategoryUseCase;
   private final GetProductsByBrandUseCase getProductsByBrandUseCase;
   private final GetProductsByModelUseCase getProductsByModelUseCase;
@@ -60,6 +62,7 @@ public class ProductController implements ProductApi {
   public ProductController(CreateProductUseCase createProductUseCase,
                            UpdateProductUseCase updateProductUseCase,
                            GetProductsUseCase getProductsUseCase,
+                           GetAllProductsUseCase getAllProductsUseCase,
                            GetProductsByCategoryUseCase getProductsByCategoryUseCase,
                            GetProductsByBrandUseCase getProductsByBrandUseCase,
                            GetProductsByModelUseCase getProductsByModelUseCase,
@@ -69,6 +72,7 @@ public class ProductController implements ProductApi {
     this.createProductUseCase = createProductUseCase;
     this.updateProductUseCase = updateProductUseCase;
     this.getProductsUseCase = getProductsUseCase;
+    this.getAllProductsUseCase = getAllProductsUseCase;
     this.getProductsByCategoryUseCase = getProductsByCategoryUseCase;
     this.getProductsByBrandUseCase = getProductsByBrandUseCase;
     this.getProductsByModelUseCase = getProductsByModelUseCase;
@@ -116,6 +120,20 @@ public class ProductController implements ProductApi {
       .type(ResponseType.SUCCESS)
       .code(HttpStatus.OK)
       .message(message)
+      .payload(products)
+      .build();
+  }
+
+  @Override
+  @GetMapping("/all")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<PageResponseDTO> getAllProducts(@RequestParam(name = "page", defaultValue = "0") int page,
+                                                         @RequestParam(name = "pageSize", defaultValue = "10") int size) {
+    PageResponseDTO products = this.getAllProductsUseCase.execute(page, size);
+    return new ResponsePayload.Builder<PageResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Todos os produtos - página: " + page + " - quantidade de produtos: " + products.currentElements())
       .payload(products)
       .build();
   }
