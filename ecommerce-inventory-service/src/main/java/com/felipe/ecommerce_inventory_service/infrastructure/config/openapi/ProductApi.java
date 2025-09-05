@@ -120,6 +120,27 @@ public interface ProductApi {
   );
 
   @Operation(
+    operationId = "getAllProducts",
+    summary = "Get all products",
+    description = "Get all products page",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with a page of products", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<ProductPageResponseDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "GetAllProductsExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<PageResponseDTO> getAllProducts(
+    @Parameter(in = ParameterIn.QUERY, name = "page", description = "The page number", schema = @Schema(type = "integer", format = "int32", example = "1"))
+    @RequestParam(name = "page") int page,
+    @Parameter(in = ParameterIn.QUERY, name = "pageSize", description = "The number of elements on the page", schema = @Schema(type = "integer", format = "int32", example = "10"))
+    @RequestParam(name = "pageSize") int size
+  );
+
+  @Operation(
     operationId = "getProductsByCategory",
     summary = "Get products by category",
     description = "Get products page of the given category",
