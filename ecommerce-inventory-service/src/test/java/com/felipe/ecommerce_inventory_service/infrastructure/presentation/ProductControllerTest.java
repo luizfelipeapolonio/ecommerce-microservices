@@ -5,7 +5,9 @@ import com.felipe.ecommerce_inventory_service.core.application.dtos.product.Page
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.DeleteProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetAllProductsUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
@@ -47,6 +49,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.mockito.Mockito.when;
@@ -56,6 +59,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -76,6 +80,12 @@ public class ProductControllerTest {
 
   @MockitoBean
   UpdateProductUseCase updateProductUseCase;
+
+  @MockitoBean
+  GetProductByIdUseCase getProductByIdUseCase;
+
+  @MockitoBean
+  DeleteProductUseCase deleteProductUseCase;
 
   @MockitoBean
   GetProductsUseCase getProductsUseCase;
@@ -206,6 +216,60 @@ public class ProductControllerTest {
       .andExpectAll(status().isOk(), content().json(jsonResponseBody));
 
     verify(this.updateProductUseCase, times(1)).execute(product.getId(), updateProductDTO);
+  }
+
+  @Test
+  @DisplayName("getProductByIdSuccess - Should return a success response with the found product")
+  void getProductByIdSuccess() throws Exception {
+    final Product product = this.dataMock.getProductsDomain().getFirst();
+    ImageFileDTO image1 = new ImageFileDTO(
+      "01",
+      "image1",
+      "imagePath",
+      "image/png",
+      "123456",
+      "image1",
+      "thumbnail",
+      "01",
+      "anything",
+      "anything"
+    );
+    final ProductResponseDTO productResponseDTO = new ProductDTO(product, List.of(image1));
+    final ResponsePayload<ProductResponseDTO> response = new ResponsePayload.Builder<ProductResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Produto de id: '" + product.getId() + "'")
+      .payload(productResponseDTO)
+      .build();
+    final String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.getProductByIdUseCase.execute(product.getId())).thenReturn(productResponseDTO);
+
+    this.mockMvc.perform(get(BASE_URL + "/{id}", product.getId())
+      .accept(APPLICATION_JSON))
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.getProductByIdUseCase ,times(1)).execute(product.getId());
+  }
+
+  @Test
+  @DisplayName("deleteProductSuccess - Should return a success response")
+  void deleteProductSuccess() throws Exception {
+    final Product product = this.dataMock.getProductsDomain().getFirst();
+
+    when(this.deleteProductUseCase.execute(product.getId())).thenReturn(product);
+
+    this.mockMvc.perform(delete(BASE_URL + "/{id}", product.getId())
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("Produto '" + product.getName() + "' excluído com sucesso"),
+        jsonPath("$.payload").isEmpty()
+      );
+
+    verify(this.deleteProductUseCase, times(1)).execute(product.getId());
   }
 
   @Test

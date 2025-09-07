@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -227,6 +228,51 @@ public class ProductGatewayImplTest {
     verify(this.productEntityMapper, times(1)).toEntity(product);
     verify(this.productRepository, times(1)).save(any(ProductEntity.class));
     verify(this.productEntityMapper, times(1)).toDomain(productEntity);
+  }
+
+  @Test
+  @DisplayName("getProductSuccess - Should successfully find and return a product")
+  void getProductSuccess() {
+    final Product productDomain = this.dataMock.getProductsDomain().getFirst();
+    final Set<String> productId = Set.of(productDomain.getId().toString());
+    ImageFileDTO image1 = new ImageFileDTO(
+      "01",
+      "image1",
+      "imagePath",
+      "image/png",
+      "123456",
+      "image1",
+      "thumbnail",
+      "01",
+      "anything",
+      "anything"
+    );
+    final UploadService.ImageResponse productImage = new UploadService.ImageResponse(
+      productDomain.getId().toString(),
+      List.of(image1)
+    );
+    final var uploadResponse = new ResponsePayload.Builder<List<UploadService.ImageResponse>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Imagens dos produtos")
+      .payload(List.of(productImage))
+      .build();
+
+    when(this.uploadService.getProductImages(productId)).thenReturn(uploadResponse);
+
+    ProductResponseDTO product = this.productGateway.getProduct(productDomain);
+
+    assertThat(product.id()).isEqualTo(productDomain.getId().toString());
+    assertThat(product.name()).isEqualTo(productDomain.getName());
+    assertThat(product.description()).isEqualTo(productDomain.getDescription());
+    assertThat(product.quantity()).isEqualTo(productDomain.getQuantity());
+    assertThat(product.unitPrice()).isEqualTo(productDomain.getUnitPrice().toString());
+    assertThat(product.createdAt()).isEqualTo(productDomain.getCreatedAt().toString());
+    assertThat(product.updatedAt()).isEqualTo(productDomain.getUpdatedAt().toString());
+    assertThat(product.images().size()).isEqualTo(uploadResponse.getPayload().getFirst().getImages().size());
+    assertThat(product.images().getFirst()).usingRecursiveComparison().isEqualTo(uploadResponse.getPayload().getFirst().getImages().getFirst());
+
+    verify(this.uploadService, times(1)).getProductImages(productId);
   }
 
   @Test
@@ -635,5 +681,39 @@ public class ProductGatewayImplTest {
     verify(this.productRepository, times(1)).findByModelNameAndBrandName(modelName, brandName, pagination);
     verify(this.productEntityMapper, times(1)).toDomain(productsEntity.get(0));
     verify(this.uploadService, times(1)).getProductImages(productIds);
+  }
+
+  @Test
+  @DisplayName("deleteProductSuccess - Should successfully delete a product and return it")
+  void deleteProductSuccess() {
+    final Product productDomain = this.dataMock.getProductsDomain().getFirst();
+    final ProductEntity productEntity = this.dataMock.getProductsEntity().getFirst();
+    final var deleteImagesResponse = new ResponsePayload.Builder<UploadService.DeleteImagesResponse>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Images excluídas com sucesso")
+      .payload(new UploadService.DeleteImagesResponse(productEntity.getId().toString(), 1))
+      .build();
+
+    when(this.productEntityMapper.toEntity(productDomain)).thenReturn(productEntity);
+    when(this.uploadService.deleteImages(productEntity.getId().toString())).thenReturn(deleteImagesResponse);
+    doNothing().when(this.productRepository).delete(productEntity);
+
+    Product deletedProduct = this.productGateway.deleteProduct(productDomain);
+
+    assertThat(deletedProduct.getId()).isEqualTo(productDomain.getId());
+    assertThat(deletedProduct.getName()).isEqualTo(productDomain.getName());
+    assertThat(deletedProduct.getDescription()).isEqualTo(productDomain.getDescription());
+    assertThat(deletedProduct.getQuantity()).isEqualTo(productDomain.getQuantity());
+    assertThat(deletedProduct.getUnitPrice().toString()).isEqualTo(productDomain.getUnitPrice().toString());
+    assertThat(deletedProduct.getCreatedAt()).isEqualTo(productDomain.getCreatedAt());
+    assertThat(deletedProduct.getUpdatedAt()).isEqualTo(productDomain.getUpdatedAt());
+    assertThat(deletedProduct.getCategory()).usingRecursiveComparison().isEqualTo(productDomain.getCategory());
+    assertThat(deletedProduct.getBrand()).usingRecursiveComparison().isEqualTo(productDomain.getBrand());
+    assertThat(deletedProduct.getModel()).usingRecursiveComparison().isEqualTo(productDomain.getModel());
+
+    verify(this.productEntityMapper, times(1)).toEntity(productDomain);
+    verify(this.uploadService, times(1)).deleteImages(productEntity.getId().toString());
+    verify(this.productRepository, times(1)).delete(productEntity);
   }
 }
