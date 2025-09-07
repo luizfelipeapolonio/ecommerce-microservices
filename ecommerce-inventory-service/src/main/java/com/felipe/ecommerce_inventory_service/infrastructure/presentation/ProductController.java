@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.DeleteProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetAllProductsUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByBrandUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
@@ -28,6 +30,7 @@ import jakarta.validation.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +52,8 @@ import java.util.stream.Stream;
 public class ProductController implements ProductApi {
   private final CreateProductUseCase createProductUseCase;
   private final UpdateProductUseCase updateProductUseCase;
+  private final GetProductByIdUseCase getProductByIdUseCase;
+  private final DeleteProductUseCase deleteProductUseCase;
   private final GetProductsUseCase getProductsUseCase;
   private final GetAllProductsUseCase getAllProductsUseCase;
   private final GetProductsByCategoryUseCase getProductsByCategoryUseCase;
@@ -61,6 +66,8 @@ public class ProductController implements ProductApi {
   
   public ProductController(CreateProductUseCase createProductUseCase,
                            UpdateProductUseCase updateProductUseCase,
+                           GetProductByIdUseCase getProductByIdUseCase,
+                           DeleteProductUseCase deleteProductUseCase,
                            GetProductsUseCase getProductsUseCase,
                            GetAllProductsUseCase getAllProductsUseCase,
                            GetProductsByCategoryUseCase getProductsByCategoryUseCase,
@@ -71,6 +78,8 @@ public class ProductController implements ProductApi {
                            Validator validator) {
     this.createProductUseCase = createProductUseCase;
     this.updateProductUseCase = updateProductUseCase;
+    this.getProductByIdUseCase = getProductByIdUseCase;
+    this.deleteProductUseCase = deleteProductUseCase;
     this.getProductsUseCase = getProductsUseCase;
     this.getAllProductsUseCase = getAllProductsUseCase;
     this.getProductsByCategoryUseCase = getProductsByCategoryUseCase;
@@ -149,6 +158,32 @@ public class ProductController implements ProductApi {
       .code(HttpStatus.OK)
       .message("Produto atualizado com sucesso")
       .payload(new UpdateProductResponseDTO(updatedProduct))
+      .build();
+  }
+
+  @Override
+  @GetMapping("/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<ProductResponseDTO> getProductById(@PathVariable UUID id) {
+    ProductResponseDTO product = this.getProductByIdUseCase.execute(id);
+    return new ResponsePayload.Builder<ProductResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Produto de id: '" + id + "'")
+      .payload(product)
+      .build();
+  }
+
+  @Override
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<Void> deleteProduct(@PathVariable UUID id) {
+    Product deletedProduct = this.deleteProductUseCase.execute(id);
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Produto '" + deletedProduct.getName() + "' excluído com sucesso")
+      .payload(null)
       .build();
   }
 

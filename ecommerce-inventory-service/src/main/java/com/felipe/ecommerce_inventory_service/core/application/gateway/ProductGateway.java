@@ -14,9 +14,11 @@ public interface ProductGateway {
   Optional<Product> findProductByName(String name);
   Optional<Product> findProductById(UUID id);
   Product updateProduct(Product product, UpdateProductDomainDTO productDTO);
+  ProductResponseDTO getProduct(Product product);
   PageResponseDTO getProducts(String category, String brand, String model, int page, int elementsQuantity);
   PageResponseDTO getAllProducts(int page, int elementsQuantity);
   PageResponseDTO getProductsByCategory(String categoryName, int page, int elementsQuantity);
   PageResponseDTO getProductsByBrand(String brandName, int page, int elementsQuantity);
   PageResponseDTO getProductsByModel(String modelName, String brandName, int page, int elementsQuantity);
+  Product deleteProduct(Product product);
 }

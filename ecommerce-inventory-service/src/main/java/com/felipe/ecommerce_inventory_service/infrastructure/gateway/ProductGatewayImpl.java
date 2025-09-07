@@ -105,6 +105,17 @@ public class ProductGatewayImpl implements ProductGateway {
   }
 
   @Override
+  public ProductResponseDTO getProduct(Product product) {
+    final Set<String> productId = Set.of(product.getId().toString());
+    final List<ImageFileDTO> productImages = this.uploadService.getProductImages(productId)
+      .getPayload()
+      .getFirst()
+      .getImages();
+
+    return new ProductDTO(product, productImages);
+  }
+
+  @Override
   public PageResponseDTO getProducts(String category, String brand, String model, int page, int elementsQuantity) {
     final Pageable pagination = PageRequest.of(page, elementsQuantity, Sort.by("name"));
     final Page<ProductEntity> productsPage = this.productRepository.findByOptionalParameters(category, brand, model, pagination);
@@ -162,6 +173,15 @@ public class ProductGatewayImpl implements ProductGateway {
     final List<ProductDTO> productDTOs = convertToProductDTOList(productsDomain, productImages.getPayload());
 
     return new ProductPageResponseDTO(productsPage, productDTOs);
+  }
+
+  @Override
+  public Product deleteProduct(Product product) {
+    final ProductEntity productEntity = this.productEntityMapper.toEntity(product);
+    final var deleteImagesResponse = this.uploadService.deleteImages(productEntity.getId().toString());
+    this.logger.info("Product: '{}' - Deleted images quantity: '{}'", product.getId(), deleteImagesResponse.getPayload().getDeletedImagesQuantity());
+    this.productRepository.delete(productEntity);
+    return product;
   }
 
   private List<ProductDTO> convertToProductDTOList(List<Product> products, List<UploadService.ImageResponse> images) {

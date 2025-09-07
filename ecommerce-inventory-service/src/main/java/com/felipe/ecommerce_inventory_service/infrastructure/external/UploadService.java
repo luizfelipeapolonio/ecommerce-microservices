@@ -65,6 +65,17 @@ public class UploadService {
       .body(new ParameterizedTypeReference<>() {});
   }
 
+  public ResponsePayload<DeleteImagesResponse> deleteImages(String productId) {
+    return this.restClient
+      .delete()
+      .uri(URI.create(this.uploadServiceUrl))
+      .header("productId", productId)
+      .attributes(clientRegistrationId(CLIENT_REGISTRATION_ID))
+      .accept(MediaType.APPLICATION_JSON)
+      .retrieve()
+      .body(new ParameterizedTypeReference<>() {});
+  }
+
   public static class ProductData {
     private final String productName;
     private final String productId;
@@ -98,6 +109,24 @@ public class UploadService {
 
     public List<ImageFileDTO> getImages() {
       return this.images;
+    }
+  }
+
+  public static class DeleteImagesResponse {
+    private final String productId;
+    private final int deletedImagesQuantity;
+
+    public DeleteImagesResponse(String productId, int deletedImagesQuantity) {
+      this.productId = productId;
+      this.deletedImagesQuantity = deletedImagesQuantity;
+    }
+
+    public String getProductId() {
+      return this.productId;
+    }
+
+    public int getDeletedImagesQuantity() {
+      return this.deletedImagesQuantity;
     }
   }
 }
