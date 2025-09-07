@@ -556,6 +556,20 @@ public class OpenAPIConfiguration {
         "All products - page: 0 - products quantity: 1",
         productPageResponseDTO
       );
+      this.apiUtils.createExample(
+        "GetProductByIdExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Product with id: '" + productDTO.id() + "'",
+        productDTO
+      );
+      this.apiUtils.createExample(
+        "DeleteProductExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Product 'Mouse Wireless Logitech G PRO' deleted successfully",
+        null
+      );
     };
   }
 }

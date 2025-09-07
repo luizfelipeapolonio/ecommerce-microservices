@@ -93,6 +93,44 @@ public interface ProductApi {
   );
 
   @Operation(
+    operationId = "getProductById",
+    summary = "Get a product by id",
+    description = "Get a product with the given id",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with a product", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<ProductDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "GetProductByIdExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<ProductResponseDTO> getProductById(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Product id", required = true, schema = @Schema(type = "string", example = "da4dd8a3-a821-4350-9af2-c5b8f3801330"))
+    @PathVariable UUID id
+  );
+
+  @Operation(
+    operationId = "deleteProduct",
+    summary = "Delete a product",
+    description = "Delete a product",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with a success message", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
+          @ExampleObject(name = "Success response", ref = "DeleteProductExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<Void> deleteProduct(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Product id", required = true, schema = @Schema(type = "string", example = "da4dd8a3-a821-4350-9af2-c5b8f3801330"))
+    @PathVariable UUID id
+  );
+
+  @Operation(
     operationId = "getProducts",
     summary = "Get products by parameters",
     description = "Get products page of the given category, brand and model",
