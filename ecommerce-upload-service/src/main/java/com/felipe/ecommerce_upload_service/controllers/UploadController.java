@@ -2,6 +2,7 @@ package com.felipe.ecommerce_upload_service.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.felipe.ecommerce_upload_service.dtos.DeleteImagesDTO;
 import com.felipe.ecommerce_upload_service.dtos.ImageDTO;
 import com.felipe.ecommerce_upload_service.dtos.ImageResponseDTO;
 import com.felipe.ecommerce_upload_service.dtos.ProductUploadDTO;
@@ -12,6 +13,7 @@ import com.felipe.response.ResponseType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -70,6 +72,18 @@ public class UploadController {
       .code(HttpStatus.OK)
       .message("Imagens dos produtos")
       .payload(images)
+      .build();
+  }
+
+  @DeleteMapping
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<DeleteImagesDTO> deleteProductImages(@RequestHeader(name = "productId") String productId) {
+    DeleteImagesDTO deleteInfo = this.uploadService.deleteImages(productId);
+    return new ResponsePayload.Builder<DeleteImagesDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Imagens excluídas com sucesso")
+      .payload(deleteInfo)
       .build();
   }
 }

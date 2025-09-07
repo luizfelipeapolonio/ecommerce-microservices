@@ -1,6 +1,8 @@
 package com.felipe.ecommerce_upload_service.controllers;
 
 import com.felipe.ecommerce_upload_service.dtos.WrongFileDTO;
+import com.felipe.ecommerce_upload_service.exceptions.DeleteFailureException;
+import com.felipe.ecommerce_upload_service.exceptions.ImageFileNotFoundException;
 import com.felipe.ecommerce_upload_service.exceptions.InvalidFileTypeException;
 import com.felipe.ecommerce_upload_service.exceptions.UnprocessableJsonException;
 import com.felipe.ecommerce_upload_service.exceptions.UploadDirectoryInitializationException;
@@ -20,7 +22,7 @@ import java.util.Set;
 @RestControllerAdvice
 public class ExceptionControllerAdvice {
 
-  @ExceptionHandler({UploadDirectoryInitializationException.class, UploadFailureException.class})
+  @ExceptionHandler({UploadDirectoryInitializationException.class, UploadFailureException.class, DeleteFailureException.class})
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ResponsePayload<Void> handleUploadExceptions(Exception ex) {
     return new ResponsePayload.Builder<Void>()
@@ -58,6 +60,17 @@ public class ExceptionControllerAdvice {
     return new ResponsePayload.Builder<Void>()
       .type(ResponseType.ERROR)
       .code(HttpStatus.UNPROCESSABLE_ENTITY)
+      .message(ex.getMessage())
+      .payload(null)
+      .build();
+  }
+
+  @ExceptionHandler(ImageFileNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ResponsePayload<Void> handleImageFileNotFoundException(ImageFileNotFoundException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.NOT_FOUND)
       .message(ex.getMessage())
       .payload(null)
       .build();

@@ -1,9 +1,12 @@
 package com.felipe.ecommerce_upload_service.services;
 
 import com.felipe.ecommerce_upload_service.config.storage.StorageProperties;
+import com.felipe.ecommerce_upload_service.dtos.DeleteImagesDTO;
 import com.felipe.ecommerce_upload_service.dtos.ImageDTO;
 import com.felipe.ecommerce_upload_service.dtos.ImageResponseDTO;
 import com.felipe.ecommerce_upload_service.dtos.ProductUploadDTO;
+import com.felipe.ecommerce_upload_service.exceptions.DeleteFailureException;
+import com.felipe.ecommerce_upload_service.exceptions.ImageFileNotFoundException;
 import com.felipe.ecommerce_upload_service.exceptions.InvalidFileTypeException;
 import com.felipe.ecommerce_upload_service.exceptions.UploadFailureException;
 import com.felipe.ecommerce_upload_service.persistence.entities.Image;
@@ -104,6 +107,40 @@ public class UploadService {
       productImages.add(new ImageResponseDTO(productId, images));
     });
     return productImages;
+  }
+
+  public DeleteImagesDTO deleteImages(String productId) {
+    final List<Image> foundImages = this.imageRepository.findAllByProductId(UUID.fromString(productId));
+    this.logger.info("Found {} images of product with id '{}'", foundImages.size(), productId);
+    int deletedImagesCount = 0;
+
+    if(!foundImages.isEmpty()) {
+      for (Image image : foundImages) {
+        final Path imageToDeletePath = Paths.get(this.rootUploadPath.toString(), image.getPath());
+
+        try {
+          final boolean isImageFileDeleted = Files.deleteIfExists(imageToDeletePath);
+
+          if(!isImageFileDeleted) {
+            this.logger.error("Error on deleting image. Image file was not found - Path: {}", imageToDeletePath);
+            throw new ImageFileNotFoundException("Não foi possível excluir! Imagem '" + image.getName() + "' não encontrada");
+          }
+          this.logger.info("Deleted image file on path: {}", imageToDeletePath);
+
+        } catch (IOException ex) {
+          this.logger.error("Error on deleting image file. Path: {}", imageToDeletePath, ex);
+          throw new DeleteFailureException("Ocorreu um erro ao excluir a imagem '" + image.getName() + "'", ex);
+        }
+
+        this.imageRepository.delete(image);
+        deletedImagesCount++;
+        this.logger.info(
+          "Image deleted successfully! ImageId: {} - ImageName: {} - DeletedImagesQuantity: {}",
+          image.getId(), image.getName(), deletedImagesCount
+        );
+      }
+    }
+    return new DeleteImagesDTO(productId, deletedImagesCount);
   }
 
   private String generateImageName(String productName, MultipartFile file) {
