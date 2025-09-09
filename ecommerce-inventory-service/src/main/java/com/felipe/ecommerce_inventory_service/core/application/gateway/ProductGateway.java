@@ -21,4 +21,5 @@ public interface ProductGateway {
   PageResponseDTO getProductsByBrand(String brandName, int page, int elementsQuantity);
   PageResponseDTO getProductsByModel(String modelName, String brandName, int page, int elementsQuantity);
   Product deleteProduct(Product product);
+  long updateProductQuantityInStock(Product product);
 }

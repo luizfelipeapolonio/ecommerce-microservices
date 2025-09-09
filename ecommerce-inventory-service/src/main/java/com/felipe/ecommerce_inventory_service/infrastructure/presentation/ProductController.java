@@ -3,7 +3,10 @@ package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductInStockDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.AddProductInStockUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CheckIfProductIsInStockUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.DeleteProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetAllProductsUseCase;
@@ -12,11 +15,14 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.product.
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.RemoveProductFromStockUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
 import com.felipe.ecommerce_inventory_service.infrastructure.config.openapi.ProductApi;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.CreateProductDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.StockProductQuantityDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.StockProductQuantityResponseDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.exceptions.UnprocessableJsonException;
@@ -43,6 +49,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -54,6 +62,9 @@ public class ProductController implements ProductApi {
   private final UpdateProductUseCase updateProductUseCase;
   private final GetProductByIdUseCase getProductByIdUseCase;
   private final DeleteProductUseCase deleteProductUseCase;
+  private final CheckIfProductIsInStockUseCase checkIfProductIsInStockUseCase;
+  private final AddProductInStockUseCase addProductInStockUseCase;
+  private final RemoveProductFromStockUseCase removeProductFromStockUseCase;
   private final GetProductsUseCase getProductsUseCase;
   private final GetAllProductsUseCase getAllProductsUseCase;
   private final GetProductsByCategoryUseCase getProductsByCategoryUseCase;
@@ -68,6 +79,9 @@ public class ProductController implements ProductApi {
                            UpdateProductUseCase updateProductUseCase,
                            GetProductByIdUseCase getProductByIdUseCase,
                            DeleteProductUseCase deleteProductUseCase,
+                           CheckIfProductIsInStockUseCase checkIfProductIsInStockUseCase,
+                           AddProductInStockUseCase addProductInStockUseCase,
+                           RemoveProductFromStockUseCase removeProductFromStockUseCase,
                            GetProductsUseCase getProductsUseCase,
                            GetAllProductsUseCase getAllProductsUseCase,
                            GetProductsByCategoryUseCase getProductsByCategoryUseCase,
@@ -80,6 +94,9 @@ public class ProductController implements ProductApi {
     this.updateProductUseCase = updateProductUseCase;
     this.getProductByIdUseCase = getProductByIdUseCase;
     this.deleteProductUseCase = deleteProductUseCase;
+    this.checkIfProductIsInStockUseCase = checkIfProductIsInStockUseCase;
+    this.addProductInStockUseCase = addProductInStockUseCase;
+    this.removeProductFromStockUseCase = removeProductFromStockUseCase;
     this.getProductsUseCase = getProductsUseCase;
     this.getAllProductsUseCase = getAllProductsUseCase;
     this.getProductsByCategoryUseCase = getProductsByCategoryUseCase;
@@ -184,6 +201,66 @@ public class ProductController implements ProductApi {
       .code(HttpStatus.OK)
       .message("Produto '" + deletedProduct.getName() + "' excluído com sucesso")
       .payload(null)
+      .build();
+  }
+
+  @Override
+  @GetMapping("/{id}/stock")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<Map<String, Boolean>> checkIfProductIsInStock(@PathVariable UUID id) {
+    final ProductInStockDTO product = this.checkIfProductIsInStockUseCase.execute(id);
+    final Map<String, Boolean> productInStockMap = new HashMap<>(1);
+    productInStockMap.put("isInStock", product.isInStock());
+
+    return new ResponsePayload.Builder<Map<String, Boolean>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Checando se o produto de id: '" + id + "' está em estoque")
+      .payload(productInStockMap)
+      .build();
+  }
+
+  @Override
+  @PatchMapping("/{id}/stock/add")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<StockProductQuantityResponseDTO> addProductInStock(@PathVariable UUID id,
+                                                                            @Valid @RequestBody StockProductQuantityDTO productDTO) {
+    final long currentProductQuantity = this.addProductInStockUseCase.execute(id, productDTO.quantity());
+    final String message = String.format(
+      "%d %s do produto de id '%s' %s %s ao estoque com sucesso",
+      productDTO.quantity(),
+      productDTO.quantity() > 1 ? "unidades" : "unidade",
+      id,
+      productDTO.quantity() > 1 ? "foram" : "foi",
+      productDTO.quantity() > 1 ? "adicionadas" : "adicionada"
+    );
+    return new ResponsePayload.Builder<StockProductQuantityResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message(message)
+      .payload(new StockProductQuantityResponseDTO(currentProductQuantity))
+      .build();
+  }
+
+  @Override
+  @PatchMapping("/{id}/stock/remove")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<StockProductQuantityResponseDTO> removeProductFromStock(@PathVariable UUID id,
+                                                                                 @Valid @RequestBody StockProductQuantityDTO productDTO) {
+    final long currentProductQuantity = this.removeProductFromStockUseCase.execute(id, productDTO.quantity());
+    final String message = String.format(
+      "%d %s do produto de id '%s' %s %s do estoque com sucesso",
+      productDTO.quantity(),
+      productDTO.quantity() > 1 ? "unidades" : "unidade",
+      id,
+      productDTO.quantity() > 1 ? "foram" : "foi",
+      productDTO.quantity() > 1 ? "removidas" : "removida"
+    );
+    return new ResponsePayload.Builder<StockProductQuantityResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message(message)
+      .payload(new StockProductQuantityResponseDTO(currentProductQuantity))
       .build();
   }
 

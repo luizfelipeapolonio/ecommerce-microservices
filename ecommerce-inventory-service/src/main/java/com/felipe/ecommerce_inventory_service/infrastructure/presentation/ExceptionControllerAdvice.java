@@ -3,6 +3,7 @@ package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.BrandAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.CategoryAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
+import com.felipe.ecommerce_inventory_service.core.application.exceptions.InvalidProductQuantityException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.ModelAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.ProductAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.infrastructure.exceptions.MappingFailureException;
@@ -94,6 +95,16 @@ public class ExceptionControllerAdvice {
     return new ResponsePayload.Builder<Void>()
       .type(ResponseType.ERROR)
       .code(HttpStatus.UNPROCESSABLE_ENTITY)
+      .message(ex.getMessage())
+      .build();
+  }
+
+  @ExceptionHandler(InvalidProductQuantityException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponsePayload<Void> handleInvalidProductQuantityException(InvalidProductQuantityException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.BAD_REQUEST)
       .message(ex.getMessage())
       .build();
   }

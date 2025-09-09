@@ -184,6 +184,12 @@ public class ProductGatewayImpl implements ProductGateway {
     return product;
   }
 
+  @Override
+  public long updateProductQuantityInStock(Product product) {
+    final ProductEntity updatedProduct = this.productRepository.save(this.productEntityMapper.toEntity(product));
+    return updatedProduct.getQuantity();
+  }
+
   private List<ProductDTO> convertToProductDTOList(List<Product> products, List<UploadService.ImageResponse> images) {
     final List<ProductDTO> productDTOs = new ArrayList<>(products.size());
 
