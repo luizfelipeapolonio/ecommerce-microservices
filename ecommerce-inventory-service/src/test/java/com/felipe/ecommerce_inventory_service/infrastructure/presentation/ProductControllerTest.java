@@ -2,8 +2,11 @@ package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductInStockDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.AddProductInStockUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CheckIfProductIsInStockUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.DeleteProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetAllProductsUseCase;
@@ -12,6 +15,7 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.product.
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByCategoryUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.RemoveProductFromStockUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.UploadFileImpl;
@@ -19,6 +23,7 @@ import com.felipe.ecommerce_inventory_service.core.domain.Product;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.CreateProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductPageResponseDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.StockProductQuantityDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.mappers.UploadFileMapper;
@@ -47,6 +52,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -86,6 +92,15 @@ public class ProductControllerTest {
 
   @MockitoBean
   DeleteProductUseCase deleteProductUseCase;
+
+  @MockitoBean
+  CheckIfProductIsInStockUseCase checkIfProductIsInStockUseCase;
+
+  @MockitoBean
+  AddProductInStockUseCase addProductInStockUseCase;
+
+  @MockitoBean
+  RemoveProductFromStockUseCase removeProductFromStockUseCase;
 
   @MockitoBean
   GetProductsUseCase getProductsUseCase;
@@ -270,6 +285,73 @@ public class ProductControllerTest {
       );
 
     verify(this.deleteProductUseCase, times(1)).execute(product.getId());
+  }
+
+  @Test
+  @DisplayName("checkIfProductIsInStockSuccess - Should return a success response with the product status")
+  void checkIfProductIsInStockSuccess() throws Exception {
+    final UUID productId = this.dataMock.getProductsDomain().getFirst().getId();
+    final ProductInStockDTO product = () -> true;
+
+    when(this.checkIfProductIsInStockUseCase.execute(productId)).thenReturn(product);
+
+    this.mockMvc.perform(get(BASE_URL + "/{id}/stock", productId)
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("Checando se o produto de id: '" + productId + "' está em estoque"),
+        jsonPath("$.payload.isInStock").value(true)
+      );
+
+    verify(this.checkIfProductIsInStockUseCase, times(1)).execute(productId);
+  }
+
+  @Test
+  @DisplayName("addProductInStockSuccess - Should return a success response with the current product quantity")
+  void addProductInStockSuccess() throws Exception {
+    final UUID productId = this.dataMock.getProductsDomain().getFirst().getId();
+    final StockProductQuantityDTO productDTO = new StockProductQuantityDTO(10L);
+    final String jsonRequestBody = this.objectMapper.writeValueAsString(productDTO);
+
+    when(this.addProductInStockUseCase.execute(productId, productDTO.quantity())).thenReturn(10L);
+
+    this.mockMvc.perform(patch(BASE_URL + "/{id}/stock/add", productId)
+      .contentType(APPLICATION_JSON).content(jsonRequestBody)
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("10 unidades do produto de id '" + productId + "' foram adicionadas ao estoque com sucesso"),
+        jsonPath("$.payload.currentQuantity").value(10L)
+      );
+
+    verify(this.addProductInStockUseCase, times(1)).execute(productId, productDTO.quantity());
+  }
+
+  @Test
+  @DisplayName("removeProductFromStockSuccess - Should return a success response with the current product quantity")
+  void removeProductFromStockSuccess() throws Exception {
+    final UUID productId = this.dataMock.getProductsDomain().getFirst().getId();
+    final StockProductQuantityDTO productDTO = new StockProductQuantityDTO(10L);
+    final String jsonRequestBody = this.objectMapper.writeValueAsString(productDTO);
+
+    when(this.removeProductFromStockUseCase.execute(productId, productDTO.quantity())).thenReturn(10L);
+
+    this.mockMvc.perform(patch(BASE_URL + "/{id}/stock/remove", productId)
+      .contentType(APPLICATION_JSON).content(jsonRequestBody)
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("10 unidades do produto de id '" + productId + "' foram removidas do estoque com sucesso"),
+        jsonPath("$.payload.currentQuantity").value(10L)
+      );
+
+    verify(this.removeProductFromStockUseCase, times(1)).execute(productId, productDTO.quantity());
   }
 
   @Test

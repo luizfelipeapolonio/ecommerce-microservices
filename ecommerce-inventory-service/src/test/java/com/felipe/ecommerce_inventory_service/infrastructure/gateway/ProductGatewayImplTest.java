@@ -716,4 +716,20 @@ public class ProductGatewayImplTest {
     verify(this.uploadService, times(1)).deleteImages(productEntity.getId().toString());
     verify(this.productRepository, times(1)).delete(productEntity);
   }
+
+  @Test
+  @DisplayName("updateProductQuantityInStockSuccess - Should successfully save and return a product with the updated quantity")
+  void updateProductQuantityInStockSuccess() {
+    final Product productDomain = this.dataMock.getProductsDomain().getFirst();
+    final ProductEntity productEntity = this.dataMock.getProductsEntity().getFirst();
+
+    when(this.productEntityMapper.toEntity(productDomain)).thenReturn(productEntity);
+    when(this.productRepository.save(productEntity)).thenReturn(productEntity);
+
+    long currentProductQuantity = this.productGateway.updateProductQuantityInStock(productDomain);
+
+    assertThat(currentProductQuantity).isEqualTo(productEntity.getQuantity());
+    verify(this.productEntityMapper, times(1)).toEntity(productDomain);
+    verify(this.productRepository, times(1)).save(productEntity);
+  }
 }
