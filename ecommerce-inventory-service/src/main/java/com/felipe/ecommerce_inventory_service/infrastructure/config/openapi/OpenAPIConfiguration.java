@@ -14,6 +14,7 @@ import com.felipe.ecommerce_inventory_service.infrastructure.dtos.model.UpdateMo
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.CreateProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductPageResponseDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.StockProductQuantityResponseDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductResponseDTO;
 import com.felipe.openapi.OpenApiUtils;
 import com.felipe.openapi.SchemaCustomizer;
@@ -37,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.felipe.openapi.OpenApiUtils.SCHEMAS_REF;
@@ -148,12 +150,20 @@ public class OpenAPIConfiguration {
           schema.addRequiredItem("images");
         }
       );
+      this.apiUtils.createSchemaFromClass(
+        "StockProductQuantityResponseDTO",
+        modelConverterInstance,
+        StockProductQuantityResponseDTO.class,
+        SchemaCustomizer.withDefaults()
+      );
       this.apiUtils.createSchema("CategoryDomainDTO", schema -> {
         schema.addProperty("id", new ObjectSchema().type("integer").format("int64"));
         schema.addProperty("name", new ObjectSchema().type("string"));
         schema.addProperty("createdAt", new ObjectSchema().type("string"));
         schema.addProperty("updatedAt", new ObjectSchema().type("string"));
       });
+      this.apiUtils.createSchema("IsInStockDTO", schema ->
+        schema.addProperty("isInStock", new ObjectSchema().type("boolean").example(true)));
       this.apiUtils.createSchema("ResponsePayload<CategoryDTO>", schema -> {
         schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
         schema.addAllOfItem(new ObjectSchema()
@@ -203,6 +213,16 @@ public class OpenAPIConfiguration {
         schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
         schema.addAllOfItem(new ObjectSchema()
           .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "ProductPageResponseDTO")));
+      });
+      this.apiUtils.createSchema("ResponsePayload<IsInStockDTO>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema()
+          .addProperty("payload", new ObjectSchema().$ref("IsInStockDTO")));
+      });
+      this.apiUtils.createSchema("ResponsePayload<StockProductQuantityResponseDTO>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema()
+          .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "StockProductQuantityResponseDTO")));
       });
 
       // Examples
@@ -568,6 +588,34 @@ public class OpenAPIConfiguration {
         ResponseType.SUCCESS,
         HttpStatus.OK,
         "Product 'Mouse Wireless Logitech G PRO' deleted successfully",
+        null
+      );
+      this.apiUtils.createExample(
+        "IsProductInStockExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Checking if product with id: '" + productDTO.id() + "' is in stock",
+        Map.of("isInStock", true)
+      );
+      this.apiUtils.createExample(
+        "AddProductInStockExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "10 units of product with id '" + productDTO.id() + "' were added to stock successfully",
+        new StockProductQuantityResponseDTO(10L)
+      );
+      this.apiUtils.createExample(
+        "RemoveProductFromStockExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "10 units of product with id '" + productDTO.id() + "' were removed from stock successfully",
+        new StockProductQuantityResponseDTO(10L)
+      );
+      this.apiUtils.createExample(
+        "InvalidProductQuantityExample",
+        ResponseType.ERROR,
+        HttpStatus.BAD_REQUEST,
+        "Invalid quantity! The product quantity to remove from stock must not be greater than the available product quantity",
         null
       );
     };

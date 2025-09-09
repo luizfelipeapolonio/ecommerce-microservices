@@ -2,6 +2,8 @@ package com.felipe.ecommerce_inventory_service.infrastructure.config.openapi;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.StockProductQuantityDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.StockProductQuantityResponseDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductResponseDTO;
 import com.felipe.response.ResponsePayload;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -128,6 +131,74 @@ public interface ProductApi {
   ResponsePayload<Void> deleteProduct(
     @Parameter(in = ParameterIn.PATH, name = "id", description = "Product id", required = true, schema = @Schema(type = "string", example = "da4dd8a3-a821-4350-9af2-c5b8f3801330"))
     @PathVariable UUID id
+  );
+
+  @Operation(
+    operationId = "checkIfProductIsInStock",
+    summary = "Check if a product is in stock",
+    description = "Check if there are product units in the stock",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the product status", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<IsInStockDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "IsProductInStockExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<Map<String, Boolean>> checkIfProductIsInStock(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Product id", required = true, schema = @Schema(type = "string", example = "da4dd8a3-a821-4350-9af2-c5b8f3801330"))
+    @PathVariable UUID id
+  );
+
+  @Operation(
+    operationId = "addProductInStock",
+    summary = "Add product in stock",
+    description = "Increase the product quantity in stock",
+    requestBody = @RequestBody(description = "Request body to send the product quantity to add in stock"),
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the current product quantity", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<StockProductQuantityResponseDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "AddProductInStockExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<StockProductQuantityResponseDTO> addProductInStock(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Product id", required = true, schema = @Schema(type = "string", example = "da4dd8a3-a821-4350-9af2-c5b8f3801330"))
+    @PathVariable UUID id,
+    @Parameter(name = "StockProductQuantityDTO", required = true)
+    @Valid @org.springframework.web.bind.annotation.RequestBody StockProductQuantityDTO productDTO
+  );
+
+  @Operation(
+    operationId = "removeProductFromStock",
+    summary = "Remove product from stock",
+    description = "Decrease the product quantity in stock",
+    requestBody = @RequestBody(description = "Request body to send the product quantity to remove from stock"),
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the current product quantity", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<StockProductQuantityResponseDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "RemoveProductFromStockExample")
+        })
+      }),
+      @ApiResponse(responseCode = "400", description = "Returns an error response if the product quantity is invalid", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
+          @ExampleObject(name = "Error response", ref = "InvalidProductQuantityExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<StockProductQuantityResponseDTO> removeProductFromStock(
+    @Parameter(in = ParameterIn.PATH, name = "id", description = "Product id", required = true, schema = @Schema(type = "string", example = "da4dd8a3-a821-4350-9af2-c5b8f3801330"))
+    @PathVariable UUID id,
+    @Parameter(name = "StockProductQuantityDTO", required = true)
+    @Valid @org.springframework.web.bind.annotation.RequestBody StockProductQuantityDTO productDTO
   );
 
   @Operation(
