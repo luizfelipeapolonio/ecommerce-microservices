@@ -3,6 +3,8 @@ package com.felipe.ecommerce_inventory_service.infrastructure.gateway;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionAppliesToDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.UpdateProductDomainDTO;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.ProductGateway;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
@@ -15,6 +17,7 @@ import com.felipe.ecommerce_inventory_service.infrastructure.mappers.UploadFileM
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ProductEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.repositories.ProductRepository;
 import com.felipe.response.ResponsePayload;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -188,6 +191,65 @@ public class ProductGatewayImpl implements ProductGateway {
   public long updateProductQuantityInStock(Product product) {
     final ProductEntity updatedProduct = this.productRepository.save(this.productEntityMapper.toEntity(product));
     return updatedProduct.getQuantity();
+  }
+
+  @Override
+  @Transactional
+  public int applyPromotionToProducts(PromotionDTO promotionDTO) {
+    // fixed_amount discount -> the max is 60% of product unit price
+    final String fixedAmountMaxDiscount = promotionDTO.discountType().equals("fixed_amount") ?
+                                          "(p.unitPrice - :#{#promotion.discountValue}) > (p.unitPrice * 0.6)" :
+                                          null;
+    int appliedPromotionCount = 0;
+
+    if(promotionDTO.promotionScope().equals("all")) {
+      for(PromotionAppliesToDTO promotion : promotionDTO.targets()) {
+        if(promotion.target().equals("category")) {
+          final int appliedPromotionQuantity = this.productRepository.applyPromotionToCategory(promotionDTO, fixedAmountMaxDiscount, promotion.targetId());
+          appliedPromotionCount += appliedPromotionQuantity;
+        }
+        if(promotion.target().equals("brand")) {
+          final int appliedPromotionQuantity = this.productRepository.applyPromotionToBrand(promotionDTO, fixedAmountMaxDiscount, promotion.targetId());
+          appliedPromotionCount += appliedPromotionQuantity;
+        }
+        if(promotion.target().equals("model")) {
+          final int appliedPromotionQuantity = this.productRepository.applyPromotionToModel(promotionDTO, fixedAmountMaxDiscount, promotion.targetId());
+          appliedPromotionCount += appliedPromotionQuantity;
+        }
+        if(promotion.target().equals("product")) {
+          final int appliedPromotionQuantity = this.productRepository.applyPromotionToProduct(
+            promotionDTO,
+            fixedAmountMaxDiscount,
+            UUID.fromString(promotion.targetId())
+          );
+          appliedPromotionCount += appliedPromotionQuantity;
+        }
+      }
+    } else {
+      String categoryId = null, brandId = null, modelId = null;
+
+      for(PromotionAppliesToDTO promotion : promotionDTO.targets()) {
+        if(promotion.target().equals("category")) {
+          categoryId = promotion.targetId();
+        }
+        if(promotion.target().equals("brand")) {
+          brandId = promotion.targetId();
+        }
+        if(promotion.target().equals("model")) {
+          modelId = promotion.targetId();
+        }
+      }
+
+      final int appliedPromotionQuantity = this.productRepository.applyPromotionToSpecific(
+        promotionDTO,
+        fixedAmountMaxDiscount,
+        categoryId,
+        brandId,
+        modelId
+      );
+      appliedPromotionCount += appliedPromotionQuantity;
+    }
+    return appliedPromotionCount;
   }
 
   private List<ProductDTO> convertToProductDTOList(List<Product> products, List<UploadService.ImageResponse> images) {

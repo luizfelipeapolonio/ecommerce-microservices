@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_inventory_service.infrastructure.config;
+package com.felipe.ecommerce_discount_service.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +21,8 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-  private static final String[] DOCS_WHITELIST = {"/inventory-service/swagger-ui.html", "/inventory-service/swagger-ui/**",
-                                                  "/inventory-service/v3/api-docs/**"};
+  private static final String[] DOCS_WHITELIST = {"/discount-service/swagger-ui.html", "/discount-service/swagger-ui/**",
+                                                  "/discount-service/v3/api-docs/**"};
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,7 +31,7 @@ public class SecurityConfiguration {
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers(HttpMethod.GET, DOCS_WHITELIST).permitAll()
         .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-        .anyRequest().hasAnyAuthority("ROLE_ADMIN", "SCOPE_admin"))
+        .anyRequest().hasAuthority("ROLE_ADMIN"))
       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .oauth2ResourceServer(oauth2 -> oauth2
         .jwt(jwt -> jwt.jwtAuthenticationConverter(this.jwtAuthenticationConverter())))

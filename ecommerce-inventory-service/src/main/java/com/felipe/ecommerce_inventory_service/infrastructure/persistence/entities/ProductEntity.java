@@ -35,6 +35,15 @@ public class ProductEntity {
   @Column(nullable = false)
   private long quantity;
 
+  @Column(name = "with_discount", nullable = false)
+  private boolean withDiscount = false;
+
+  @Column(name = "discount_type", length = 12)
+  private String discountType;
+
+  @Column(name = "discount_value", length = 50)
+  private String discountValue;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
@@ -78,6 +87,18 @@ public class ProductEntity {
     return this.quantity;
   }
 
+  public boolean isItWithDiscount() {
+    return this.withDiscount;
+  }
+
+  public String getDiscountType() {
+    return this.discountType;
+  }
+
+  public String getDiscountValue() {
+    return this.discountValue;
+  }
+
   public LocalDateTime getCreatedAt() {
     return this.createdAt;
   }
@@ -112,6 +133,9 @@ public class ProductEntity {
     this.description = builder.description;
     this.unitPrice = builder.unitPrice;
     this.quantity = builder.quantity;
+    this.withDiscount = builder.withDiscount;
+    this.discountType = builder.discountType;
+    this.discountValue = builder.discountValue;
     this.createdAt = builder.createdAt;
     this.updatedAt = builder.updatedAt;
     this.category = builder.category;
@@ -125,6 +149,9 @@ public class ProductEntity {
     private String description;
     private BigDecimal unitPrice;
     private long quantity;
+    private boolean withDiscount = false;
+    private String discountType;
+    private String discountValue;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private CategoryEntity category;
@@ -140,6 +167,9 @@ public class ProductEntity {
       this.description = product.getDescription();
       this.unitPrice = product.getUnitPrice();
       this.quantity = product.getQuantity();
+      this.withDiscount = product.isItWithDiscount();
+      this.discountType = product.getDiscountType();
+      this.discountValue = product.getDiscountValue();
       this.createdAt = product.getCreatedAt();
       this.updatedAt = product.getUpdatedAt();
       this.category = product.getCategory();
@@ -169,6 +199,21 @@ public class ProductEntity {
 
     public Builder quantity(long quantity) {
       this.quantity = quantity;
+      return this;
+    }
+
+    public Builder withDiscount(boolean withDiscount) {
+      this.withDiscount = withDiscount;
+      return this;
+    }
+
+    public Builder discountType(String discountType) {
+      this.discountType = discountType;
+      return this;
+    }
+
+    public Builder discountValue(String discountValue) {
+      this.discountValue = discountValue;
       return this;
     }
 

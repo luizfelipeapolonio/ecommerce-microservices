@@ -8,6 +8,7 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.brand.Ge
 import com.felipe.ecommerce_inventory_service.core.application.usecases.category.GetCategoryByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.model.GetModelByIdUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.AddProductInStockUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.ApplyPromotionToProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CheckIfProductIsInStockUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.DeleteProductUseCase;
@@ -20,6 +21,7 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.product.
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.RemoveProductFromStockUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.AddProductInStockUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.ApplyPromotionToProductsUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.CheckIfProductIsInStockUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.CreateProductUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.DeleteProductUseCaseImpl;
@@ -118,5 +120,10 @@ public class ProductBeans {
   @Bean
   public RemoveProductFromStockUseCase removeProductFromStockUseCase() {
     return new RemoveProductFromStockUseCaseImpl(productGateway);
+  }
+
+  @Bean
+  public ApplyPromotionToProductsUseCase applyPromotionToProductsUseCase() {
+    return new ApplyPromotionToProductsUseCaseImpl(productGateway);
   }
 }
