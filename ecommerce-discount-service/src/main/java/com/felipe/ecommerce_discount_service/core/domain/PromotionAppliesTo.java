@@ -5,7 +5,7 @@ import com.felipe.ecommerce_discount_service.core.domain.enums.PromotionAppliesT
 import java.time.LocalDateTime;
 
 public class PromotionAppliesTo {
-  private long id;
+  private Long id;
   private String target;
   private String targetId;
   private LocalDateTime appliedAt;
@@ -14,7 +14,7 @@ public class PromotionAppliesTo {
   public PromotionAppliesTo() {
   }
 
-  public long getId() {
+  public Long getId() {
     return this.id;
   }
 

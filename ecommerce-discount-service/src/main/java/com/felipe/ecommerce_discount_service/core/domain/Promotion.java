@@ -5,6 +5,7 @@ import com.felipe.ecommerce_discount_service.core.domain.enums.PromotionScope;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -109,7 +110,7 @@ public class Promotion {
     private boolean isActive = true;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<PromotionAppliesTo> promotionApplies;
+    private List<PromotionAppliesTo> promotionApplies = new ArrayList<>();
 
     private Builder() {
     }

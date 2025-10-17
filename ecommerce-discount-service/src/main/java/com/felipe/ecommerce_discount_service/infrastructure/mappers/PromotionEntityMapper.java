@@ -49,7 +49,7 @@ public class PromotionEntityMapper {
 
   private PromotionAppliesToEntity promotionAppliesToEntity(PromotionAppliesTo promotionAppliesTo) {
     final PromotionAppliesToEntity promotionApplies = new PromotionAppliesToEntity();
-    promotionApplies.setId(promotionApplies.getId());
+    promotionApplies.setId(promotionAppliesTo.getId());
     promotionApplies.setTarget(PromotionAppliesTarget.of(promotionAppliesTo.getTarget()));
     promotionApplies.setTargetId(promotionAppliesTo.getTargetId());
     promotionApplies.setAppliedAt(promotionAppliesTo.getAppliedAt());
