@@ -2,6 +2,8 @@ package com.felipe.ecommerce_inventory_service.infrastructure.config.openapi;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.category.CategoriesDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionAppliesToDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionDTO;
 import com.felipe.ecommerce_inventory_service.core.domain.Brand;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.core.domain.Model;
@@ -61,7 +63,8 @@ public class OpenAPIConfiguration {
         new Tag().name("Category").description("All category operations"),
         new Tag().name("Brand").description("All brand operations"),
         new Tag().name("Model").description("All model operations"),
-        new Tag().name("Product").description("All product operations")
+        new Tag().name("Product").description("All product operations"),
+        new Tag().name("Promotion").description("All promotion operations")
       ))
       .components(new Components()
         .schemas(this.apiUtils.getSchemas())
@@ -164,6 +167,9 @@ public class OpenAPIConfiguration {
       });
       this.apiUtils.createSchema("IsInStockDTO", schema ->
         schema.addProperty("isInStock", new ObjectSchema().type("boolean").example(true)));
+      this.apiUtils.createSchema("ApplyPromotionResponse", schema ->
+        schema.addProperty("appliedPromotionQuantity", new ObjectSchema()
+          .type("integer").format("int32").example(12)));
       this.apiUtils.createSchema("ResponsePayload<CategoryDTO>", schema -> {
         schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
         schema.addAllOfItem(new ObjectSchema()
@@ -223,6 +229,11 @@ public class OpenAPIConfiguration {
         schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
         schema.addAllOfItem(new ObjectSchema()
           .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "StockProductQuantityResponseDTO")));
+      });
+      this.apiUtils.createSchema("ResponsePayload<ApplyPromotionResponse>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema()
+          .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "ApplyPromotionResponse")));
       });
 
       // Examples
@@ -362,6 +373,16 @@ public class OpenAPIConfiguration {
       ProductDTO productDTO = new ProductDTO(product, List.of(image1));
       UpdateProductResponseDTO updateProductResponseDTO = new UpdateProductResponseDTO(product);
       var productPageResponseDTO = new ProductPageResponseDTO(0, 1, 1, 1, List.of(productDTO));
+      var promotionCategoryTarget = new PromotionAppliesToDTO("category", "1");
+      var promotionBrandTarget = new PromotionAppliesToDTO("brand", "2");
+      var promotionDTO = new PromotionDTO(
+        "all",
+        "fixed_amount",
+        "120.00",
+        LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+        new BigDecimal("130.00"),
+        List.of(promotionCategoryTarget, promotionBrandTarget)
+      );
 
       this.apiUtils.createExample(
         "CategoryDTOWithNoSubcategoryExample",
@@ -617,6 +638,21 @@ public class OpenAPIConfiguration {
         HttpStatus.BAD_REQUEST,
         "Invalid quantity! The product quantity to remove from stock must not be greater than the available product quantity",
         null
+      );
+      this.apiUtils.createExample("PromotionDTOExample", promotionDTO);
+      this.apiUtils.createExample(
+        "AppliedPromotionExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Promotion applied to 12 products successfully",
+        Map.of("appliedPromotionQuantity", 12)
+      );
+      this.apiUtils.createExample(
+        "NoAppliedPromotionExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Promotion applied to 0 products successfully",
+        Map.of("appliedPromotionQuantity", 0)
       );
     };
   }

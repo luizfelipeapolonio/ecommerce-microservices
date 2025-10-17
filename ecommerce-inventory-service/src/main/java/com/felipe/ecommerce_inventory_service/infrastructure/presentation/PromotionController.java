@@ -2,6 +2,7 @@ package com.felipe.ecommerce_inventory_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.ApplyPromotionToProductsUseCase;
+import com.felipe.ecommerce_inventory_service.infrastructure.config.openapi.PromotionApi;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
 import org.springframework.http.HttpStatus;
@@ -16,13 +17,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/promotions")
-public class PromotionController {
+public class PromotionController implements PromotionApi {
   private final ApplyPromotionToProductsUseCase applyPromotionToProductsUseCase;
 
   public PromotionController(ApplyPromotionToProductsUseCase applyPromotionToProductsUseCase) {
     this.applyPromotionToProductsUseCase = applyPromotionToProductsUseCase;
   }
 
+  @Override
   @PostMapping
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<Map<String, Integer>> applyPromotion(@RequestBody PromotionDTO promotionDTO) {

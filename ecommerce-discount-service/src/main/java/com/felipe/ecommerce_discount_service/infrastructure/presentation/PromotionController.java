@@ -2,6 +2,7 @@ package com.felipe.ecommerce_discount_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.CreatePromotionUseCase;
 import com.felipe.ecommerce_discount_service.core.domain.Promotion;
+import com.felipe.ecommerce_discount_service.infrastructure.config.openapi.PromotionApi;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.CreatePromotionDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.PromotionResponseDTO;
 import com.felipe.response.ResponsePayload;
@@ -18,13 +19,14 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/promotions")
-public class PromotionController {
+public class PromotionController implements PromotionApi {
   private final CreatePromotionUseCase createPromotionUseCase;
 
   public PromotionController(CreatePromotionUseCase createPromotionUseCase) {
     this.createPromotionUseCase = createPromotionUseCase;
   }
 
+  @Override
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public ResponsePayload<PromotionResponseDTO> createPromotion(@Valid @RequestBody CreatePromotionDTOImpl promotionDTO) {
