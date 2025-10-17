@@ -3,6 +3,8 @@ package com.felipe.ecommerce_inventory_service.infrastructure.gateway;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionAppliesToDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.UpdateProductDomainDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.UploadFileImpl;
@@ -33,6 +35,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -44,6 +48,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 
 @ExtendWith(MockitoExtension.class)
@@ -731,5 +736,183 @@ public class ProductGatewayImplTest {
     assertThat(currentProductQuantity).isEqualTo(productEntity.getQuantity());
     verify(this.productEntityMapper, times(1)).toEntity(productDomain);
     verify(this.productRepository, times(1)).save(productEntity);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToProductsWithPromotionScopeAll - Should successfully apply promotion to products")
+  void applyPromotionToProductsWithPromotionScopeAll() {
+    final PromotionAppliesToDTO category = new PromotionAppliesToDTO("category", "5");
+    final PromotionAppliesToDTO brand = new PromotionAppliesToDTO("brand", "1");
+    final PromotionAppliesToDTO model = new PromotionAppliesToDTO("model", "1");
+    final PromotionAppliesToDTO product = new PromotionAppliesToDTO("product", "54e210c9-8d3b-48fd-9c73-e8b7d5fe7503");
+
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "fixed_amount",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of(category, brand, model, product)
+    );
+
+    when(this.productRepository.applyPromotionToCategory(
+      eq(promotionDTO),
+      anyString(),
+      eq(category.targetId())
+    )).thenReturn(1);
+    when(this.productRepository.applyPromotionToBrand(
+      eq(promotionDTO),
+      anyString(),
+      eq(brand.targetId())
+    )).thenReturn(1);
+    when(this.productRepository.applyPromotionToModel(
+      eq(promotionDTO),
+      anyString(),
+      eq(model.targetId())
+    )).thenReturn(1);
+    when(this.productRepository.applyPromotionToProduct(
+      eq(promotionDTO),
+      anyString(),
+      eq(UUID.fromString(product.targetId()))
+    )).thenReturn(1);
+
+    int quantityOfAppliedPromotion = this.productGateway.applyPromotionToProducts(promotionDTO);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(4);
+
+    verify(this.productRepository, times(1))
+      .applyPromotionToCategory(eq(promotionDTO), anyString(), eq(category.targetId()));
+    verify(this.productRepository, times(1))
+      .applyPromotionToBrand(eq(promotionDTO), anyString(), eq(brand.targetId()));
+    verify(this.productRepository, times(1))
+      .applyPromotionToModel(eq(promotionDTO), anyString(), eq(model.targetId()));
+    verify(this.productRepository, times(1))
+      .applyPromotionToProduct(eq(promotionDTO), anyString(), eq(UUID.fromString(product.targetId())));
+  }
+
+  @Test
+  @DisplayName("applyPromotionToProductsWithPromotionScopeSpecific - Should successfully apply promotion to products")
+  void applyPromotionToProductsWithPromotionScopeSpecific() {
+    final PromotionAppliesToDTO category = new PromotionAppliesToDTO("category", "5");
+    final PromotionAppliesToDTO brand = new PromotionAppliesToDTO("brand", "1");
+    final PromotionAppliesToDTO model = new PromotionAppliesToDTO("model", "1");
+
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "specific",
+      "fixed_amount",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of(category, brand, model)
+    );
+
+    when(this.productRepository.applyPromotionToSpecific(
+      eq(promotionDTO),
+      anyString(),
+      eq(category.targetId()),
+      eq(brand.targetId()),
+      eq(model.targetId())
+    )).thenReturn(1);
+
+    int quantityOfAppliedPromotion = this.productGateway.applyPromotionToProducts(promotionDTO);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(1);
+
+    verify(this.productRepository, times(1))
+      .applyPromotionToSpecific(
+        eq(promotionDTO),
+        anyString(),
+        eq(category.targetId()),
+        eq(brand.targetId()),
+        eq(model.targetId())
+      );
+  }
+
+  @Test
+  @DisplayName("applyPromotionToProductsWithFixedAmountDiscountType - Should successfully apply promotion to products")
+  void applyPromotionToProductsWithFixedAmountDiscountType() {
+    final PromotionAppliesToDTO category = new PromotionAppliesToDTO("category", "5");
+    final PromotionAppliesToDTO brand = new PromotionAppliesToDTO("brand", "1");
+    final PromotionAppliesToDTO model = new PromotionAppliesToDTO("model", "1");
+    final PromotionAppliesToDTO product = new PromotionAppliesToDTO("product", "54e210c9-8d3b-48fd-9c73-e8b7d5fe7503");
+
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "fixed_amount",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of(category, brand, model, product)
+    );
+
+    when(this.productRepository.applyPromotionToCategory(
+      eq(promotionDTO),
+      anyString(),
+      eq(category.targetId())
+    )).thenReturn(1);
+    when(this.productRepository.applyPromotionToBrand(
+      eq(promotionDTO),
+      anyString(),
+      eq(brand.targetId())
+    )).thenReturn(1);
+    when(this.productRepository.applyPromotionToModel(
+      eq(promotionDTO),
+      anyString(),
+      eq(model.targetId())
+    )).thenReturn(1);
+    when(this.productRepository.applyPromotionToProduct(
+      eq(promotionDTO),
+      anyString(),
+      eq(UUID.fromString(product.targetId()))
+    )).thenReturn(1);
+
+    int quantityOfAppliedPromotion = this.productGateway.applyPromotionToProducts(promotionDTO);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(4);
+
+    verify(this.productRepository, times(1))
+      .applyPromotionToCategory(eq(promotionDTO), anyString(), eq(category.targetId()));
+    verify(this.productRepository, times(1))
+      .applyPromotionToBrand(eq(promotionDTO), anyString(), eq(brand.targetId()));
+    verify(this.productRepository, times(1))
+      .applyPromotionToModel(eq(promotionDTO), anyString(), eq(model.targetId()));
+    verify(this.productRepository, times(1))
+      .applyPromotionToProduct(eq(promotionDTO), anyString(), eq(UUID.fromString(product.targetId())));
+  }
+
+  @Test
+  @DisplayName("applyPromotionToProductsWithPercentageDiscountType - Should successfully apply promotion to products")
+  void applyPromotionToProductsWithPercentageDiscountType() {
+    final PromotionAppliesToDTO category = new PromotionAppliesToDTO("category", "5");
+    final PromotionAppliesToDTO brand = new PromotionAppliesToDTO("brand", "1");
+    final PromotionAppliesToDTO model = new PromotionAppliesToDTO("model", "1");
+    final PromotionAppliesToDTO product = new PromotionAppliesToDTO("product", "54e210c9-8d3b-48fd-9c73-e8b7d5fe7503");
+
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of(category, brand, model, product)
+    );
+
+    when(this.productRepository.applyPromotionToCategory(promotionDTO, null, category.targetId())).thenReturn(1);
+    when(this.productRepository.applyPromotionToBrand(promotionDTO, null, brand.targetId())).thenReturn(1);
+    when(this.productRepository.applyPromotionToModel(promotionDTO, null, model.targetId())).thenReturn(1);
+    when(this.productRepository.applyPromotionToProduct(promotionDTO, null, UUID.fromString(product.targetId()))).thenReturn(1);
+
+    int quantityOfAppliedPromotion = this.productGateway.applyPromotionToProducts(promotionDTO);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(4);
+
+    verify(this.productRepository, times(1))
+      .applyPromotionToCategory(promotionDTO, null, category.targetId());
+    verify(this.productRepository, times(1))
+      .applyPromotionToBrand(promotionDTO, null, brand.targetId());
+    verify(this.productRepository, times(1))
+      .applyPromotionToModel(promotionDTO, null, model.targetId());
+    verify(this.productRepository, times(1))
+      .applyPromotionToProduct(promotionDTO, null, UUID.fromString(product.targetId()));
   }
 }

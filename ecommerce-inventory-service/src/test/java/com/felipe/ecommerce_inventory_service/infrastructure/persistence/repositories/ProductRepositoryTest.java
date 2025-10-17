@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.persistence.repositories;
 
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.BrandEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.CategoryEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ModelEntity;
@@ -17,7 +18,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -279,6 +283,259 @@ public class ProductRepositoryTest {
     assertThat(productsPage.getContent().get(0).getQuantity()).isEqualTo(this.productsMock.get(0).getQuantity());
     assertThat(productsPage.getContent().get(0).getCreatedAt()).isEqualTo(this.productsMock.get(0).getCreatedAt());
     assertThat(productsPage.getContent().get(0).getUpdatedAt()).isEqualTo(this.productsMock.get(0).getUpdatedAt());
+  }
+
+  @Test
+  @DisplayName("applyPromotionToCategorySuccessWithDiscountLimitNotNull - Should successfully apply a promotion to all products of a category and return the quantity of applied promotion")
+  void applyPromotionToCategorySuccessWithDiscountLimitNotNull() {
+    final String categoryId = this.productsMock.get(0).getCategory().getId().toString();
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "fixed_amount",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+    final String discountLimit = "(p.unitPrice - :#{#promotion.discountValue}) > (p.unitPrice * 0.6)";
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToCategory(promotionDTO, discountLimit, categoryId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToCategorySuccessWithDiscountLimitNull - Should successfully apply a promotion to all products of a category and return the quantity of applied promotion")
+  void applyPromotionToCategorySuccessWithDiscountLimitNull() {
+    final String categoryId = this.productsMock.get(0).getCategory().getId().toString();
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToCategory(promotionDTO, null, categoryId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToBrandSuccessWithDiscountLimitNotNull - Should successfully apply a promotion to all products of a brand and return the quantity of applied promotion")
+  void applyPromotionToBrandSuccessWithDiscountLimitNotNull() {
+    final String brandId = this.productsMock.get(0).getBrand().getId().toString();
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+    final String discountLimit = "(p.unitPrice - :#{#promotion.discountValue}) > (p.unitPrice * 0.6)";
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToBrand(promotionDTO, discountLimit, brandId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToBrandSuccessWithDiscountLimitNull - Should successfully apply a promotion to all products of a brand and return the quantity of applied promotion")
+  void applyPromotionToBrandSuccessWithDiscountLimitNull() {
+    final String brandId = this.productsMock.get(0).getBrand().getId().toString();
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToBrand(promotionDTO, null, brandId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToModelSuccessWithDiscountLimitNotNull - Should successfully apply a promotion to all products of a model and return the quantity of applied promotion")
+  void applyPromotionToModelSuccessWithDiscountLimitNotNull() {
+    final String modelId = this.productsMock.get(0).getModel().getId().toString();
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+    final String discountLimit = "(p.unitPrice - :#{#promotion.discountValue}) > (p.unitPrice * 0.6)";
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToModel(promotionDTO, discountLimit, modelId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToModelSuccessWithDiscountLimitNull - Should successfully apply a promotion to all products of a model and return the quantity of applied promotion")
+  void applyPromotionToModelSuccessWithDiscountLimitNull() {
+    final String modelId = this.productsMock.get(0).getModel().getId().toString();
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToModel(promotionDTO, null, modelId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToProductSuccessWithDiscountLimitNotNull - Should successfully apply promotion to product and return the quantity of applied promotion")
+  void applyPromotionToProductSuccessWithDiscountLimitNotNull() {
+    final UUID productId = this.productsMock.get(0).getId();
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+    final String discountLimit = "(p.unitPrice - :#{#promotion.discountValue}) > (p.unitPrice * 0.6)";
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToProduct(promotionDTO, discountLimit, productId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToProductSuccessWithDiscountLimitNull - Should successfully apply promotion to product and return the quantity of applied promotion")
+  void applyPromotionToProductSuccessWithDiscountLimitNull() {
+    final UUID productId = this.productsMock.get(0).getId();
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToProduct(promotionDTO, null, productId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToSpecificWithAllParameters - Should successfully apply promotion to product with the given parameters")
+  void applyPromotionToSpecificWithAllParameters() {
+    final String categoryId = this.productsMock.get(0).getCategory().getId().toString();
+    final String brandId = this.productsMock.get(0).getBrand().getId().toString();
+    final String modelId = this.productsMock.get(0).getModel().getId().toString();
+
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+    final String discountLimit = "(p.unitPrice - :#{#promotion.discountValue}) > (p.unitPrice * 0.6)";
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToSpecific(promotionDTO, discountLimit, categoryId, brandId, modelId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToSpecificWithModelIdNull - Should successfully apply promotion to product with the given parameters")
+  void applyPromotionToSpecificWithModelIdNull() {
+    final String categoryId = this.productsMock.get(0).getCategory().getId().toString();
+    final String brandId = this.productsMock.get(0).getBrand().getId().toString();
+
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+    final String discountLimit = "(p.unitPrice - :#{#promotion.discountValue}) > (p.unitPrice * 0.6)";
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToSpecific(promotionDTO, discountLimit, categoryId, brandId, null);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToSpecificWithBrandIdNull - Should successfully apply promotion to product with the given parameters")
+  void applyPromotionToSpecificWithBrandIdNull() {
+    final String categoryId = this.productsMock.get(0).getCategory().getId().toString();
+    final String modelId = this.productsMock.get(0).getModel().getId().toString();
+
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+    final String discountLimit = "(p.unitPrice - :#{#promotion.discountValue}) > (p.unitPrice * 0.6)";
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToSpecific(promotionDTO, discountLimit, categoryId, null, modelId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToSpecificWithCategoryIdNull - Should successfully apply promotion to product with the given parameters")
+  void applyPromotionToSpecificWithCategoryIdNull() {
+    final String brandId = this.productsMock.get(0).getBrand().getId().toString();
+    final String modelId = this.productsMock.get(0).getModel().getId().toString();
+
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+    final String discountLimit = "(p.unitPrice - :#{#promotion.discountValue}) > (p.unitPrice * 0.6)";
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToSpecific(promotionDTO, discountLimit, null, brandId, modelId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("applyPromotionToSpecificWithDiscountLimitNull - Should successfully apply promotion to product with the given parameters")
+  void applyPromotionToSpecificWithDiscountLimitNull() {
+    final String categoryId = this.productsMock.get(0).getCategory().getId().toString();
+    final String brandId = this.productsMock.get(0).getBrand().getId().toString();
+    final String modelId = this.productsMock.get(0).getModel().getId().toString();
+
+    final PromotionDTO promotionDTO = new PromotionDTO(
+      "all",
+      "percentage",
+      "20.00",
+      LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
+      new BigDecimal("30.00"),
+      List.of()
+    );
+
+    int quantityOfAppliedPromotion = this.productRepository.applyPromotionToSpecific(promotionDTO, null, categoryId, brandId, modelId);
+
+    assertThat(quantityOfAppliedPromotion).isEqualTo(1);
   }
 
   private List<ProductEntity> setUpDatabaseData() {
