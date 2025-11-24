@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -38,6 +40,7 @@ import static org.mockito.Mockito.times;
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Import({OAuth2TestMockConfiguration.class})
+@EnableAutoConfiguration(exclude = {KafkaAutoConfiguration.class})
 public class PromotionControllerTest {
 
   @Autowired
@@ -55,6 +58,7 @@ public class PromotionControllerTest {
   @DisplayName("applyPromotionSuccess - Should return a success response with the quantity of applied promotion")
   void applyPromotionSuccess() throws Exception {
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",

@@ -747,6 +747,7 @@ public class ProductGatewayImplTest {
     final PromotionAppliesToDTO product = new PromotionAppliesToDTO("product", "54e210c9-8d3b-48fd-9c73-e8b7d5fe7503");
 
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "fixed_amount",
       "20.00",
@@ -798,6 +799,7 @@ public class ProductGatewayImplTest {
     final PromotionAppliesToDTO model = new PromotionAppliesToDTO("model", "1");
 
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "specific",
       "fixed_amount",
       "20.00",
@@ -837,6 +839,7 @@ public class ProductGatewayImplTest {
     final PromotionAppliesToDTO product = new PromotionAppliesToDTO("product", "54e210c9-8d3b-48fd-9c73-e8b7d5fe7503");
 
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "fixed_amount",
       "20.00",
@@ -889,6 +892,7 @@ public class ProductGatewayImplTest {
     final PromotionAppliesToDTO product = new PromotionAppliesToDTO("product", "54e210c9-8d3b-48fd-9c73-e8b7d5fe7503");
 
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",

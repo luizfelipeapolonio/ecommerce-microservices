@@ -290,6 +290,7 @@ public class ProductRepositoryTest {
   void applyPromotionToCategorySuccessWithDiscountLimitNotNull() {
     final String categoryId = this.productsMock.get(0).getCategory().getId().toString();
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "fixed_amount",
       "20.00",
@@ -309,6 +310,7 @@ public class ProductRepositoryTest {
   void applyPromotionToCategorySuccessWithDiscountLimitNull() {
     final String categoryId = this.productsMock.get(0).getCategory().getId().toString();
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",
@@ -326,6 +328,7 @@ public class ProductRepositoryTest {
   void applyPromotionToBrandSuccessWithDiscountLimitNotNull() {
     final String brandId = this.productsMock.get(0).getBrand().getId().toString();
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",
@@ -345,6 +348,7 @@ public class ProductRepositoryTest {
   void applyPromotionToBrandSuccessWithDiscountLimitNull() {
     final String brandId = this.productsMock.get(0).getBrand().getId().toString();
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",
@@ -363,6 +367,7 @@ public class ProductRepositoryTest {
   void applyPromotionToModelSuccessWithDiscountLimitNotNull() {
     final String modelId = this.productsMock.get(0).getModel().getId().toString();
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",
@@ -382,6 +387,7 @@ public class ProductRepositoryTest {
   void applyPromotionToModelSuccessWithDiscountLimitNull() {
     final String modelId = this.productsMock.get(0).getModel().getId().toString();
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",
@@ -400,6 +406,7 @@ public class ProductRepositoryTest {
   void applyPromotionToProductSuccessWithDiscountLimitNotNull() {
     final UUID productId = this.productsMock.get(0).getId();
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",
@@ -419,6 +426,7 @@ public class ProductRepositoryTest {
   void applyPromotionToProductSuccessWithDiscountLimitNull() {
     final UUID productId = this.productsMock.get(0).getId();
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",
@@ -440,6 +448,7 @@ public class ProductRepositoryTest {
     final String modelId = this.productsMock.get(0).getModel().getId().toString();
 
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",
@@ -461,6 +470,7 @@ public class ProductRepositoryTest {
     final String brandId = this.productsMock.get(0).getBrand().getId().toString();
 
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",
@@ -482,6 +492,7 @@ public class ProductRepositoryTest {
     final String modelId = this.productsMock.get(0).getModel().getId().toString();
 
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",
@@ -503,6 +514,7 @@ public class ProductRepositoryTest {
     final String modelId = this.productsMock.get(0).getModel().getId().toString();
 
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",
@@ -525,6 +537,7 @@ public class ProductRepositoryTest {
     final String modelId = this.productsMock.get(0).getModel().getId().toString();
 
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "percentage",
       "20.00",

@@ -7,6 +7,7 @@ import com.felipe.ecommerce_discount_service.infrastructure.mappers.PromotionEnt
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionAppliesToEntity;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionEntity;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.repositories.PromotionRepository;
+import com.felipe.ecommerce_discount_service.infrastructure.services.PromotionSchedulerService;
 import com.felipe.ecommerce_discount_service.testutils.DataMock;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -41,6 +43,9 @@ public class PromotionGatewayImplTest {
 
   @Mock
   private InventoryService inventoryService;
+
+  @Mock
+  private PromotionSchedulerService promotionSchedulerService;
 
   @InjectMocks
   private PromotionGatewayImpl promotionGateway;
@@ -71,9 +76,10 @@ public class PromotionGatewayImplTest {
       .payload(Map.of("appliedPromotionQuantity", 12))
       .build();
 
-    when(this.promotionEntityMapper.toEntity(promotionDomain)).thenReturn(promotionEntity);
+    when(this.promotionEntityMapper.toEntity(any(Promotion.class))).thenReturn(promotionEntity);
     when(this.inventoryService.applyPromotion(any(InventoryService.PromotionRequest.class))).thenReturn(inventoryServiceResponse);
     when(this.promotionRepository.save(promotionEntity)).thenReturn(promotionEntity);
+    doNothing().when(this.promotionSchedulerService).schedulePromotionToExpire(promotionEntity);
     when(this.promotionEntityMapper.toDomain(promotionEntity)).thenReturn(promotionDomain);
 
     final Optional<Promotion> createdPromotion = this.promotionGateway.createPromotion(promotionDomain);
@@ -92,9 +98,10 @@ public class PromotionGatewayImplTest {
     assertThat(createdPromotion.get().getPromotionApplies().get(0)).usingRecursiveComparison().isEqualTo(promotionDomain.getPromotionApplies().get(0));
     assertThat(createdPromotion.get().getPromotionApplies().get(1)).usingRecursiveComparison().isEqualTo(promotionDomain.getPromotionApplies().get(1));
 
-    verify(this.promotionEntityMapper, times(1)).toEntity(promotionDomain);
+    verify(this.promotionEntityMapper, times(1)).toEntity(any(Promotion.class));
     verify(this.inventoryService, times(1)).applyPromotion(any(InventoryService.PromotionRequest.class));
     verify(this.promotionRepository, times(1)).save(promotionEntity);
+    verify(this.promotionSchedulerService, times(1)).schedulePromotionToExpire(promotionEntity);
     verify(this.promotionEntityMapper, times(1)).toDomain(promotionEntity);
   }
 
@@ -118,15 +125,16 @@ public class PromotionGatewayImplTest {
       .payload(Map.of("appliedPromotionQuantity", 0))
       .build();
 
-    when(this.promotionEntityMapper.toEntity(promotionDomain)).thenReturn(promotionEntity);
+    when(this.promotionEntityMapper.toEntity(any(Promotion.class))).thenReturn(promotionEntity);
     when(this.inventoryService.applyPromotion(any(InventoryService.PromotionRequest.class))).thenReturn(inventoryServiceResponse);
 
     final Optional<Promotion> createdPromotion = this.promotionGateway.createPromotion(promotionDomain);
 
     assertThat(createdPromotion.isEmpty()).isTrue();
-    verify(this.promotionEntityMapper, times(1)).toEntity(promotionDomain);
+    verify(this.promotionEntityMapper, times(1)).toEntity(any(Promotion.class));
     verify(this.inventoryService, times(1)).applyPromotion(any(InventoryService.PromotionRequest.class));
     verify(this.promotionRepository, never()).save(any(PromotionEntity.class));
+    verify(this.promotionSchedulerService, never()).schedulePromotionToExpire(any(PromotionEntity.class));
     verify(this.promotionEntityMapper, never()).toDomain(any(PromotionEntity.class));
   }
 }

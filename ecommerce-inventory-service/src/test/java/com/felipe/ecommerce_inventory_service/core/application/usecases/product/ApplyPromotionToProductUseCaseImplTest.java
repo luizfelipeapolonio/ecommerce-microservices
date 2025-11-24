@@ -36,6 +36,7 @@ public class ApplyPromotionToProductUseCaseImplTest {
   @DisplayName("applyPromotionSuccess - Should successfully return the quantity of applied promotion")
   void applyPromotionSuccess() {
     final PromotionDTO promotionDTO = new PromotionDTO(
+      "84eb4e8a-84cc-408b-8980-3e8c269138ba",
       "all",
       "fixed_amount",
       "10.00",
