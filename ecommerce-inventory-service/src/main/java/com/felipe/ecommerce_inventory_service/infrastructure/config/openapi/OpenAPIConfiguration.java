@@ -376,6 +376,7 @@ public class OpenAPIConfiguration {
       var promotionCategoryTarget = new PromotionAppliesToDTO("category", "1");
       var promotionBrandTarget = new PromotionAppliesToDTO("brand", "2");
       var promotionDTO = new PromotionDTO(
+        "4a8643f8-da1a-4968-b5ea-03a98b363735",
         "all",
         "fixed_amount",
         "120.00",

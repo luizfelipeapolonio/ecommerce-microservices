@@ -11,6 +11,7 @@ public class Product {
   private final BigDecimal unitPrice;
   private final long quantity;
   private final boolean withDiscount;
+  private final String promotionId;
   private final String discountType;
   private final String discountValue;
   private final LocalDateTime createdAt;
@@ -41,6 +42,10 @@ public class Product {
 
   public boolean isItWithDiscount() {
     return this.withDiscount;
+  }
+
+  public String getPromotionId() {
+    return this.promotionId;
   }
 
   public String getDiscountType() {
@@ -86,6 +91,7 @@ public class Product {
     this.unitPrice = builder.unitPrice;
     this.quantity = builder.quantity;
     this.withDiscount = builder.withDiscount;
+    this.promotionId = builder.promotionId;
     this.discountType = builder.discountType;
     this.discountValue = builder.discountValue;
     this.createdAt = builder.createdAt;
@@ -102,6 +108,7 @@ public class Product {
     private BigDecimal unitPrice;
     private long quantity;
     private boolean withDiscount = false;
+    private String promotionId;
     private String discountType;
     private String discountValue;
     private LocalDateTime createdAt;
@@ -120,6 +127,7 @@ public class Product {
       this.unitPrice = product.getUnitPrice();
       this.quantity = product.getQuantity();
       this.withDiscount = product.isItWithDiscount();
+      this.promotionId = product.getPromotionId();
       this.discountType = product.getDiscountType();
       this.discountValue = product.getDiscountValue();
       this.createdAt = product.getCreatedAt();
@@ -156,6 +164,11 @@ public class Product {
 
     public Builder withDiscount(boolean withDiscount) {
       this.withDiscount = withDiscount;
+      return this;
+    }
+
+    public Builder promotionId(String promotionId) {
+      this.promotionId = promotionId;
       return this;
     }
 

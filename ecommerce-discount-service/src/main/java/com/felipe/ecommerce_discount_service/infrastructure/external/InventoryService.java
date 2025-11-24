@@ -39,6 +39,7 @@ public class InventoryService {
   }
 
   public static class PromotionRequest {
+    private final String promotionId;
     private final String promotionScope;
     private final String discountType;
     private final String discountValue;
@@ -47,12 +48,17 @@ public class InventoryService {
     private final List<PromotionAppliesToDTOImpl> targets;
 
     public PromotionRequest(PromotionEntity promotionEntity, List<PromotionAppliesToDTOImpl> targets) {
+      this.promotionId = promotionEntity.getId().toString();
       this.promotionScope = promotionEntity.getScope();
       this.discountType = promotionEntity.getDiscountType();
       this.discountValue = promotionEntity.getDiscountValue();
       this.endDate = promotionEntity.getEndDate().toString();
       this.minimumPrice = promotionEntity.getMinimumPrice().toString();
       this.targets = targets;
+    }
+
+    public String getPromotionId() {
+      return this.promotionId;
     }
 
     public String getPromotionScope() {

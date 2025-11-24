@@ -8,7 +8,10 @@ import com.felipe.ecommerce_discount_service.infrastructure.exceptions.CreatePro
 import com.felipe.response.CustomValidationErrors;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaProducerException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -18,6 +21,7 @@ import java.util.List;
 
 @RestControllerAdvice
 public class ExceptionControllerAdvice {
+  private final Logger logger = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -64,6 +68,23 @@ public class ExceptionControllerAdvice {
       .type(ResponseType.ERROR)
       .code(HttpStatus.BAD_REQUEST)
       .message(ex.getMessage())
+      .build();
+  }
+
+  @ExceptionHandler(KafkaProducerException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleKafkaProducerException(KafkaProducerException ex) {
+    this.logger.error(
+      "Message: {} \nFailed on topic: {}\nWith the value: {}",
+      ex.getMessage(),
+      ex.getFailedProducerRecord().topic(),
+      ex.getFailedProducerRecord().value()
+    );
+
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message("Ocorreu um erro interno do servidor. Por favor, tente mais tarde")
       .build();
   }
 }

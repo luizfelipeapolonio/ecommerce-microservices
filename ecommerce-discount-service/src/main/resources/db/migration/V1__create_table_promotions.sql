@@ -1,5 +1,5 @@
 CREATE TABLE promotions (
-    id             UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    id             UUID         NOT NULL PRIMARY KEY,
     name           VARCHAR(150) NOT NULL,
     description    VARCHAR(255),
     scope          VARCHAR(10)  NOT NULL,

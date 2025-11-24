@@ -5,8 +5,7 @@ import com.felipe.ecommerce_discount_service.core.domain.enums.PromotionScope;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -24,7 +23,6 @@ import java.util.UUID;
 public class PromotionEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
   @Column(length = 150, nullable = false)
@@ -58,7 +56,7 @@ public class PromotionEntity {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
-  @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<PromotionAppliesToEntity> promotionApplies;
 
   protected PromotionEntity() {

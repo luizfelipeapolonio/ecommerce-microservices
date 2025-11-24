@@ -38,6 +38,10 @@ spring:
     hibernate.ddl-auto: validate
     show-sql: true
 
+  # === Kafka ===
+  kafka:
+    bootstrap-servers: http://localhost:9094
+
 eureka:
   client:
     fetchRegistry: true

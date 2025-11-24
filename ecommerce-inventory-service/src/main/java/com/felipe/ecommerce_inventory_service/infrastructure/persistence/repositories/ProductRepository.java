@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +24,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
 
   @Query("SELECT p FROM ProductEntity p JOIN p.model m JOIN p.brand b WHERE m.name = :modelName AND b.name = :brandName")
   Page<ProductEntity> findByModelNameAndBrandName(@Param("modelName") String modelName, @Param("brandName") String brandName, Pageable pageable);
+
+  List<ProductEntity> findAllByPromotionId(String promotionId);
 
   @Query(
     "SELECT p FROM ProductEntity p JOIN p.category c JOIN p.brand b JOIN p.model m " +
@@ -42,7 +45,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
   @Modifying
   @Query(
     "UPDATE ProductEntity p " +
-    "SET p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
+    "SET p.promotionId = :#{#promotion.promotionId}, p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
     "WHERE p.unitPrice > :#{#promotion.minimumPrice} AND " +
     "(:discount_limit IS NULL OR :discount_limit IS NOT NULL) AND " +
     "p.category.id = :categoryId"
@@ -54,7 +57,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
   @Modifying
   @Query(
     "UPDATE ProductEntity p " +
-    "SET p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
+    "SET p.promotionId = :#{#promotion.promotionId}, p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
     "WHERE p.unitPrice > :#{#promotion.minimumPrice} AND " +
     "(:discount_limit IS NULL OR :discount_limit IS NOT NULL) AND " +
     "p.brand.id = :brandId"
@@ -67,7 +70,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
   @Modifying
   @Query(
     "UPDATE ProductEntity p " +
-    "SET p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
+    "SET p.promotionId = :#{#promotion.promotionId}, p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
     "WHERE p.unitPrice > :#{#promotion.minimumPrice} AND " +
     "(:discount_limit IS NULL OR :discount_limit IS NOT NULL) AND " +
     "p.model.id = :modelId"
@@ -79,7 +82,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
   @Modifying
   @Query(
     "UPDATE ProductEntity p " +
-    "SET p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
+    "SET p.promotionId = :#{#promotion.promotionId}, p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
     "WHERE p.unitPrice > :#{#promotion.minimumPrice} AND " +
     "(:discount_limit IS NULL OR :discount_limit IS NOT NULL) AND " +
     "p.id = :productId"
@@ -92,7 +95,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
   @Modifying
   @Query(
     "UPDATE ProductEntity p " +
-    "SET p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
+    "SET p.promotionId = :#{#promotion.promotionId}, p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
     "WHERE p.unitPrice > :#{#promotion.minimumPrice} AND " +
     "(:discount_limit IS NULL OR :discount_limit IS NOT NULL) AND " +
     "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +

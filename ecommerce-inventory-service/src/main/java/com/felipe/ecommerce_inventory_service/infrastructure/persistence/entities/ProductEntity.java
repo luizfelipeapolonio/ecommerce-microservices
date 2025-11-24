@@ -38,6 +38,9 @@ public class ProductEntity {
   @Column(name = "with_discount", nullable = false)
   private boolean withDiscount = false;
 
+  @Column(name = "promotion_id")
+  private String promotionId;
+
   @Column(name = "discount_type", length = 12)
   private String discountType;
 
@@ -91,6 +94,10 @@ public class ProductEntity {
     return this.withDiscount;
   }
 
+  public String getPromotionId() {
+    return this.promotionId;
+  }
+
   public String getDiscountType() {
     return this.discountType;
   }
@@ -134,6 +141,7 @@ public class ProductEntity {
     this.unitPrice = builder.unitPrice;
     this.quantity = builder.quantity;
     this.withDiscount = builder.withDiscount;
+    this.promotionId = builder.promotionId;
     this.discountType = builder.discountType;
     this.discountValue = builder.discountValue;
     this.createdAt = builder.createdAt;
@@ -150,6 +158,7 @@ public class ProductEntity {
     private BigDecimal unitPrice;
     private long quantity;
     private boolean withDiscount = false;
+    private String promotionId;
     private String discountType;
     private String discountValue;
     private LocalDateTime createdAt;
@@ -168,6 +177,7 @@ public class ProductEntity {
       this.unitPrice = product.getUnitPrice();
       this.quantity = product.getQuantity();
       this.withDiscount = product.isItWithDiscount();
+      this.promotionId = product.getPromotionId();
       this.discountType = product.getDiscountType();
       this.discountValue = product.getDiscountValue();
       this.createdAt = product.getCreatedAt();
@@ -204,6 +214,11 @@ public class ProductEntity {
 
     public Builder withDiscount(boolean withDiscount) {
       this.withDiscount = withDiscount;
+      return this;
+    }
+
+    public Builder promotionId(String promotionId) {
+      this.promotionId = promotionId;
       return this;
     }
 
