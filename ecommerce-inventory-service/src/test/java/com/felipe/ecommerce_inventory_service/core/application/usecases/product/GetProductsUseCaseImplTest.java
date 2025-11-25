@@ -71,6 +71,9 @@ public class GetProductsUseCaseImplTest {
                             String description,
                             String unitPrice,
                             long quantity,
+                            boolean withDiscount,
+                            String discountType,
+                            String discountValue,
                             String createdAt,
                             String updatedAt,
                             List<ImageFileDTO> images) implements ProductResponseDTO {
@@ -81,6 +84,9 @@ public class GetProductsUseCaseImplTest {
         product.getDescription(),
         product.getUnitPrice().toString(),
         product.getQuantity(),
+        product.isItWithDiscount(),
+        product.getDiscountType() == null ? null : product.getDiscountType(),
+        product.getDiscountValue() == null ? null : product.getDiscountValue(),
         product.getCreatedAt().toString(),
         product.getUpdatedAt().toString(),
         images

@@ -85,16 +85,19 @@ public class GetProductByIdUseCaseImplTest {
   }
 
   private record ProductDTO(String id,
-                           String name,
-                           String description,
-                           String unitPrice,
-                           long quantity,
-                           String createdAt,
-                           String updatedAt,
-                           CategoryDTO category,
-                           BrandDTO brand,
-                           ModelDTO model,
-                           List<ImageFileDTO> images) implements ProductResponseDTO {
+                            String name,
+                            String description,
+                            String unitPrice,
+                            long quantity,
+                            boolean withDiscount,
+                            String discountType,
+                            String discountValue,
+                            String createdAt,
+                            String updatedAt,
+                            CategoryDTO category,
+                            BrandDTO brand,
+                            ModelDTO model,
+                            List<ImageFileDTO> images) implements ProductResponseDTO {
     public ProductDTO(Product product, List<ImageFileDTO> images) {
       this(
         product.getId().toString(),
@@ -102,6 +105,9 @@ public class GetProductByIdUseCaseImplTest {
         product.getDescription(),
         product.getUnitPrice().toString(),
         product.getQuantity(),
+        product.isItWithDiscount(),
+        product.getDiscountType() == null ? null : product.getDiscountType(),
+        product.getDiscountValue() == null ? null : product.getDiscountValue(),
         product.getCreatedAt().toString(),
         product.getUpdatedAt().toString(),
         new CategoryDTO(product.getCategory()),
