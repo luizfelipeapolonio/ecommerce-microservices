@@ -8,6 +8,9 @@ public interface ProductResponseDTO {
   String description();
   String unitPrice();
   long quantity();
+  boolean withDiscount();
+  String discountType();
+  String discountValue();
   String createdAt();
   String updatedAt();
   List<ImageFileDTO> images();
