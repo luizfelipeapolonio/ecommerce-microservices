@@ -48,7 +48,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
     "SET p.promotionId = :#{#promotion.promotionId}, p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
     "WHERE p.unitPrice > :#{#promotion.minimumPrice} AND " +
     "(:discount_limit IS NULL OR :discount_limit IS NOT NULL) AND " +
-    "p.category.id = :categoryId"
+    "p.category.id = :categoryId AND " +
+    "p.withDiscount = false"
   )
   int applyPromotionToCategory(@Param("promotion") PromotionDTO promotion,
                                @Param("discount_limit") String discountLimit,
@@ -60,7 +61,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
     "SET p.promotionId = :#{#promotion.promotionId}, p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
     "WHERE p.unitPrice > :#{#promotion.minimumPrice} AND " +
     "(:discount_limit IS NULL OR :discount_limit IS NOT NULL) AND " +
-    "p.brand.id = :brandId"
+    "p.brand.id = :brandId AND " +
+    "p.withDiscount = false"
   )
   int applyPromotionToBrand(@Param("promotion") PromotionDTO promotion,
                             @Param("discount_limit") String discountLimit,
@@ -73,7 +75,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
     "SET p.promotionId = :#{#promotion.promotionId}, p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
     "WHERE p.unitPrice > :#{#promotion.minimumPrice} AND " +
     "(:discount_limit IS NULL OR :discount_limit IS NOT NULL) AND " +
-    "p.model.id = :modelId"
+    "p.model.id = :modelId AND " +
+    "p.withDiscount = false"
   )
   int applyPromotionToModel(@Param("promotion") PromotionDTO promotion,
                             @Param("discount_limit") String discountLimit,
@@ -85,7 +88,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
     "SET p.promotionId = :#{#promotion.promotionId}, p.withDiscount = true, p.discountType = :#{#promotion.discountType}, p.discountValue = :#{#promotion.discountValue} " +
     "WHERE p.unitPrice > :#{#promotion.minimumPrice} AND " +
     "(:discount_limit IS NULL OR :discount_limit IS NOT NULL) AND " +
-    "p.id = :productId"
+    "p.id = :productId AND " +
+    "p.withDiscount = false"
   )
   int applyPromotionToProduct(@Param("promotion") PromotionDTO promotion,
                               @Param("discount_limit") String discountLimit,
@@ -100,7 +104,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
     "(:discount_limit IS NULL OR :discount_limit IS NOT NULL) AND " +
     "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +
     "(:brandId IS NULL OR p.brand.id = :brandId) AND " +
-    "(:modelId IS NULL OR p.model.id = :modelId)"
+    "(:modelId IS NULL OR p.model.id = :modelId) AND " +
+    "p.withDiscount = false"
   )
   int applyPromotionToSpecific(@Param("promotion") PromotionDTO promotion,
                                @Param("discount_limit") String discountLimit,
