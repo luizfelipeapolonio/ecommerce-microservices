@@ -9,6 +9,7 @@ import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.repositories.PromotionRepository;
 import com.felipe.ecommerce_discount_service.infrastructure.services.PromotionSchedulerService;
 import com.felipe.ecommerce_discount_service.testutils.DataMock;
+import com.felipe.kafka.ExpiredPromotionKafkaDTO;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,10 +20,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -30,6 +33,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +51,9 @@ public class PromotionGatewayImplTest {
 
   @Mock
   private PromotionSchedulerService promotionSchedulerService;
+
+  @Mock
+  private KafkaTemplate<String, ExpiredPromotionKafkaDTO> kafkaTemplate;
 
   @InjectMocks
   private PromotionGatewayImpl promotionGateway;
@@ -136,5 +144,113 @@ public class PromotionGatewayImplTest {
     verify(this.promotionRepository, never()).save(any(PromotionEntity.class));
     verify(this.promotionSchedulerService, never()).schedulePromotionToExpire(any(PromotionEntity.class));
     verify(this.promotionEntityMapper, never()).toDomain(any(PromotionEntity.class));
+  }
+
+  @Test
+  @DisplayName("findPromotionByIdSuccess - Should successfully find a promotion and return an Optional of Promotion")
+  void findPromotionByIdReturnsOptionalOfPromotion() {
+    final Promotion promotionDomain = this.dataMock.getPromotionsDomain().getFirst();
+    final PromotionEntity promotionEntity = this.dataMock.getPromotionsEntity().getFirst();
+
+    when(this.promotionRepository.findById(promotionDomain.getId())).thenReturn(Optional.of(promotionEntity));
+    when(this.promotionEntityMapper.toDomain(promotionEntity)).thenReturn(promotionDomain);
+
+    Optional<Promotion> foundPromotion = this.promotionGateway.findPromotionById(promotionDomain.getId());
+
+    assertThat(foundPromotion.isPresent()).isTrue();
+    assertThat(foundPromotion.get().getId()).isEqualTo(promotionDomain.getId());
+    assertThat(foundPromotion.get().getName()).isEqualTo(promotionDomain.getName());
+    assertThat(foundPromotion.get().getDescription()).isEqualTo(promotionDomain.getDescription());
+    assertThat(foundPromotion.get().isActive()).isEqualTo(promotionDomain.isActive());
+    assertThat(foundPromotion.get().getScope()).isEqualTo(promotionDomain.getScope());
+    assertThat(foundPromotion.get().getMinimumPrice()).isEqualTo(promotionDomain.getMinimumPrice());
+    assertThat(foundPromotion.get().getDiscountType()).isEqualTo(promotionDomain.getDiscountType());
+    assertThat(foundPromotion.get().getDiscountValue()).isEqualTo(promotionDomain.getDiscountValue());
+    assertThat(foundPromotion.get().getEndDate()).isEqualTo(promotionDomain.getEndDate());
+    assertThat(foundPromotion.get().getCreatedAt()).isEqualTo(promotionDomain.getCreatedAt());
+    assertThat(foundPromotion.get().getUpdatedAt()).isEqualTo(promotionDomain.getUpdatedAt());
+    assertThat(foundPromotion.get().getPromotionApplies().size()).isEqualTo(promotionDomain.getPromotionApplies().size());
+
+    verify(this.promotionRepository, times(1)).findById(promotionDomain.getId());
+    verify(this.promotionEntityMapper, times(1)).toDomain(promotionEntity);
+  }
+
+  @Test
+  @DisplayName("findPromotionByIdReturnsOptionalEmpty - Should return an Optional empty")
+  void findPromotionByIdReturnsOptionalEmpty() {
+    final UUID promotionId = this.dataMock.getPromotionsDomain().getFirst().getId();
+
+    when(this.promotionRepository.findById(promotionId)).thenReturn(Optional.empty());
+
+    Optional<Promotion> foundPromotion = this.promotionGateway.findPromotionById(promotionId);
+
+    assertThat(foundPromotion.isEmpty()).isTrue();
+    verify(this.promotionRepository, times(1)).findById(promotionId);
+    verify(this.promotionEntityMapper, never()).toDomain(any(PromotionEntity.class));
+  }
+
+  @Test
+  @DisplayName("deletePromotionSuccessWithIsActiveTrue - Should successfully delete a promotion and return the deleted promotion")
+  void deletePromotionSuccessWithIsActiveTrue() {
+    final Promotion promotionDomain = this.dataMock.getPromotionsDomain().getFirst();
+    final PromotionEntity promotionEntity = this.dataMock.getPromotionsEntity().getFirst();
+
+    when(this.promotionEntityMapper.toEntity(promotionDomain)).thenReturn(promotionEntity);
+    doNothing().when(this.promotionRepository).delete(promotionEntity);
+    doNothing().when(this.promotionSchedulerService).cancelScheduledPromotion(promotionEntity);
+    when(this.kafkaTemplate.send(eq("expired-promotion"), any(ExpiredPromotionKafkaDTO.class))).thenReturn(any());
+
+    Promotion deletedPromotion = this.promotionGateway.deletePromotion(promotionDomain);
+
+    assertThat(deletedPromotion.getId()).isEqualTo(promotionDomain.getId());
+    assertThat(deletedPromotion.getName()).isEqualTo(promotionDomain.getName());
+    assertThat(deletedPromotion.getDescription()).isEqualTo(promotionDomain.getDescription());
+    assertThat(deletedPromotion.isActive()).isEqualTo(promotionDomain.isActive());
+    assertThat(deletedPromotion.getScope()).isEqualTo(promotionDomain.getScope());
+    assertThat(deletedPromotion.getMinimumPrice()).isEqualTo(promotionDomain.getMinimumPrice());
+    assertThat(deletedPromotion.getDiscountType()).isEqualTo(promotionDomain.getDiscountType());
+    assertThat(deletedPromotion.getDiscountValue()).isEqualTo(promotionDomain.getDiscountValue());
+    assertThat(deletedPromotion.getEndDate()).isEqualTo(promotionDomain.getEndDate());
+    assertThat(deletedPromotion.getCreatedAt()).isEqualTo(promotionDomain.getCreatedAt());
+    assertThat(deletedPromotion.getUpdatedAt()).isEqualTo(promotionDomain.getUpdatedAt());
+    assertThat(deletedPromotion.getPromotionApplies().size()).isEqualTo(promotionDomain.getPromotionApplies().size());
+
+    verify(this.promotionEntityMapper, times(1)).toEntity(promotionDomain);
+    verify(this.promotionRepository, times(1)).delete(promotionEntity);
+    verify(this.promotionSchedulerService, times(1)).cancelScheduledPromotion(promotionEntity);
+    verify(this.kafkaTemplate, times(1)).send(eq("expired-promotion"), any(ExpiredPromotionKafkaDTO.class));
+  }
+
+  @Test
+  @DisplayName("deletePromotionSuccessWithIsActiveFalse - Should successfully delete a promotion and return the deleted promotion")
+  void deletePromotionSuccessWithIsActiveFalse() {
+    final Promotion promotionDomain = Promotion.mutate(this.dataMock.getPromotionsDomain().getFirst())
+      .isActive(false)
+      .build();
+    final PromotionEntity promotionEntity = this.dataMock.getPromotionsEntity().getFirst();
+
+    when(this.promotionEntityMapper.toEntity(promotionDomain)).thenReturn(promotionEntity);
+    doNothing().when(this.promotionRepository).delete(promotionEntity);
+    doNothing().when(this.promotionSchedulerService).cancelScheduledPromotion(promotionEntity);
+
+    Promotion deletedPromotion = this.promotionGateway.deletePromotion(promotionDomain);
+
+    assertThat(deletedPromotion.getId()).isEqualTo(promotionDomain.getId());
+    assertThat(deletedPromotion.getName()).isEqualTo(promotionDomain.getName());
+    assertThat(deletedPromotion.getDescription()).isEqualTo(promotionDomain.getDescription());
+    assertThat(deletedPromotion.isActive()).isEqualTo(promotionDomain.isActive());
+    assertThat(deletedPromotion.getScope()).isEqualTo(promotionDomain.getScope());
+    assertThat(deletedPromotion.getMinimumPrice()).isEqualTo(promotionDomain.getMinimumPrice());
+    assertThat(deletedPromotion.getDiscountType()).isEqualTo(promotionDomain.getDiscountType());
+    assertThat(deletedPromotion.getDiscountValue()).isEqualTo(promotionDomain.getDiscountValue());
+    assertThat(deletedPromotion.getEndDate()).isEqualTo(promotionDomain.getEndDate());
+    assertThat(deletedPromotion.getCreatedAt()).isEqualTo(promotionDomain.getCreatedAt());
+    assertThat(deletedPromotion.getUpdatedAt()).isEqualTo(promotionDomain.getUpdatedAt());
+    assertThat(deletedPromotion.getPromotionApplies().size()).isEqualTo(promotionDomain.getPromotionApplies().size());
+
+    verify(this.promotionEntityMapper, times(1)).toEntity(promotionDomain);
+    verify(this.promotionRepository, times(1)).delete(promotionEntity);
+    verify(this.promotionSchedulerService, times(1)).cancelScheduledPromotion(promotionEntity);
+    verify(this.kafkaTemplate, never()).send(anyString(), any());
   }
 }

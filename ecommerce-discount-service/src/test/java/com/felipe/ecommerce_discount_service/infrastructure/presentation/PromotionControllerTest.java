@@ -3,6 +3,7 @@ package com.felipe.ecommerce_discount_service.infrastructure.presentation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_discount_service.core.application.dtos.promotion.CreatePromotionDTO;
 import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.CreatePromotionUseCase;
+import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.DeletePromotionUseCase;
 import com.felipe.ecommerce_discount_service.core.domain.Promotion;
 import com.felipe.ecommerce_discount_service.core.domain.PromotionAppliesTo;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.CreatePromotionDTOImpl;
@@ -25,6 +26,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,8 +35,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -56,6 +60,9 @@ public class PromotionControllerTest {
 
   @MockitoBean
   CreatePromotionUseCase createPromotionUseCase;
+
+  @MockitoBean
+  DeletePromotionUseCase deletePromotionUseCase;
 
   private DataMock dataMock;
   private static final String BASE_URL = "/api/v1/promotions";
@@ -134,5 +141,25 @@ public class PromotionControllerTest {
       .andExpectAll(status().isCreated(), content().json(jsonResponseBody));
 
     verify(this.createPromotionUseCase, times(1)).execute(promotionDTO);
+  }
+
+  @Test
+  @DisplayName("deletePromotionSuccess - Should return a success response")
+  void deletePromotionSuccess() throws Exception {
+    final Promotion promotion = this.dataMock.getPromotionsDomain().getFirst();
+
+    when(this.deletePromotionUseCase.execute(promotion.getId())).thenReturn(promotion);
+
+    this.mockMvc.perform(delete(BASE_URL + "/{promotionId}", promotion.getId())
+      .accept(APPLICATION_JSON))
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.type").value(ResponseType.SUCCESS.getText()),
+        jsonPath("$.code").value(HttpStatus.OK.value()),
+        jsonPath("$.message").value("Promoção '" + promotion.getName() + "' excluída com sucesso"),
+        jsonPath("$.payload").isEmpty()
+      );
+
+    verify(this.deletePromotionUseCase, times(1)).execute(promotion.getId());
   }
 }
