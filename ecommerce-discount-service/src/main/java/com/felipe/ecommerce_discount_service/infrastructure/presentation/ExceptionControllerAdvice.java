@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_discount_service.infrastructure.presentation;
 
+import com.felipe.ecommerce_discount_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidDiscountTypeException;
 import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidEndDateException;
 import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidPromotionAppliesTargetException;
@@ -53,6 +54,16 @@ public class ExceptionControllerAdvice {
       .code(HttpStatus.UNPROCESSABLE_ENTITY)
       .message("Erros de validação")
       .payload(List.of(error))
+      .build();
+  }
+
+  @ExceptionHandler(DataNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ResponsePayload<Void> handleDataNotFoundException(DataNotFoundException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.NOT_FOUND)
+      .message(ex.getMessage())
       .build();
   }
 

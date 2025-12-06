@@ -8,9 +8,11 @@ import com.felipe.ecommerce_discount_service.infrastructure.mappers.PromotionEnt
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionEntity;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.repositories.PromotionRepository;
 import com.felipe.ecommerce_discount_service.infrastructure.services.PromotionSchedulerService;
+import com.felipe.kafka.ExpiredPromotionKafkaDTO;
 import com.felipe.response.ResponsePayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,16 +26,20 @@ public class PromotionGatewayImpl implements PromotionGateway {
   private final PromotionEntityMapper promotionEntityMapper;
   private final InventoryService inventoryService;
   private final PromotionSchedulerService promotionSchedulerService;
+  private final KafkaTemplate<String, ExpiredPromotionKafkaDTO> kafkaTemplate;
+
   private final Logger logger = LoggerFactory.getLogger(PromotionGatewayImpl.class);
 
   public PromotionGatewayImpl(PromotionRepository promotionRepository,
                               PromotionEntityMapper promotionEntityMapper,
                               InventoryService inventoryService,
-                              PromotionSchedulerService promotionSchedulerService) {
+                              PromotionSchedulerService promotionSchedulerService,
+                              KafkaTemplate<String, ExpiredPromotionKafkaDTO> kafkaTemplate) {
     this.promotionRepository = promotionRepository;
     this.promotionEntityMapper = promotionEntityMapper;
     this.inventoryService = inventoryService;
     this.promotionSchedulerService = promotionSchedulerService;
+    this.kafkaTemplate = kafkaTemplate;
   }
 
   @Override
@@ -58,4 +64,29 @@ public class PromotionGatewayImpl implements PromotionGateway {
 
     return Optional.of(this.promotionEntityMapper.toDomain(savedPromotion));
   }
+
+  @Override
+  public Optional<Promotion> findPromotionById(UUID promotionId) {
+    return this.promotionRepository.findById(promotionId)
+      .map(this.promotionEntityMapper::toDomain);
+  }
+
+  @Override
+  public Promotion deletePromotion(Promotion promotion) {
+    final PromotionEntity promotionEntity = this.promotionEntityMapper.toEntity(promotion);
+    this.promotionRepository.delete(promotionEntity);
+    this.promotionSchedulerService.cancelScheduledPromotion(promotionEntity);
+
+    if(promotion.isActive()) {
+      this.kafkaTemplate.send("expired-promotion", new ExpiredPromotionKafkaDTO(promotion.getId().toString()));
+      this.logger.info("cancelScheduledPromotion - Promotion \"{}\" to remove posted on topic", promotion.getId());
+    }
+    return promotion;
+  }
+
+  // Update:
+  // - cancel the scheduled promotion
+  // - if there is discount type or discount value, send the promotion to kafka topic
+  //   - re-apply the promotion
+  // - if there is not, is not needed to send to kafka topic
 }
