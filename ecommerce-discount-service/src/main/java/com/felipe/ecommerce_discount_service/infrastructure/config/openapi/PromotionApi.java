@@ -5,6 +5,7 @@ import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.Promo
 import com.felipe.response.ResponsePayload;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,6 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -43,5 +47,24 @@ public interface PromotionApi {
   ResponsePayload<PromotionResponseDTO> createPromotion(
     @Parameter(name = "CreatePromotionDTO", required = true)
     @Valid @org.springframework.web.bind.annotation.RequestBody CreatePromotionDTOImpl promotionDTO
+  );
+
+  @Operation(
+    operationId = "deletePromotion",
+    summary = "Delete a Promotion",
+    description = "Delete a Promotion",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with a message with the deleted promotion name", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
+          @ExampleObject(name = "Success response", ref = "DeletePromotionExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<Void> deletePromotion(
+    @Parameter(in = ParameterIn.PATH, name = "promotionId", description = "Promotion id", required = true, schema = @Schema(type = "string", example = "da4dd8a3-a821-4350-9af2-c5b8f3801330"))
+    @PathVariable UUID promotionId
   );
 }

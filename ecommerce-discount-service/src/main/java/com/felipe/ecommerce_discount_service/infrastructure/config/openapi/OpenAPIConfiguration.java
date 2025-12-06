@@ -122,6 +122,13 @@ public class OpenAPIConfiguration {
         "Invalid discount type! The value 'amount' is not a valid discount type",
         null
       );
+      this.apiUtils.createExample(
+        "DeletePromotionExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Promotion '50% OFF' deleted successfully",
+        null
+      );
     };
   }
 }
