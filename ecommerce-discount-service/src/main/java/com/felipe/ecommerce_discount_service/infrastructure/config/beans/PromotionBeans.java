@@ -3,8 +3,10 @@ package com.felipe.ecommerce_discount_service.infrastructure.config.beans;
 import com.felipe.ecommerce_discount_service.core.application.gateway.PromotionGateway;
 import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.CreatePromotionUseCase;
 import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.DeletePromotionUseCase;
+import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.UpdatePromotionUseCase;
 import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.impl.CreatePromotionUseCaseImpl;
 import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.impl.DeletePromotionUseCaseImpl;
+import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.impl.UpdatePromotionUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,5 +26,10 @@ public class PromotionBeans {
   @Bean
   public DeletePromotionUseCase deletePromotionUseCase() {
     return new DeletePromotionUseCaseImpl(promotionGateway);
+  }
+
+  @Bean
+  public UpdatePromotionUseCase updatePromotionUseCase() {
+    return new UpdatePromotionUseCaseImpl(promotionGateway);
   }
 }

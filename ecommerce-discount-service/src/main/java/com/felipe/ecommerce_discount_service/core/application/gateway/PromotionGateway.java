@@ -9,4 +9,6 @@ public interface PromotionGateway {
   Optional<Promotion> createPromotion(Promotion promotion);
   Optional<Promotion> findPromotionById(UUID promotionId);
   Promotion deletePromotion(Promotion promotion);
+  Optional<Promotion> findActivePromotionById(UUID promotionId);
+  Promotion updatePromotion(Promotion promotion);
 }

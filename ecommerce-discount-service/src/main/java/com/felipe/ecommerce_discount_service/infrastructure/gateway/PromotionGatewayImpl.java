@@ -84,9 +84,19 @@ public class PromotionGatewayImpl implements PromotionGateway {
     return promotion;
   }
 
-  // Update:
-  // - cancel the scheduled promotion
-  // - if there is discount type or discount value, send the promotion to kafka topic
-  //   - re-apply the promotion
-  // - if there is not, is not needed to send to kafka topic
+  @Override
+  public Optional<Promotion> findActivePromotionById(UUID promotionId) {
+    return this.promotionRepository.findByIdAndIsActiveTrue(promotionId)
+      .map(this.promotionEntityMapper::toDomain);
+  }
+
+  @Override
+  public Promotion updatePromotion(Promotion promotion) {
+    final PromotionEntity entity = this.promotionEntityMapper.toEntity(promotion);
+    this.promotionSchedulerService.cancelScheduledPromotion(entity);
+
+    final PromotionEntity updatedPromotion = this.promotionRepository.save(entity);
+    this.promotionSchedulerService.schedulePromotionToExpire(updatedPromotion);
+    return this.promotionEntityMapper.toDomain(updatedPromotion);
+  }
 }
