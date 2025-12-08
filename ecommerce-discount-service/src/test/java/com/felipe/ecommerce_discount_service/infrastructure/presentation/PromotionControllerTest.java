@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_discount_service.core.application.dtos.promotion.CreatePromotionDTO;
 import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.CreatePromotionUseCase;
 import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.DeletePromotionUseCase;
+import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.UpdatePromotionUseCase;
 import com.felipe.ecommerce_discount_service.core.domain.Promotion;
 import com.felipe.ecommerce_discount_service.core.domain.PromotionAppliesTo;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.CreatePromotionDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.EndDateDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.PromotionAppliesToDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.PromotionResponseDTO;
+import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.UpdatePromotionDTOImpl;
 import com.felipe.ecommerce_discount_service.testutils.DataMock;
 import com.felipe.ecommerce_discount_service.testutils.OAuth2TestMockConfiguration;
 import com.felipe.response.ResponsePayload;
@@ -26,7 +28,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,6 +37,7 @@ import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -63,6 +65,9 @@ public class PromotionControllerTest {
 
   @MockitoBean
   DeletePromotionUseCase deletePromotionUseCase;
+
+  @MockitoBean
+  UpdatePromotionUseCase updatePromotionUseCase;
 
   private DataMock dataMock;
   private static final String BASE_URL = "/api/v1/promotions";
@@ -161,5 +166,35 @@ public class PromotionControllerTest {
       );
 
     verify(this.deletePromotionUseCase, times(1)).execute(promotion.getId());
+  }
+
+  @Test
+  @DisplayName("updatePromotionSuccess - Should return a success response with the updated promotion")
+  void updatePromotionSuccess() throws Exception {
+    final Promotion updatedPromotion = this.dataMock.getPromotionsDomain().getFirst();
+    final UpdatePromotionDTOImpl promotionDTO = new UpdatePromotionDTOImpl(
+      "Updated promotion name",
+      "Updated description",
+      new EndDateDTOImpl(8, 12, 2024, 13, 0, 0)
+    );
+
+    final ResponsePayload<PromotionResponseDTO> response = new ResponsePayload.Builder<PromotionResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Promoção atualizada com sucesso")
+      .payload(new PromotionResponseDTO(updatedPromotion))
+      .build();
+
+    final String jsonRequestBody = this.objectMapper.writeValueAsString(promotionDTO);
+    final String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.updatePromotionUseCase.execute(updatedPromotion.getId(), promotionDTO)).thenReturn(updatedPromotion);
+
+    this.mockMvc.perform(patch(BASE_URL + "/{promotionId}", updatedPromotion.getId())
+      .contentType(APPLICATION_JSON).content(jsonRequestBody)
+      .accept(APPLICATION_JSON))
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.updatePromotionUseCase, times(1)).execute(updatedPromotion.getId(), promotionDTO);
   }
 }
