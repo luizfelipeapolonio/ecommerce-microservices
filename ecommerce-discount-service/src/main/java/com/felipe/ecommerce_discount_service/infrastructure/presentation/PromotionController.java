@@ -69,6 +69,7 @@ public class PromotionController implements PromotionApi {
       .build();
   }
 
+  @Override
   @PatchMapping("/{promotionId}")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<PromotionResponseDTO> updatePromotion(@PathVariable UUID promotionId,

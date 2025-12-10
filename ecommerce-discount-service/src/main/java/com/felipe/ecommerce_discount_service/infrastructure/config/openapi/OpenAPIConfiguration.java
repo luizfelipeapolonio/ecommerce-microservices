@@ -123,11 +123,25 @@ public class OpenAPIConfiguration {
         null
       );
       this.apiUtils.createExample(
+        "InvalidPromotionEndDateExample",
+        ResponseType.ERROR,
+        HttpStatus.BAD_REQUEST,
+        "Invalid end date! The end date should not be before the current date. Invalid end date: 2025-05-12T13:00",
+        null
+      );
+      this.apiUtils.createExample(
         "DeletePromotionExample",
         ResponseType.SUCCESS,
         HttpStatus.OK,
         "Promotion '50% OFF' deleted successfully",
         null
+      );
+      this.apiUtils.createExample(
+        "UpdatePromotionExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Promotion updated successfully",
+        new PromotionResponseDTO(promotion1)
       );
     };
   }

@@ -2,6 +2,7 @@ package com.felipe.ecommerce_discount_service.infrastructure.config.openapi;
 
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.CreatePromotionDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.PromotionResponseDTO;
+import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.UpdatePromotionDTOImpl;
 import com.felipe.response.ResponsePayload;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -66,5 +67,31 @@ public interface PromotionApi {
   ResponsePayload<Void> deletePromotion(
     @Parameter(in = ParameterIn.PATH, name = "promotionId", description = "Promotion id", required = true, schema = @Schema(type = "string", example = "da4dd8a3-a821-4350-9af2-c5b8f3801330"))
     @PathVariable UUID promotionId
+  );
+
+  @Operation(
+    operationId = "updatePromotion",
+    summary = "Update a promotion",
+    description = "Update a promotion",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with the updated promotion", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<PromotionResponseDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "UpdatePromotionExample")
+        })
+      }),
+      @ApiResponse(responseCode = "400", description = "Returns an error response if supplied promotion end date is invalid", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<Void>"), examples = {
+          @ExampleObject(name = "Error response", ref = "InvalidPromotionEndDateExample")
+        })
+      }),
+      @ApiResponse(responseCode = "404", ref = "NotFound"),
+      @ApiResponse(responseCode = "422", ref = "ValidationErrors"),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<PromotionResponseDTO> updatePromotion(
+    @Parameter(in = ParameterIn.PATH, name = "promotionId", description = "Promotion id", required = true, schema = @Schema(type = "string", example = "da4dd8a3-a821-4350-9af2-c5b8f3801330"))
+    @PathVariable UUID promotionId,
+    @Valid @RequestBody UpdatePromotionDTOImpl promotionDTO
   );
 }
