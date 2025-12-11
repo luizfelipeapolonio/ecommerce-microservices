@@ -9,6 +9,7 @@ import com.felipe.ecommerce_discount_service.infrastructure.exceptions.CreatePro
 import com.felipe.response.CustomValidationErrors;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -79,6 +80,30 @@ public class ExceptionControllerAdvice {
       .type(ResponseType.ERROR)
       .code(HttpStatus.BAD_REQUEST)
       .message(ex.getMessage())
+      .build();
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponsePayload<List<CustomValidationErrors>> handleConstraintViolationException(ConstraintViolationException ex) {
+    List<CustomValidationErrors> errors = ex.getConstraintViolations()
+      .stream()
+      .map(constraintViolation -> {
+        String field = constraintViolation.getPropertyPath().toString();
+        field = field.contains(".") ? field.split("\\.")[1] : field;
+        CustomValidationErrors validationError = new CustomValidationErrors();
+        validationError.setField(field);
+        validationError.setRejectedValue(constraintViolation.getInvalidValue());
+        validationError.setCause(constraintViolation.getMessage());
+        return validationError;
+      })
+      .toList();
+
+    return new ResponsePayload.Builder<List<CustomValidationErrors>>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.BAD_REQUEST)
+      .message("Erros de validação")
+      .payload(errors)
       .build();
   }
 

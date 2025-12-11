@@ -2,6 +2,7 @@ package com.felipe.ecommerce_discount_service.infrastructure.gateway;
 
 import com.felipe.ecommerce_discount_service.core.application.gateway.PromotionGateway;
 import com.felipe.ecommerce_discount_service.core.domain.Promotion;
+import com.felipe.ecommerce_discount_service.core.domain.enums.DiscountType;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.PromotionAppliesToDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.external.InventoryService;
 import com.felipe.ecommerce_discount_service.infrastructure.mappers.PromotionEntityMapper;
@@ -98,5 +99,29 @@ public class PromotionGatewayImpl implements PromotionGateway {
     final PromotionEntity updatedPromotion = this.promotionRepository.save(entity);
     this.promotionSchedulerService.schedulePromotionToExpire(updatedPromotion);
     return this.promotionEntityMapper.toDomain(updatedPromotion);
+  }
+
+  @Override
+  public List<Promotion> findAllPromotions() {
+    return this.promotionRepository.findAll()
+      .stream()
+      .map(this.promotionEntityMapper::toDomain)
+      .toList();
+  }
+
+  @Override
+  public List<Promotion> findAllActiveOrInactivePromotions(boolean isActive) {
+    return this.promotionRepository.findAllByIsActive(isActive)
+      .stream()
+      .map(this.promotionEntityMapper::toDomain)
+      .toList();
+  }
+
+  @Override
+  public List<Promotion> findAllPromotionsByDiscountType(DiscountType discountType) {
+    return this.promotionRepository.findAllByDiscountType(discountType.getText())
+      .stream()
+      .map(this.promotionEntityMapper::toDomain)
+      .toList();
   }
 }

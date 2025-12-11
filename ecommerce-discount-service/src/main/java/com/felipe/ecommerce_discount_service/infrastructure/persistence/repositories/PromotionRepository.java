@@ -14,4 +14,6 @@ public interface PromotionRepository extends JpaRepository<PromotionEntity, UUID
   List<PromotionEntity> findAllByEndDateAfterNowAndIsActiveTrue();
 
   Optional<PromotionEntity> findByIdAndIsActiveTrue(UUID id);
+  List<PromotionEntity> findAllByIsActive(boolean isActive);
+  List<PromotionEntity> findAllByDiscountType(String discountType);
 }
