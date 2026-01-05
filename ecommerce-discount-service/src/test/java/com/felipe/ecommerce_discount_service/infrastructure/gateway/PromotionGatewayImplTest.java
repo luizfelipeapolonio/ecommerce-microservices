@@ -2,6 +2,7 @@ package com.felipe.ecommerce_discount_service.infrastructure.gateway;
 
 import com.felipe.ecommerce_discount_service.core.domain.Promotion;
 import com.felipe.ecommerce_discount_service.core.domain.PromotionAppliesTo;
+import com.felipe.ecommerce_discount_service.core.domain.enums.DiscountType;
 import com.felipe.ecommerce_discount_service.infrastructure.external.InventoryService;
 import com.felipe.ecommerce_discount_service.infrastructure.mappers.PromotionEntityMapper;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionAppliesToEntity;
@@ -329,5 +330,69 @@ public class PromotionGatewayImplTest {
     verify(this.promotionRepository, times(1)).save(promotionEntity);
     verify(this.promotionSchedulerService, times(1)).schedulePromotionToExpire(promotionEntity);
     verify(this.promotionEntityMapper, times(1)).toDomain(promotionEntity);
+  }
+
+  @Test
+  @DisplayName("findAllPromotionsSuccess - Should successfully return all promotions")
+  void findAllPromotionsSuccess() {
+    final List<PromotionEntity> promotions = this.dataMock.getPromotionsEntity();
+    final List<Promotion> promotionsDomain = this.dataMock.getPromotionsDomain();
+
+    when(this.promotionRepository.findAll()).thenReturn(promotions);
+    when(this.promotionEntityMapper.toDomain(promotions.get(0))).thenReturn(promotionsDomain.get(0));
+    when(this.promotionEntityMapper.toDomain(promotions.get(1))).thenReturn(promotionsDomain.get(1));
+
+    List<Promotion> allPromotions = this.promotionGateway.findAllPromotions();
+
+    assertThat(allPromotions.size()).isEqualTo(promotions.size());
+    assertThat(allPromotions.get(0)).usingRecursiveComparison().isEqualTo(promotionsDomain.get(0));
+    assertThat(allPromotions.get(1)).usingRecursiveComparison().isEqualTo(promotionsDomain.get(1));
+
+    verify(this.promotionRepository, times(1)).findAll();
+    verify(this.promotionEntityMapper, times(1)).toDomain(promotions.get(0));
+    verify(this.promotionEntityMapper, times(1)).toDomain(promotions.get(1));
+  }
+
+  @Test
+  @DisplayName("findAllActiveOrInactivePromotionsSuccess - Should successfully return all active or inactive promotions")
+  void findAllActiveOrInactivePromotionsSuccess() {
+    final List<PromotionEntity> promotions = this.dataMock.getPromotionsEntity();
+    final List<Promotion> promotionsDomain = this.dataMock.getPromotionsDomain();
+
+    when(this.promotionRepository.findAllByIsActive(true)).thenReturn(promotions);
+    when(this.promotionEntityMapper.toDomain(promotions.get(0))).thenReturn(promotionsDomain.get(0));
+    when(this.promotionEntityMapper.toDomain(promotions.get(1))).thenReturn(promotionsDomain.get(1));
+
+    List<Promotion> allPromotions = this.promotionGateway.findAllActiveOrInactivePromotions(true);
+
+    assertThat(allPromotions.size()).isEqualTo(promotions.size());
+    assertThat(allPromotions.get(0)).usingRecursiveComparison().isEqualTo(promotionsDomain.get(0));
+    assertThat(allPromotions.get(1)).usingRecursiveComparison().isEqualTo(promotionsDomain.get(1));
+
+    verify(this.promotionRepository, times(1)).findAllByIsActive(true);
+    verify(this.promotionEntityMapper, times(1)).toDomain(promotions.get(0));
+    verify(this.promotionEntityMapper, times(1)).toDomain(promotions.get(1));
+  }
+
+  @Test
+  @DisplayName("findAllPromotionsByDiscountTypeSuccess - Should successfully return all promotions selected by discount type")
+  void findAllPromotionsByDiscountTypeSuccess() {
+    final List<PromotionEntity> promotions = this.dataMock.getPromotionsEntity();
+    final List<Promotion> promotionsDomain = this.dataMock.getPromotionsDomain();
+    final String discountType = "fixed_amount";
+
+    when(this.promotionRepository.findAllByDiscountType(discountType)).thenReturn(promotions);
+    when(this.promotionEntityMapper.toDomain(promotions.get(0))).thenReturn(promotionsDomain.get(0));
+    when(this.promotionEntityMapper.toDomain(promotions.get(1))).thenReturn(promotionsDomain.get(1));
+
+    List<Promotion> allPromotions = this.promotionGateway.findAllPromotionsByDiscountType(DiscountType.FIXED_AMOUNT);
+
+    assertThat(allPromotions.size()).isEqualTo(promotions.size());
+    assertThat(allPromotions.get(0)).usingRecursiveComparison().isEqualTo(promotionsDomain.get(0));
+    assertThat(allPromotions.get(1)).usingRecursiveComparison().isEqualTo(promotionsDomain.get(1));
+
+    verify(this.promotionRepository, times(1)).findAllByDiscountType(discountType);
+    verify(this.promotionEntityMapper, times(1)).toDomain(promotions.get(0));
+    verify(this.promotionEntityMapper, times(1)).toDomain(promotions.get(1));
   }
 }

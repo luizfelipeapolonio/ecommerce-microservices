@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_discount_service.core.application.dtos.promotion.CreatePromotionDTO;
 import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.CreatePromotionUseCase;
 import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.DeletePromotionUseCase;
+import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.GetAllActiveOrInactivePromotionsUseCase;
+import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.GetAllPromotionsByDiscountTypeUseCase;
+import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.GetAllPromotionsUseCase;
+import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.GetPromotionByIdUseCase;
 import com.felipe.ecommerce_discount_service.core.application.usecases.promotion.UpdatePromotionUseCase;
 import com.felipe.ecommerce_discount_service.core.domain.Promotion;
 import com.felipe.ecommerce_discount_service.core.domain.PromotionAppliesTo;
@@ -37,6 +41,7 @@ import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -68,6 +73,18 @@ public class PromotionControllerTest {
 
   @MockitoBean
   UpdatePromotionUseCase updatePromotionUseCase;
+
+  @MockitoBean
+  GetAllPromotionsUseCase getAllPromotionsUseCase;
+
+  @MockitoBean
+  GetPromotionByIdUseCase getPromotionByIdUseCase;
+
+  @MockitoBean
+  GetAllActiveOrInactivePromotionsUseCase getAllActiveOrInactivePromotionsUseCase;
+
+  @MockitoBean
+  GetAllPromotionsByDiscountTypeUseCase getAllPromotionsByDiscountTypeUseCase;
 
   private DataMock dataMock;
   private static final String BASE_URL = "/api/v1/promotions";
@@ -149,6 +166,28 @@ public class PromotionControllerTest {
   }
 
   @Test
+  @DisplayName("getAllPromotionsSuccess - Should return a success response with all promotions")
+  void getAllPromotionsSuccess() throws Exception {
+    final List<Promotion> promotions = this.dataMock.getPromotionsDomain();
+    final List<PromotionResponseDTO> promotionDTOs = promotions.stream().map(PromotionResponseDTO::new).toList();
+    final var response = new ResponsePayload.Builder<List<PromotionResponseDTO>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Todas as promoções")
+      .payload(promotionDTOs)
+      .build();
+    final String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.getAllPromotionsUseCase.execute()).thenReturn(promotions);
+
+    this.mockMvc.perform(get(BASE_URL)
+      .accept(APPLICATION_JSON))
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.getAllPromotionsUseCase, times(1)).execute();
+  }
+
+  @Test
   @DisplayName("deletePromotionSuccess - Should return a success response")
   void deletePromotionSuccess() throws Exception {
     final Promotion promotion = this.dataMock.getPromotionsDomain().getFirst();
@@ -196,5 +235,71 @@ public class PromotionControllerTest {
       .andExpectAll(status().isOk(), content().json(jsonResponseBody));
 
     verify(this.updatePromotionUseCase, times(1)).execute(updatedPromotion.getId(), promotionDTO);
+  }
+
+  @Test
+  @DisplayName("getPromotionByIdSuccess - Should return a success response with the found promotion")
+  void getPromotionByIdSuccess() throws Exception {
+    final Promotion promotion = this.dataMock.getPromotionsDomain().getFirst();
+    final ResponsePayload<PromotionResponseDTO> response = new ResponsePayload.Builder<PromotionResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Promoção de id: '" + promotion.getId() + "' encontrada")
+      .payload(new PromotionResponseDTO(promotion))
+      .build();
+    final String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.getPromotionByIdUseCase.execute(promotion.getId())).thenReturn(promotion);
+
+    this.mockMvc.perform(get(BASE_URL + "/{promotionId}", promotion.getId())
+      .accept(APPLICATION_JSON))
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.getPromotionByIdUseCase, times(1)).execute(promotion.getId());
+  }
+
+  @Test
+  @DisplayName("getAllActiveOrInactivePromotionsSuccess - Should return a success response with all active or inactive promotions")
+  void getAllActiveOrInactivePromotionsSuccess() throws Exception {
+    final List<Promotion> promotions = this.dataMock.getPromotionsDomain();
+    final List<PromotionResponseDTO> promotionDTOs = promotions.stream().map(PromotionResponseDTO::new).toList();
+    final var response = new ResponsePayload.Builder<List<PromotionResponseDTO>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Todas as promoções ativas encontradas")
+      .payload(promotionDTOs)
+      .build();
+    final String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.getAllActiveOrInactivePromotionsUseCase.execute(true)).thenReturn(promotions);
+
+    this.mockMvc.perform(get(BASE_URL + "/status?isActive=true")
+      .accept(APPLICATION_JSON))
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.getAllActiveOrInactivePromotionsUseCase, times(1)).execute(true);
+  }
+
+  @Test
+  @DisplayName("getAllPromotionsByDiscountTypeSuccess - Should return a success response with all found promotions")
+  void getAllPromotionsByDiscountTypeSuccess() throws Exception {
+    final List<Promotion> promotions = this.dataMock.getPromotionsDomain();
+    final List<PromotionResponseDTO> promotionDTOs = promotions.stream().map(PromotionResponseDTO::new).toList();
+    final String discountType = "fixed_amount";
+    final var response = new ResponsePayload.Builder<List<PromotionResponseDTO>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Todas as promoções com desconto do tipo '" + discountType + "'")
+      .payload(promotionDTOs)
+      .build();
+    final String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.getAllPromotionsByDiscountTypeUseCase.execute(discountType)).thenReturn(promotions);
+
+    this.mockMvc.perform(get(BASE_URL + "/discount?discountType={discount}", discountType)
+      .accept(APPLICATION_JSON))
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.getAllPromotionsByDiscountTypeUseCase, times(1)).execute(discountType);
   }
 }

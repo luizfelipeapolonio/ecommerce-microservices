@@ -57,7 +57,21 @@ public class DataMock {
       .endDate(LocalDateTime.now().plusDays(10))
       .build();
 
+    Promotion promotion2 = Promotion.builder()
+      .id(UUID.fromString("7e99ccd1-72d8-4b45-840d-12d7df00cd4d"))
+      .name("Promotion 2")
+      .description("Description of Promotion 2")
+      .discountType(DiscountType.FIXED_AMOUNT)
+      .discountValue("20.00")
+      .minimumPrice(new BigDecimal("20.00"))
+      .scope(PromotionScope.ALL)
+      .createdAt(LocalDateTime.parse("2025-10-14T17:55:30.467863282"))
+      .updatedAt(LocalDateTime.parse("2025-10-14T17:55:30.467863282"))
+      .endDate(LocalDateTime.now().plusDays(10))
+      .build();
+
     this.promotionsDomain.add(promotion1);
+    this.promotionsDomain.add(promotion2);
   }
 
   private void createPromotionAppliesToDomain() {
@@ -105,7 +119,21 @@ public class DataMock {
       .endDate(LocalDateTime.now().plusDays(10))
       .build();
 
+    PromotionEntity promotion2 = PromotionEntity.builder()
+      .id(UUID.fromString("7e99ccd1-72d8-4b45-840d-12d7df00cd4d"))
+      .name("Promotion 2")
+      .description("Description of Promotion 2")
+      .discountType(DiscountType.FIXED_AMOUNT)
+      .discountValue("20.00")
+      .minimumPrice(new BigDecimal("20.00"))
+      .scope(PromotionScope.ALL)
+      .createdAt(LocalDateTime.parse("2025-10-14T17:55:30.467863282"))
+      .updatedAt(LocalDateTime.parse("2025-10-14T17:55:30.467863282"))
+      .endDate(LocalDateTime.now().plusDays(10))
+      .build();
+
     this.promotionsEntity.add(promotion1);
+    this.promotionsEntity.add(promotion2);
   }
 
   private void createPromotionAppliesToEntity() {
