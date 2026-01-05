@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
@@ -80,6 +81,11 @@ public class OpenAPIConfiguration {
         schema.addAllOfItem(new ObjectSchema()
           .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "PromotionResponseDTO")));
       });
+      this.apiUtils.createSchema("ResponsePayload<List<PromotionResponseDTO>>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema().addProperty("payload", new ArraySchema()
+          .items(new ObjectSchema().$ref(SCHEMAS_REF + "PromotionResponseDTO"))));
+      });
 
       // Examples
       PromotionAppliesTo target1 = new PromotionAppliesTo();
@@ -142,6 +148,34 @@ public class OpenAPIConfiguration {
         HttpStatus.OK,
         "Promotion updated successfully",
         new PromotionResponseDTO(promotion1)
+      );
+      this.apiUtils.createExample(
+        "GetPromotionByIdExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Promotion found with id: 'da4dd8a3-a821-4350-9af2-c5b8f3801330'",
+        new PromotionResponseDTO(promotion1)
+      );
+      this.apiUtils.createExample(
+        "AllPromotionsExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "All promotions",
+        List.of(new PromotionResponseDTO(promotion1))
+      );
+      this.apiUtils.createExample(
+        "AllActiveOrInactivePromotionsExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "All active promotions found",
+        List.of(new PromotionResponseDTO(promotion1))
+      );
+      this.apiUtils.createExample(
+        "AllPromotionsByDiscountTypeExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "All promotions with discount type 'percentage'",
+        List.of(new PromotionResponseDTO(promotion1))
       );
     };
   }

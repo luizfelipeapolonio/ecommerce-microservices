@@ -79,6 +79,7 @@ public class PromotionController implements PromotionApi {
       .build();
   }
 
+  @Override
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<List<PromotionResponseDTO>> getAllPromotions() {
@@ -122,6 +123,7 @@ public class PromotionController implements PromotionApi {
       .build();
   }
 
+  @Override
   @GetMapping("/{promotionId}")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<PromotionResponseDTO> getPromotionById(@PathVariable UUID promotionId) {
@@ -134,6 +136,7 @@ public class PromotionController implements PromotionApi {
       .build();
   }
 
+  @Override
   @GetMapping("/status")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<List<PromotionResponseDTO>> getAllActiveOrInactivePromotions(
@@ -153,6 +156,7 @@ public class PromotionController implements PromotionApi {
       .build();
   }
 
+  @Override
   @GetMapping("/discount")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<List<PromotionResponseDTO>> getAllPromotionsByDiscountType(
