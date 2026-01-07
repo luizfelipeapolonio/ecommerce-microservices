@@ -9,24 +9,26 @@ spring:
       enabled: ALWAYS
   cloud:
     gateway:
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - PATCH
-              - DELETE
-            allowedHeaders: "*"
-      routes:
-      - id: ecommerce-customer-service
-        uri: lb://ECOMMERCE-CUSTOMER-SERVICE
-        predicates:
-        - Path=/api/v1/customers/**,/customer-service/v3/api-docs
-        filters:
-        - TokenRelay=
+      server:
+        webflux:
+          globalcors:
+            corsConfigurations:
+              '[/**]':
+                allowedOrigins: "*"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - PATCH
+                  - DELETE
+                allowedHeaders: "*"
+          routes:
+          - id: ecommerce-customer-service
+            uri: lb://ECOMMERCE-CUSTOMER-SERVICE
+            predicates:
+            - Path=/api/v1/customers/**,/customer-service/v3/api-docs
+            filters:
+            - TokenRelay=
 
   security:
     oauth2:
