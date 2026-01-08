@@ -42,6 +42,18 @@ spring:
   kafka:
     bootstrap-servers: http://localhost:9094
 
+# === Actuator ===
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+
 eureka:
   client:
     fetchRegistry: true
