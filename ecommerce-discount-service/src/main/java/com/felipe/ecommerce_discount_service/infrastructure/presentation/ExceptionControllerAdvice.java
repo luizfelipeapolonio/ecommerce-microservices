@@ -6,9 +6,12 @@ import com.felipe.ecommerce_discount_service.core.application.exceptions.Invalid
 import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidPromotionAppliesTargetException;
 import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidPromotionScopeException;
 import com.felipe.ecommerce_discount_service.infrastructure.exceptions.CreatePromotionDTOValidationException;
+import com.felipe.ecommerce_discount_service.infrastructure.exceptions.InventoryServiceException;
 import com.felipe.response.CustomValidationErrors;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,6 +124,47 @@ public class ExceptionControllerAdvice {
       .type(ResponseType.ERROR)
       .code(HttpStatus.INTERNAL_SERVER_ERROR)
       .message("Ocorreu um erro interno do servidor. Por favor, tente mais tarde")
+      .build();
+  }
+
+  @ExceptionHandler(RequestNotPermitted.class)
+  @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+  public ResponsePayload<Void> handleRequestNotPermittedException() {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.TOO_MANY_REQUESTS)
+      .message("Muitas requisições foram feitas em um determinado período de tempo. Por favor, tente novamente mais tarde")
+      .build();
+  }
+
+  @ExceptionHandler(CallNotPermittedException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleCallNotPermittedException() {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message("Ocorreu um erro ao se comunicar com o servidor")
+      .build();
+  }
+
+  @ExceptionHandler(InventoryServiceException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleInventoryServiceException(InventoryServiceException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message(ex.getMessage())
+      .build();
+  }
+
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleUncaughtException(Exception ex) {
+    this.logger.error("Uncaught exception handler: {}", ex.getMessage());
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message("Ocorreu um erro interno do servidor! Por favor, tente mais tarde")
       .build();
   }
 }

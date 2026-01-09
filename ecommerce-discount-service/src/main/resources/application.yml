@@ -38,6 +38,43 @@ spring:
   kafka:
     bootstrap-servers: http://localhost:9094
 
+# === Actuator ===
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  health:
+    circuitbreakers.enabled: true
+    ratelimiters.enabled: true
+
+# === Circuit breaker configuration for 'inventoryServiceCircuitBreaker' ===
+resilience4j:
+  circuitbreaker:
+    instances:
+      inventoryServiceCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: false
+        slowCallDurationThreshold: 2s
+        slowCallRateThreshold: 100
+  ratelimiter:
+    instances:
+      inventoryServiceCircuitBreaker:
+        limitRefreshPeriod: 60s
+        limitForPeriod: 2
+        timeoutDuration: 0s
+        registerHealthIndicator: true
+
 eureka:
   client:
     fetchRegistry: true
