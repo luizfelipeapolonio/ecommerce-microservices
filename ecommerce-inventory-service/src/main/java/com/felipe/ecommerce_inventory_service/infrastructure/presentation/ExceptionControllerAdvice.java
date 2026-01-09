@@ -8,10 +8,15 @@ import com.felipe.ecommerce_inventory_service.core.application.exceptions.ModelA
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.ProductAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.infrastructure.exceptions.MappingFailureException;
 import com.felipe.ecommerce_inventory_service.infrastructure.exceptions.UnprocessableJsonException;
+import com.felipe.ecommerce_inventory_service.infrastructure.exceptions.UploadServiceException;
 import com.felipe.response.CustomValidationErrors;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,6 +27,7 @@ import java.util.List;
 
 @RestControllerAdvice
 public class ExceptionControllerAdvice {
+  private final Logger logger = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
 
   @ExceptionHandler({
     CategoryAlreadyExistsException.class,
@@ -116,6 +122,47 @@ public class ExceptionControllerAdvice {
       .type(ResponseType.ERROR)
       .code(HttpStatus.INTERNAL_SERVER_ERROR)
       .message(ex.getMessage())
+      .build();
+  }
+
+  @ExceptionHandler(RequestNotPermitted.class)
+  @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+  public ResponsePayload<Void> handleRequestNotPermittedException() {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.TOO_MANY_REQUESTS)
+      .message("Muitas requisições foram feitas em um determinado período de tempo. Por favor, tente novamente mais tarde")
+      .build();
+  }
+
+  @ExceptionHandler(CallNotPermittedException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleCallNotPermittedException() {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message("Ocorreu um erro ao se comunicar com o servidor")
+      .build();
+  }
+
+  @ExceptionHandler(UploadServiceException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleUploadServiceException(UploadServiceException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message(ex.getMessage())
+      .build();
+  }
+
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleUncaughtException(Exception ex) {
+    this.logger.error("Uncaught exception handler: {}", ex.getMessage());
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message("Ocorreu um erro interno do servidor! Por favor, tente mais tarde")
       .build();
   }
 }

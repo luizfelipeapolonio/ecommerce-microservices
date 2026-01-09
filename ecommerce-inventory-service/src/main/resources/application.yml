@@ -53,6 +53,31 @@ management:
       show-details: always
     prometheus:
       enabled: true
+  health:
+    circuitbreakers.enabled: true
+    ratelimiters.enabled: true
+
+# === Circuit breaker configuration for 'uploadServiceCircuitBreaker' ===
+resilience4j:
+  circuitbreaker:
+    instances:
+      uploadServiceCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: false
+        slowCallDurationThreshold: 2s
+        slowCallRateThreshold: 100
+  ratelimiter:
+    instances:
+      uploadServiceCircuitBreaker:
+        limitRefreshPeriod: 60s
+        limitForPeriod: 2
+        timeoutDuration: 0s
+        registerHealthIndicator: true
 
 eureka:
   client:

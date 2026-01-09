@@ -55,6 +55,7 @@ public class ProductGatewayImpl implements ProductGateway {
   }
 
   @Override
+  @Transactional
   public ProductResponseDTO createProduct(Product product, UploadFile[] files) {
     ProductEntity productEntity = this.productEntityMapper.toEntity(product);
     MultipartFile[] images = Stream.of(files)
