@@ -1,0 +1,52 @@
+server:
+  port: 8084
+spring:
+  application.name: ecommerce-cart-service
+  output.ansi.enabled: ALWAYS
+
+  # === OAuth2 ====
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180
+
+      client:
+        registration:
+          ecommerce-cart-service:
+            provider: spring
+            client-id: ecommerce-cart-service
+            client-secret: cart-client-secret
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: client_credentials
+            scope: admin
+        provider:
+          spring:
+            issuer-uri: http://localhost:8180
+            authorization-uri: http://localhost:8180/oauth2/authorize
+
+  # === Database ===
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecommerce_cart_service_db
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate.ddl-auto: validate
+    show-sql: true
+
+eureka:
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+springdoc:
+  override-with-generic-response: false
+  api-docs:
+    version: openapi_3_0
+    enabled: true
+    path: /cart-service/v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /cart-service/swagger-ui.html

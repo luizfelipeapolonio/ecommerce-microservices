@@ -3,6 +3,7 @@ package com.felipe.ecommerce_customer_service.infrastructure.presentation;
 import com.felipe.ecommerce_customer_service.core.application.exceptions.AuthServerException;
 import com.felipe.ecommerce_customer_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_customer_service.core.application.exceptions.EmailAlreadyExistsException;
+import com.felipe.ecommerce_customer_service.infrastructure.exceptions.CartServiceException;
 import com.felipe.response.CustomValidationErrors;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
@@ -79,6 +80,16 @@ public class ExceptionControllerAdvice {
   @ExceptionHandler(AuthServerException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ResponsePayload<Void> handleAuthServerException(AuthServerException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message(ex.getMessage())
+      .build();
+  }
+
+  @ExceptionHandler(CartServiceException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleCartServiceException(CartServiceException ex) {
     return new ResponsePayload.Builder<Void>()
       .type(ResponseType.ERROR)
       .code(HttpStatus.INTERNAL_SERVER_ERROR)

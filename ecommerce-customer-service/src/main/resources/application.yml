@@ -19,7 +19,7 @@ spring:
             client-secret: customer-client-secret
             client-authentication-method: client_secret_basic
             authorization-grant-type: client_credentials
-            scope: read,write
+            scope: read,write,admin
         provider:
           spring:
             issuer-uri: http://localhost:8180
@@ -83,9 +83,13 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
 
-auth:
-  server:
-    internal-uri: http://localhost:8180/auth/internal/users
+# === External services ===
+external:
+  services:
+    auth-server:
+      internal-uri: http://localhost:8180/auth/internal/users
+    cart-service:
+      uri: http://localhost:8084/api/v1/carts
 
 springdoc:
   override-with-generic-response: false

@@ -21,7 +21,7 @@ public class AuthServerGatewayImpl implements AuthServerGateway {
   private final RestClient restClient;
   private final Logger logger = LoggerFactory.getLogger(AuthServerGatewayImpl.class);
 
-  @Value("${auth.server.internal-uri}")
+  @Value("${external.services.auth-server.internal-uri}")
   private String authServerUri;
 
   public AuthServerGatewayImpl(RestClient restClient) {

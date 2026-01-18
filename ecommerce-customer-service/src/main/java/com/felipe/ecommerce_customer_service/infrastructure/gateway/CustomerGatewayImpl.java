@@ -4,6 +4,7 @@ import com.felipe.ecommerce_customer_service.core.application.dtos.UpdateCustome
 import com.felipe.ecommerce_customer_service.core.domain.Address;
 import com.felipe.ecommerce_customer_service.core.domain.Customer;
 import com.felipe.ecommerce_customer_service.core.application.gateway.CustomerGateway;
+import com.felipe.ecommerce_customer_service.infrastructure.external.CartService;
 import com.felipe.ecommerce_customer_service.infrastructure.mappers.AddressEntityMapper;
 import com.felipe.ecommerce_customer_service.infrastructure.mappers.CustomerEntityMapper;
 import com.felipe.ecommerce_customer_service.infrastructure.persistence.entities.AddressEntity;
@@ -18,18 +19,23 @@ public class CustomerGatewayImpl implements CustomerGateway {
   private final CustomerRepository customerRepository;
   private final CustomerEntityMapper customerMapper;
   private final AddressEntityMapper addressMapper;
+  private final CartService cartService;
 
-  public CustomerGatewayImpl(CustomerRepository customerRepository, CustomerEntityMapper customerMapper,
-                             AddressEntityMapper addressMapper) {
+  public CustomerGatewayImpl(CustomerRepository customerRepository,
+                             CustomerEntityMapper customerMapper,
+                             AddressEntityMapper addressMapper,
+                             CartService cartService) {
     this.customerRepository = customerRepository;
     this.customerMapper = customerMapper;
     this.addressMapper = addressMapper;
+    this.cartService = cartService;
   }
 
   @Override
   public Customer createCustomer(Customer customer) {
     CustomerEntity customerEntity = this.customerMapper.toEntity(customer);
     CustomerEntity createdCustomerEntity = this.customerRepository.save(customerEntity);
+    this.cartService.createCart(new CartService.CreateCartDTO(createdCustomerEntity.getId()));
     return this.customerMapper.toDomain(createdCustomerEntity);
   }
 
