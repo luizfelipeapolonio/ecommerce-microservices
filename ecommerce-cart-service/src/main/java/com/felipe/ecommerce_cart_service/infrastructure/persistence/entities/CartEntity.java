@@ -73,12 +73,12 @@ public class CartEntity {
   }
 
   public void addCartItem(CartItemEntity item) {
-    item.setCart(this);
-    this.items.add(item);
+    CartItemEntity cartItem = CartItemEntity.mutate(item).cart(this).build();
+    this.items.add(cartItem);
   }
 
   public void removeCartItem(CartItemEntity item) {
-    item.setCart(null);
+    CartItemEntity.mutate(item).cart(null).build();
     this.items.remove(item);
   }
 }

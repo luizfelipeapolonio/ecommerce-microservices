@@ -37,20 +37,30 @@ public class CartEntityMapper {
   }
 
   private CartItem toCartItemDomain(CartItemEntity entity) {
-    CartItem item = new CartItem();
-    item.setId(entity.getId());
-    item.setProductId(entity.getProductId());
-    item.setQuantity(entity.getQuantity());
-    item.setAddedAt(entity.getAddedAt());
-    return item;
+    return CartItem.builder()
+      .id(entity.getId())
+      .productId(entity.getProductId())
+      .productName(entity.getProductName())
+      .thumbnailImage(entity.getThumbnailImage())
+      .unitPrice(entity.getUnitPrice())
+      .discountType(entity.getDiscountType())
+      .discountValue(entity.getDiscountValue())
+      .quantity(entity.getQuantity())
+      .addedAt(entity.getAddedAt())
+      .build();
   }
 
   private CartItemEntity toCartItemEntity(CartItem item) {
-    CartItemEntity entity = new CartItemEntity();
-    entity.setId(item.getId());
-    entity.setProductId(item.getProductId());
-    entity.setQuantity(item.getQuantity());
-    entity.setAddedAt(item.getAddedAt());
-    return entity;
+    return CartItemEntity.builder()
+      .id(item.getId())
+      .productId(item.getProductId())
+      .productName(item.getProductName())
+      .thumbnailImage(item.getThumbnailImage())
+      .unitPrice(item.getUnitPrice())
+      .discountType(item.getDiscountType())
+      .discountValue(item.getDiscountValue())
+      .quantity(item.getQuantity())
+      .addedAt(item.getAddedAt())
+      .build();
   }
 }
