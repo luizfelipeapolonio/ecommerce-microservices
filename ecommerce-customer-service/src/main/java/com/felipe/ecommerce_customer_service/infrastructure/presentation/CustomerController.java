@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,8 +75,10 @@ public class CustomerController implements CustomerApi {
   @Override
   @GetMapping("/profile")
   @ResponseStatus(HttpStatus.OK)
-  public ResponsePayload<CustomerProfileDTO> getAuthCustomerProfile(@AuthenticationPrincipal Jwt jwt) {
-    Customer profile = this.getCustomerByEmailUseCase.execute(jwt.getSubject());
+  public ResponsePayload<CustomerProfileDTO> getAuthCustomerProfile(@AuthenticationPrincipal Jwt jwt,
+                                                                    @RequestHeader("authCustomerEmail") String customerEmail) {
+    final String email = customerEmail != null ? customerEmail : jwt.getSubject();
+    Customer profile = this.getCustomerByEmailUseCase.execute(email);
 
     return new ResponsePayload.Builder<CustomerProfileDTO>()
       .type(ResponseType.SUCCESS)

@@ -72,13 +72,12 @@ public class CartEntity {
     this.items = items;
   }
 
-  public void addCartItem(CartItemEntity item) {
-    CartItemEntity cartItem = CartItemEntity.mutate(item).cart(this).build();
+  public void addCartItem(CartItemEntity.Builder item) {
+    CartItemEntity cartItem = item.cart(this).build();
     this.items.add(cartItem);
   }
 
   public void removeCartItem(CartItemEntity item) {
-    CartItemEntity.mutate(item).cart(null).build();
     this.items.remove(item);
   }
 }

@@ -40,6 +40,9 @@ public class CartItemEntity {
   @Column(name = "discount_value", length = 50)
   private String discountValue;
 
+  @Column(name = "final_price", nullable = false)
+  private BigDecimal finalPrice;
+
   @Column(nullable = false)
   private Integer quantity;
 
@@ -62,6 +65,7 @@ public class CartItemEntity {
     this.unitPrice = builder.unitPrice;
     this.discountType = builder.discountType;
     this.discountValue = builder.discountValue;
+    this.finalPrice = builder.finalPrice;
     this.quantity = builder.quantity;
     this.addedAt = builder.addedAt;
     this.cart = builder.cart;
@@ -99,6 +103,10 @@ public class CartItemEntity {
     return this.discountValue;
   }
 
+  public BigDecimal getFinalPrice() {
+    return this.finalPrice;
+  }
+
   public LocalDateTime getAddedAt() {
     return this.addedAt;
   }
@@ -123,6 +131,7 @@ public class CartItemEntity {
     private BigDecimal unitPrice;
     private String discountType;
     private String discountValue;
+    private BigDecimal finalPrice;
     private Integer quantity;
     private LocalDateTime addedAt;
     private CartEntity cart;
@@ -138,6 +147,7 @@ public class CartItemEntity {
       this.unitPrice = entity.getUnitPrice();
       this.discountType = entity.getDiscountType();
       this.discountValue = entity.getDiscountValue();
+      this.finalPrice = entity.getFinalPrice();
       this.quantity = entity.getQuantity();
       this.addedAt = entity.getAddedAt();
       this.cart = entity.getCart();
@@ -175,6 +185,11 @@ public class CartItemEntity {
 
     public Builder discountValue(String discountValue) {
       this.discountValue = discountValue;
+      return this;
+    }
+
+    public Builder finalPrice(BigDecimal finalPrice) {
+      this.finalPrice = finalPrice;
       return this;
     }
 

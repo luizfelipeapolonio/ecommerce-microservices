@@ -7,32 +7,8 @@ import com.felipe.ecommerce_cart_service.infrastructure.persistence.entities.Car
 import org.springframework.stereotype.Component;
 
 @Component
-public class CartEntityMapper {
-  public Cart toDomain(CartEntity entity) {
-    Cart cart = new Cart();
-    cart.setId(entity.getId());
-    cart.setCustomerId(entity.getCustomerId());
-    cart.setCreatedAt(entity.getCreatedAt());
-    entity.getItems().forEach(item -> {
-      CartItem.Builder cartItem = toCartItemDomainBuilder(item);
-      cart.addItem(cartItem);
-    });
-    return cart;
-  }
-
-  public CartEntity toEntity(Cart cart) {
-    CartEntity cartEntity = new CartEntity();
-    cartEntity.setId(cart.getId());
-    cartEntity.setCustomerId(cart.getCustomerId());
-    cartEntity.setCreatedAt(cart.getCreatedAt());
-    cart.getItems().forEach(item -> {
-      CartItemEntity.Builder cartItem = toCartItemEntityBuilder(item);
-      cartEntity.addCartItem(cartItem);
-    });
-    return cartEntity;
-  }
-
-  private CartItem.Builder toCartItemDomainBuilder(CartItemEntity entity) {
+public class CartItemEntityMapper {
+  public CartItem toDomain(CartItemEntity entity) {
     return CartItem.builder()
       .id(entity.getId())
       .productId(entity.getProductId())
@@ -43,10 +19,12 @@ public class CartEntityMapper {
       .discountValue(entity.getDiscountValue())
       .finalPrice(entity.getFinalPrice())
       .quantity(entity.getQuantity())
-      .addedAt(entity.getAddedAt());
+      .addedAt(entity.getAddedAt())
+      .cart(toCartDomain(entity.getCart()))
+      .build();
   }
 
-  private CartItemEntity.Builder toCartItemEntityBuilder(CartItem cartItem) {
+  public CartItemEntity toEntity(CartItem cartItem) {
     return CartItemEntity.builder()
       .id(cartItem.getId())
       .productId(cartItem.getProductId())
@@ -57,6 +35,24 @@ public class CartEntityMapper {
       .discountValue(cartItem.getDiscountValue())
       .finalPrice(cartItem.getFinalPrice())
       .quantity(cartItem.getQuantity())
-      .addedAt(cartItem.getAddedAt());
+      .addedAt(cartItem.getAddedAt())
+      .cart(toCartEntity(cartItem.getCart()))
+      .build();
+  }
+
+  private Cart toCartDomain(CartEntity entity) {
+    Cart cart = new Cart();
+    cart.setId(entity.getId());
+    cart.setCustomerId(entity.getCustomerId());
+    cart.setCreatedAt(entity.getCreatedAt());
+    return cart;
+  }
+
+  private CartEntity toCartEntity(Cart cart) {
+    CartEntity cartEntity = new CartEntity();
+    cartEntity.setId(cart.getId());
+    cartEntity.setCustomerId(cart.getCustomerId());
+    cartEntity.setCreatedAt(cart.getCreatedAt());
+    return cartEntity;
   }
 }

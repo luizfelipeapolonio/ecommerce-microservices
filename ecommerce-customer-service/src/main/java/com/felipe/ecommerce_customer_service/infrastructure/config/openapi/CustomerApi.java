@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -67,7 +68,10 @@ public interface CustomerApi {
       @ApiResponse(responseCode = "500", ref = "InternalServerError")
     }
   )
-  ResponsePayload<CustomerProfileDTO> getAuthCustomerProfile(@AuthenticationPrincipal Jwt jwt);
+  ResponsePayload<CustomerProfileDTO> getAuthCustomerProfile(
+    @AuthenticationPrincipal Jwt jwt,
+    @RequestHeader("authCustomerEmail") String customerEmail
+  );
 
   @Operation(
     operationId = "updateCustomer",

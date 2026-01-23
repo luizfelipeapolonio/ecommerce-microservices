@@ -50,13 +50,12 @@ public class Cart {
     this.items = items;
   }
 
-  public void addItem(CartItem item) {
-    CartItem cartItem = CartItem.mutate(item).cart(this).build();
+  public void addItem(CartItem.Builder item) {
+    CartItem cartItem = item.cart(this).build();
     this.items.add(cartItem);
   }
 
   public void removeItem(CartItem item) {
-    CartItem.mutate(item).cart(null).build();
     this.items.remove(item);
   }
 }

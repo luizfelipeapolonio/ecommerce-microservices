@@ -6,6 +6,7 @@ CREATE TABLE cart_items (
     unit_price      NUMERIC      NOT NULL,
     discount_type   VARCHAR(12),
     discount_value  VARCHAR(50),
+    final_price     NUMERIC      NOT NULL,
     quantity        INTEGER      NOT NULL,
     cart_id         UUID         NOT NULL,
     added_at        TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,

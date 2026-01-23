@@ -34,6 +34,13 @@ spring:
     hibernate.ddl-auto: validate
     show-sql: true
 
+external:
+  services:
+    customer-service:
+      uri: http://localhost:8081/api/v1/customers
+    inventory-service:
+      uri: http://localhost:8082/api/v1/products
+
 eureka:
   client:
     fetchRegistry: true

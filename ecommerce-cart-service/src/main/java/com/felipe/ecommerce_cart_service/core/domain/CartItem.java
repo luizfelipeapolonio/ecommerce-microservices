@@ -12,6 +12,7 @@ public class CartItem {
   private BigDecimal unitPrice;
   private String discountType;
   private String discountValue;
+  private BigDecimal finalPrice;
   private Integer quantity;
   private LocalDateTime addedAt;
   private Cart cart;
@@ -27,6 +28,7 @@ public class CartItem {
     this.unitPrice = builder.unitPrice;
     this.discountType = builder.discountType;
     this.discountValue = builder.discountValue;
+    this.finalPrice = builder.finalPrice;
     this.quantity = builder.quantity;
     this.addedAt = builder.addedAt;
     this.cart = builder.cart;
@@ -60,6 +62,10 @@ public class CartItem {
     return this.discountValue;
   }
 
+  public BigDecimal getFinalPrice() {
+    return this.finalPrice;
+  }
+
   public int getQuantity() {
     return this.quantity;
   }
@@ -88,6 +94,7 @@ public class CartItem {
     private BigDecimal unitPrice;
     private String discountType;
     private String discountValue;
+    private BigDecimal finalPrice;
     private Integer quantity;
     private LocalDateTime addedAt;
     private Cart cart;
@@ -103,6 +110,7 @@ public class CartItem {
       this.unitPrice = item.getUnitPrice();
       this.discountType = item.getDiscountType();
       this.discountValue = item.getDiscountValue();
+      this.finalPrice = item.getFinalPrice();
       this.quantity = item.getQuantity();
       this.addedAt = item.getAddedAt();
       this.cart = item.getCart();
@@ -140,6 +148,11 @@ public class CartItem {
 
     public Builder discountValue(String discountValue) {
       this.discountValue = discountValue;
+      return this;
+    }
+
+    public Builder finalPrice(BigDecimal finalPrice) {
+      this.finalPrice = finalPrice;
       return this;
     }
 
