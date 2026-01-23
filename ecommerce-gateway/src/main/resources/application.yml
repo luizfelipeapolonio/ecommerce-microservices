@@ -29,6 +29,12 @@ spring:
             - Path=/api/v1/customers/**,/customer-service/v3/api-docs
             filters:
             - TokenRelay=
+          - id: ecommerce-cart-service
+            uri: lb://ECOMMERCE-CART-SERVICE
+            predicates:
+            - Path=/api/v1/carts/**,/cart-service/v3/api-docs
+            filters:
+            - TokenRelay=
 
   security:
     oauth2:
@@ -67,4 +73,6 @@ springdoc:
       - name: E-commerce Gateway
         url: /v3/api-docs
       - name: E-commerce Customer Service
+        url: /customer-service/v3/api-docs
+      - name: E-commerce Cart Service
         url: /customer-service/v3/api-docs
