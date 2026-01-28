@@ -3,9 +3,11 @@ package com.felipe.ecommerce_cart_service.infrastructure.config.beans;
 import com.felipe.ecommerce_cart_service.core.application.gateway.CartGateway;
 import com.felipe.ecommerce_cart_service.core.application.usecases.AddItemToCartUseCase;
 import com.felipe.ecommerce_cart_service.core.application.usecases.CreateCartUseCase;
+import com.felipe.ecommerce_cart_service.core.application.usecases.GetCartItemByIdUseCase;
 import com.felipe.ecommerce_cart_service.core.application.usecases.RemoveItemFromCartUseCase;
 import com.felipe.ecommerce_cart_service.core.application.usecases.impl.AddItemToCartUseCaseImpl;
 import com.felipe.ecommerce_cart_service.core.application.usecases.impl.CreateCartUseCaseImpl;
+import com.felipe.ecommerce_cart_service.core.application.usecases.impl.GetCartItemByIdUseCaseImpl;
 import com.felipe.ecommerce_cart_service.core.application.usecases.impl.RemoveItemFromCartUseCaseImpl;
 import com.felipe.ecommerce_cart_service.infrastructure.external.CustomerService;
 import org.springframework.context.annotation.Bean;
@@ -34,5 +36,10 @@ public class CartBeans {
   @Bean
   public RemoveItemFromCartUseCase removeItemFromCartUseCase() {
     return new RemoveItemFromCartUseCaseImpl(this.cartGateway, this.customerService);
+  }
+
+  @Bean
+  public GetCartItemByIdUseCase getCartItemByIdUseCase() {
+    return new GetCartItemByIdUseCaseImpl(this.cartGateway, this.customerService);
   }
 }
