@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_cart_service.core.application.usecases.impl;
 
+import com.felipe.ecommerce_cart_service.core.application.dtos.CartItemDTO;
 import com.felipe.ecommerce_cart_service.core.application.dtos.CustomerProfileDTO;
 import com.felipe.ecommerce_cart_service.core.application.exceptions.CartItemAlreadyExistsException;
 import com.felipe.ecommerce_cart_service.core.application.exceptions.CartNotFoundException;
@@ -9,7 +10,6 @@ import com.felipe.ecommerce_cart_service.core.application.usecases.AddItemToCart
 import com.felipe.ecommerce_cart_service.core.domain.Cart;
 import com.felipe.ecommerce_cart_service.core.domain.CartItem;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class AddItemToCartUseCaseImpl implements AddItemToCartUseCase {
@@ -30,12 +30,15 @@ public class AddItemToCartUseCaseImpl implements AddItemToCartUseCase {
     final Cart foundCart = this.cartGateway.findCartByCustomerId(customerId)
       .orElseThrow(() -> new CartNotFoundException("Carrinho do cliente de id '" + customerId + "' não encontrado"));
 
-    // Check if the product is already in the cart
-    Optional<CartItem> existingCartItem = this.cartGateway.findCartItemByProductIdAndCartId(productId, foundCart.getId());
-    if(existingCartItem.isPresent()) {
+    boolean isItemAlreadyInCart = foundCart.getItems()
+      .stream()
+      .anyMatch(item -> item.getProductId().equals(productId));
+
+    if(isItemAlreadyInCart) {
       throw new CartItemAlreadyExistsException("O produto de id '" + productId + "' já está no carrinho");
     }
 
-    return this.cartGateway.addItemToCart(foundCart, productId, quantity);
+    CartItemDTO itemDTO = this.cartGateway.addItemToCart(foundCart, productId, quantity);
+    return itemDTO.cart().getItems().get(itemDTO.itemIndex());
   }
 }
