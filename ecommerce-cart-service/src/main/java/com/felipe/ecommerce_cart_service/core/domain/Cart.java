@@ -50,12 +50,13 @@ public class Cart {
     this.items = items;
   }
 
-  public void addItem(CartItem.Builder item) {
-    CartItem cartItem = item.cart(this).build();
-    this.items.add(cartItem);
+  public void addItem(CartItem item) {
+    this.items.add(item);
+    item.setCart(this);
   }
 
   public void removeItem(CartItem item) {
     this.items.remove(item);
+    item.setCart(null);
   }
 }

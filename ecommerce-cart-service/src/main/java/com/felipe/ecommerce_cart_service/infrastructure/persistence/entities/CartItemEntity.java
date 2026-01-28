@@ -2,6 +2,7 @@ package com.felipe.ecommerce_cart_service.infrastructure.persistence.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -47,169 +48,156 @@ public class CartItemEntity {
   private Integer quantity;
 
   @CreationTimestamp
-  @Column(name = "added_at", nullable = false)
+  @Column(name = "added_at", nullable = false, updatable = false)
   private LocalDateTime addedAt;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "cart_id", nullable = false)
   private CartEntity cart;
 
-  protected CartItemEntity() {
-  }
-
-  protected CartItemEntity(Builder builder) {
-    this.id = builder.id;
-    this.productId = builder.productId;
-    this.productName = builder.productName;
-    this.thumbnailImage = builder.thumbnailImage;
-    this.unitPrice = builder.unitPrice;
-    this.discountType = builder.discountType;
-    this.discountValue = builder.discountValue;
-    this.finalPrice = builder.finalPrice;
-    this.quantity = builder.quantity;
-    this.addedAt = builder.addedAt;
-    this.cart = builder.cart;
+  public CartItemEntity() {
   }
 
   public Long getId() {
     return this.id;
   }
 
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public CartItemEntity id(Long id) {
+    this.id = id;
+    return this;
+  }
+
   public UUID getProductId() {
     return this.productId;
+  }
+
+  public void setProductId(UUID productId) {
+    this.productId = productId;
+  }
+
+  public CartItemEntity productId(UUID productId) {
+    this.productId = productId;
+    return this;
   }
 
   public Integer getQuantity() {
     return this.quantity;
   }
 
+  public void setQuantity(Integer quantity) {
+    this.quantity = quantity;
+  }
+
+  public CartItemEntity quantity(Integer quantity) {
+    this.quantity = quantity;
+    return this;
+  }
+
   public String getProductName() {
     return this.productName;
+  }
+
+  public void setProductName(String productName) {
+    this.productName = productName;
+  }
+
+  public CartItemEntity productName(String productName) {
+    this.productName = productName;
+    return this;
   }
 
   public String getThumbnailImage() {
     return this.thumbnailImage;
   }
 
+  public void setThumbnailImage(String thumbnailImage) {
+    this.thumbnailImage = thumbnailImage;
+  }
+
+  public CartItemEntity thumbnailImage(String thumbnailImage) {
+    this.thumbnailImage = thumbnailImage;
+    return this;
+  }
+
   public BigDecimal getUnitPrice() {
     return this.unitPrice;
+  }
+
+  public void setUnitPrice(BigDecimal unitPrice) {
+    this.unitPrice = unitPrice;
+  }
+
+  public CartItemEntity unitPrice(BigDecimal unitPrice) {
+    this.unitPrice = unitPrice;
+    return this;
   }
 
   public String getDiscountType() {
     return this.discountType;
   }
 
+  public void setDiscountType(String discountType) {
+    this.discountType = discountType;
+  }
+
+  public CartItemEntity discountType(String discountType) {
+    this.discountType = discountType;
+    return this;
+  }
+
   public String getDiscountValue() {
     return this.discountValue;
+  }
+
+  public void setDiscountValue(String discountValue) {
+    this.discountValue = discountValue;
+  }
+
+  public CartItemEntity discountValue(String discountValue) {
+    this.discountValue = discountValue;
+    return this;
   }
 
   public BigDecimal getFinalPrice() {
     return this.finalPrice;
   }
 
+  public void setFinalPrice(BigDecimal finalPrice) {
+    this.finalPrice = finalPrice;
+  }
+
+  public CartItemEntity finalPrice(BigDecimal finalPrice) {
+    this.finalPrice = finalPrice;
+    return this;
+  }
+
   public LocalDateTime getAddedAt() {
     return this.addedAt;
+  }
+
+  public void setAddedAt(LocalDateTime addedAt) {
+    this.addedAt = addedAt;
+  }
+
+  public CartItemEntity addedAt(LocalDateTime addedAt) {
+    this.addedAt = addedAt;
+    return this;
   }
 
   public CartEntity getCart() {
     return this.cart;
   }
 
-  public static Builder builder() {
-    return new Builder();
+  public void setCart(CartEntity cart) {
+    this.cart = cart;
   }
 
-  public static Builder mutate(CartItemEntity cartItemEntity) {
-    return new Builder(cartItemEntity);
-  }
-
-  public static class Builder {
-    private Long id;
-    private UUID productId;
-    private String productName;
-    private String thumbnailImage;
-    private BigDecimal unitPrice;
-    private String discountType;
-    private String discountValue;
-    private BigDecimal finalPrice;
-    private Integer quantity;
-    private LocalDateTime addedAt;
-    private CartEntity cart;
-
-    private Builder() {
-    }
-
-    private Builder(CartItemEntity entity) {
-      this.id = entity.getId();
-      this.productId = entity.getProductId();
-      this.productName = entity.getProductName();
-      this.thumbnailImage = entity.getThumbnailImage();
-      this.unitPrice = entity.getUnitPrice();
-      this.discountType = entity.getDiscountType();
-      this.discountValue = entity.getDiscountValue();
-      this.finalPrice = entity.getFinalPrice();
-      this.quantity = entity.getQuantity();
-      this.addedAt = entity.getAddedAt();
-      this.cart = entity.getCart();
-    }
-
-    public Builder id(Long id) {
-      this.id = id;
-      return this;
-    }
-
-    public Builder productId(UUID productId) {
-      this.productId = productId;
-      return this;
-    }
-
-    public Builder productName(String productName) {
-      this.productName = productName;
-      return this;
-    }
-
-    public Builder thumbnailImage(String thumbnailImage) {
-      this.thumbnailImage = thumbnailImage;
-      return this;
-    }
-
-    public Builder unitPrice(BigDecimal unitPrice) {
-      this.unitPrice = unitPrice;
-      return this;
-    }
-
-    public Builder discountType(String discountType) {
-      this.discountType = discountType;
-      return this;
-    }
-
-    public Builder discountValue(String discountValue) {
-      this.discountValue = discountValue;
-      return this;
-    }
-
-    public Builder finalPrice(BigDecimal finalPrice) {
-      this.finalPrice = finalPrice;
-      return this;
-    }
-
-    public Builder quantity(Integer quantity) {
-      this.quantity = quantity;
-      return this;
-    }
-
-    public Builder addedAt(LocalDateTime addedAt) {
-      this.addedAt = addedAt;
-      return this;
-    }
-
-    public Builder cart(CartEntity cart) {
-      this.cart = cart;
-      return this;
-    }
-
-    public CartItemEntity build() {
-      return new CartItemEntity(this);
-    }
+  public CartItemEntity cart(CartEntity cart) {
+    this.cart = cart;
+    return this;
   }
 }

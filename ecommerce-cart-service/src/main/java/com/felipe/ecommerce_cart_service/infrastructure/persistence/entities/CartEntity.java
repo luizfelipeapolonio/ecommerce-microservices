@@ -72,12 +72,14 @@ public class CartEntity {
     this.items = items;
   }
 
-  public void addCartItem(CartItemEntity.Builder item) {
-    CartItemEntity cartItem = item.cart(this).build();
-    this.items.add(cartItem);
+  public int addItem(CartItemEntity item) {
+    this.items.add(item);
+    item.setCart(this);
+    return this.items.indexOf(item);
   }
 
-  public void removeCartItem(CartItemEntity item) {
+  public void removeItem(CartItemEntity item) {
     this.items.remove(item);
+    item.setCart(null);
   }
 }
