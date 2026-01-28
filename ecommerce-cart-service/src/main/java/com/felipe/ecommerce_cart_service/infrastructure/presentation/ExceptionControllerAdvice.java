@@ -1,6 +1,7 @@
 package com.felipe.ecommerce_cart_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_cart_service.core.application.exceptions.CartItemAlreadyExistsException;
+import com.felipe.ecommerce_cart_service.core.application.exceptions.CartItemNotFoundException;
 import com.felipe.ecommerce_cart_service.core.application.exceptions.CartNotFoundException;
 import com.felipe.ecommerce_cart_service.infrastructure.exceptions.CustomerServiceException;
 import com.felipe.ecommerce_cart_service.infrastructure.exceptions.InventoryServiceException;
@@ -49,9 +50,9 @@ public class ExceptionControllerAdvice {
       .build();
   }
 
-  @ExceptionHandler(CartNotFoundException.class)
+  @ExceptionHandler({CartNotFoundException.class, CartItemNotFoundException.class})
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ResponsePayload<Void> handleCartNotFoundException(CartNotFoundException ex) {
+  public ResponsePayload<Void> handleDataNotFoundException(Exception ex) {
     return new ResponsePayload.Builder<Void>()
       .type(ResponseType.ERROR)
       .code(HttpStatus.NOT_FOUND)

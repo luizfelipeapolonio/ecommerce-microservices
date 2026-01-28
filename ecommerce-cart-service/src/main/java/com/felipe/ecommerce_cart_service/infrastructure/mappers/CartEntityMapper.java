@@ -14,7 +14,7 @@ public class CartEntityMapper {
     cart.setCustomerId(entity.getCustomerId());
     cart.setCreatedAt(entity.getCreatedAt());
     entity.getItems().forEach(item -> {
-      CartItem.Builder cartItem = toCartItemDomainBuilder(item);
+      CartItem cartItem = toCartItemDomain(item);
       cart.addItem(cartItem);
     });
     return cart;
@@ -26,14 +26,14 @@ public class CartEntityMapper {
     cartEntity.setCustomerId(cart.getCustomerId());
     cartEntity.setCreatedAt(cart.getCreatedAt());
     cart.getItems().forEach(item -> {
-      CartItemEntity.Builder cartItem = toCartItemEntityBuilder(item);
-      cartEntity.addCartItem(cartItem);
+      CartItemEntity cartItem = toCartItemEntity(item);
+      cartEntity.addItem(cartItem);
     });
     return cartEntity;
   }
 
-  private CartItem.Builder toCartItemDomainBuilder(CartItemEntity entity) {
-    return CartItem.builder()
+  private CartItem toCartItemDomain(CartItemEntity entity) {
+    return new CartItem()
       .id(entity.getId())
       .productId(entity.getProductId())
       .productName(entity.getProductName())
@@ -46,8 +46,8 @@ public class CartEntityMapper {
       .addedAt(entity.getAddedAt());
   }
 
-  private CartItemEntity.Builder toCartItemEntityBuilder(CartItem cartItem) {
-    return CartItemEntity.builder()
+  private CartItemEntity toCartItemEntity(CartItem cartItem) {
+    return new CartItemEntity()
       .id(cartItem.getId())
       .productId(cartItem.getProductId())
       .productName(cartItem.getProductName())

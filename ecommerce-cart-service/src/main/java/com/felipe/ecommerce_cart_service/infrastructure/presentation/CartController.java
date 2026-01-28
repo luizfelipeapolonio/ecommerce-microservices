@@ -2,6 +2,7 @@ package com.felipe.ecommerce_cart_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_cart_service.core.application.usecases.AddItemToCartUseCase;
 import com.felipe.ecommerce_cart_service.core.application.usecases.CreateCartUseCase;
+import com.felipe.ecommerce_cart_service.core.application.usecases.RemoveItemFromCartUseCase;
 import com.felipe.ecommerce_cart_service.core.domain.Cart;
 import com.felipe.ecommerce_cart_service.core.domain.CartItem;
 import com.felipe.ecommerce_cart_service.infrastructure.dtos.cart.AddItemToCartDTO;
@@ -14,6 +15,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,10 +28,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class CartController {
   private final CreateCartUseCase createCartUseCase;
   private final AddItemToCartUseCase addItemToCartUseCase;
+  private final RemoveItemFromCartUseCase removeItemFromCartUseCase;
 
-  public CartController(CreateCartUseCase createCartUseCase, AddItemToCartUseCase addItemToCartUseCase) {
+  public CartController(CreateCartUseCase createCartUseCase, AddItemToCartUseCase addItemToCartUseCase,
+                        RemoveItemFromCartUseCase removeItemFromCartUseCase) {
     this.createCartUseCase = createCartUseCase;
     this.addItemToCartUseCase = addItemToCartUseCase;
+    this.removeItemFromCartUseCase = removeItemFromCartUseCase;
   }
 
   @PostMapping
@@ -58,6 +64,19 @@ public class CartController {
       .code(HttpStatus.CREATED)
       .message(message)
       .payload(new CartItemResponseDTO(addedItem))
+      .build();
+  }
+
+  @DeleteMapping("/items/{itemId}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<Void> removeItemFromCart(@PathVariable Long itemId,
+                                                  @AuthenticationPrincipal Jwt jwt) {
+    CartItem removedItem = this.removeItemFromCartUseCase.execute(itemId, jwt.getSubject());
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Item '" + removedItem.getProductName() + "' removido com sucesso")
+      .payload(null)
       .build();
   }
 }
