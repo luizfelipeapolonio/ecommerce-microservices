@@ -1,6 +1,5 @@
 package com.felipe.ecommerce_cart_service.core.application.usecases.impl;
 
-import com.felipe.ecommerce_cart_service.core.application.dtos.CartItemDTO;
 import com.felipe.ecommerce_cart_service.core.application.dtos.CustomerProfileDTO;
 import com.felipe.ecommerce_cart_service.core.application.exceptions.CartItemNotFoundException;
 import com.felipe.ecommerce_cart_service.core.application.exceptions.CartNotFoundException;
