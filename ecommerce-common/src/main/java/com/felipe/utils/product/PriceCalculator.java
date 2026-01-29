@@ -3,7 +3,7 @@ package com.felipe.utils.product;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class ProductUtils {
+public class PriceCalculator {
   public static BigDecimal calculateFinalPrice(
     String discountType,
     String unitPrice,
@@ -15,14 +15,13 @@ public class ProductUtils {
     final BigDecimal quantity = new BigDecimal(productQuantity);
 
     return switch (discountType) {
-      case "fixed_amount" -> price.subtract(discount).multiply(quantity);
+      case "fixed_amount" -> price.multiply(quantity).subtract(discount);
       case "percentage" -> {
         final BigDecimal discountPercentage = discount.divide(new BigDecimal(100));
         final BigDecimal discountPrice = price.multiply(discountPercentage);
-
-        yield price.subtract(discountPrice)
-          .setScale(2, RoundingMode.HALF_DOWN)
-          .multiply(quantity);
+        yield price.multiply(quantity)
+          .subtract(discountPrice)
+          .setScale(2, RoundingMode.HALF_DOWN);
       }
       default -> throw new PriceCalculationException("The discount type '" + discountType + "' is not supported");
     };
