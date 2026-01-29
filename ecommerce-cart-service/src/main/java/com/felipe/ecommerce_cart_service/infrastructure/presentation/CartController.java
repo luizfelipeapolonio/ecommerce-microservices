@@ -5,12 +5,14 @@ import com.felipe.ecommerce_cart_service.core.application.usecases.CreateCartUse
 import com.felipe.ecommerce_cart_service.core.application.usecases.GetAllCartItemsUseCase;
 import com.felipe.ecommerce_cart_service.core.application.usecases.GetCartItemByIdUseCase;
 import com.felipe.ecommerce_cart_service.core.application.usecases.RemoveItemFromCartUseCase;
+import com.felipe.ecommerce_cart_service.core.application.usecases.UpdateCartItemUseCase;
 import com.felipe.ecommerce_cart_service.core.domain.Cart;
 import com.felipe.ecommerce_cart_service.core.domain.CartItem;
 import com.felipe.ecommerce_cart_service.infrastructure.dtos.cart.AddItemToCartDTO;
 import com.felipe.ecommerce_cart_service.infrastructure.dtos.cart.CartItemResponseDTO;
 import com.felipe.ecommerce_cart_service.infrastructure.dtos.cart.CartResponseDTO;
 import com.felipe.ecommerce_cart_service.infrastructure.dtos.cart.CreateCartDTO;
+import com.felipe.ecommerce_cart_service.infrastructure.dtos.cart.UpdateCartItemDTO;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
 import jakarta.validation.Valid;
@@ -19,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,17 +39,20 @@ public class CartController {
   private final RemoveItemFromCartUseCase removeItemFromCartUseCase;
   private final GetCartItemByIdUseCase getCartItemByIdUseCase;
   private final GetAllCartItemsUseCase getAllCartItemsUseCase;
+  private final UpdateCartItemUseCase updateCartItemUseCase;
 
   public CartController(CreateCartUseCase createCartUseCase,
                         AddItemToCartUseCase addItemToCartUseCase,
                         RemoveItemFromCartUseCase removeItemFromCartUseCase,
                         GetCartItemByIdUseCase getCartItemByIdUseCase,
-                        GetAllCartItemsUseCase getAllCartItemsUseCase) {
+                        GetAllCartItemsUseCase getAllCartItemsUseCase,
+                        UpdateCartItemUseCase updateCartItemUseCase) {
     this.createCartUseCase = createCartUseCase;
     this.addItemToCartUseCase = addItemToCartUseCase;
     this.removeItemFromCartUseCase = removeItemFromCartUseCase;
     this.getCartItemByIdUseCase = getCartItemByIdUseCase;
     this.getAllCartItemsUseCase = getAllCartItemsUseCase;
+    this.updateCartItemUseCase = updateCartItemUseCase;
   }
 
   @PostMapping
@@ -115,6 +121,20 @@ public class CartController {
       .code(HttpStatus.OK)
       .message("Item de id '" + itemId + "' encontrado")
       .payload(new CartItemResponseDTO(item))
+      .build();
+  }
+
+  @PatchMapping("/items/{itemId}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<CartItemResponseDTO> updateCartItem(@PathVariable Long itemId,
+                                                             @AuthenticationPrincipal Jwt jwt,
+                                                             @Valid @RequestBody UpdateCartItemDTO itemDTO) {
+    CartItem updatedItem = this.updateCartItemUseCase.execute(itemId, itemDTO.quantity(), jwt.getSubject());
+    return new ResponsePayload.Builder<CartItemResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Item de id '" + itemId + "' atualizado com sucesso")
+      .payload(new CartItemResponseDTO(updatedItem))
       .build();
   }
 }

@@ -10,5 +10,6 @@ public interface CartGateway {
   Cart createCart(UUID customerId);
   CartItemDTO addItemToCart(Cart cart, UUID productId, int quantity);
   void removeItemFromCart(Cart cart);
+  void updateCartItem(Cart cart);
   Optional<Cart> findCartByCustomerId(UUID customerId);
 }
