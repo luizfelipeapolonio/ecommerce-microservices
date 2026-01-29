@@ -2,6 +2,7 @@ package com.felipe.ecommerce_cart_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_cart_service.core.application.usecases.AddItemToCartUseCase;
 import com.felipe.ecommerce_cart_service.core.application.usecases.CreateCartUseCase;
+import com.felipe.ecommerce_cart_service.core.application.usecases.GetAllCartItemsUseCase;
 import com.felipe.ecommerce_cart_service.core.application.usecases.GetCartItemByIdUseCase;
 import com.felipe.ecommerce_cart_service.core.application.usecases.RemoveItemFromCartUseCase;
 import com.felipe.ecommerce_cart_service.core.domain.Cart;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/carts")
 public class CartController {
@@ -32,15 +35,18 @@ public class CartController {
   private final AddItemToCartUseCase addItemToCartUseCase;
   private final RemoveItemFromCartUseCase removeItemFromCartUseCase;
   private final GetCartItemByIdUseCase getCartItemByIdUseCase;
+  private final GetAllCartItemsUseCase getAllCartItemsUseCase;
 
   public CartController(CreateCartUseCase createCartUseCase,
                         AddItemToCartUseCase addItemToCartUseCase,
                         RemoveItemFromCartUseCase removeItemFromCartUseCase,
-                        GetCartItemByIdUseCase getCartItemByIdUseCase) {
+                        GetCartItemByIdUseCase getCartItemByIdUseCase,
+                        GetAllCartItemsUseCase getAllCartItemsUseCase) {
     this.createCartUseCase = createCartUseCase;
     this.addItemToCartUseCase = addItemToCartUseCase;
     this.removeItemFromCartUseCase = removeItemFromCartUseCase;
     this.getCartItemByIdUseCase = getCartItemByIdUseCase;
+    this.getAllCartItemsUseCase = getAllCartItemsUseCase;
   }
 
   @PostMapping
@@ -70,6 +76,19 @@ public class CartController {
       .code(HttpStatus.CREATED)
       .message(message)
       .payload(new CartItemResponseDTO(addedItem))
+      .build();
+  }
+
+  @GetMapping("/items")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<List<CartItemResponseDTO>> getAllCartItems(@AuthenticationPrincipal Jwt jwt) {
+    List<CartItem> items = this.getAllCartItemsUseCase.execute(jwt.getSubject());
+    List<CartItemResponseDTO> itemsDTO = items.stream().map(CartItemResponseDTO::new).toList();
+    return new ResponsePayload.Builder<List<CartItemResponseDTO>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Todos os itens do carrinho")
+      .payload(itemsDTO)
       .build();
   }
 
