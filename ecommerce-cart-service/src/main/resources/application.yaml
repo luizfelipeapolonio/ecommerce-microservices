@@ -34,6 +34,53 @@ spring:
     hibernate.ddl-auto: validate
     show-sql: true
 
+# === Actuator ===
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  health:
+    circuitbreakers.enabled: true
+    ratelimiters.enabled: true
+
+# === Circuit breaker configuration ===
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: false
+        slowCallDurationThreshold: 2s
+        slowCallRateThreshold: 100
+    instances:
+      cart__inventoryService:
+        baseConfig: default
+      cart__customerService:
+        baseConfig: default
+  ratelimiter:
+    configs:
+      default:
+        limitRefreshPeriod: 60s
+        limitForPeriod: 2
+        timeoutDuration: 0s
+        registerHealthIndicator: true
+    instances:
+      cart__inventoryService:
+        baseConfig: default
+      cart__customerService:
+        baseConfig: default
+
 external:
   services:
     customer-service:

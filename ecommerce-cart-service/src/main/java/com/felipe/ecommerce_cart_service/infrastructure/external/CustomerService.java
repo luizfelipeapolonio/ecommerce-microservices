@@ -4,6 +4,10 @@ import com.felipe.ecommerce_cart_service.core.application.dtos.CustomerProfileDT
 import com.felipe.ecommerce_cart_service.core.application.gateway.CustomerGateway;
 import com.felipe.ecommerce_cart_service.infrastructure.exceptions.CustomerServiceException;
 import com.felipe.response.ResponsePayload;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +36,8 @@ public class CustomerService implements CustomerGateway {
   }
 
   @Override
+  @CircuitBreaker(name = "cart__customerService", fallbackMethod = "fallback")
+  @RateLimiter(name = "cart__customerService", fallbackMethod = "fallback")
   public CustomerProfileDTO fetchAuthCustomerProfile(String customerEmail) {
     try {
       final ResponsePayload<CustomerProfileDTO> response = this.restClient
@@ -49,5 +55,15 @@ public class CustomerService implements CustomerGateway {
       logger.error("Error in Customer Service RestClient -> {}", ex.getMessage());
       throw new CustomerServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }
+  }
+
+  public CustomerProfileDTO fallback(String customerEmail, CallNotPermittedException ex) {
+    logger.error("Customer Service Circuit Breaker fallback -> {}", ex.getMessage());
+    throw ex;
+  }
+
+  public CustomerProfileDTO fallback(String customerEmail, RequestNotPermitted ex) {
+    logger.error("Customer Service Rate Limiter fallback -> {}", ex.getMessage());
+    throw ex;
   }
 }

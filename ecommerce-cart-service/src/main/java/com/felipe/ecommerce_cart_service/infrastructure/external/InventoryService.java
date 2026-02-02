@@ -3,6 +3,10 @@ package com.felipe.ecommerce_cart_service.infrastructure.external;
 import com.felipe.ecommerce_cart_service.infrastructure.exceptions.InventoryServiceException;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.product.ProductResponseDTO;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +35,8 @@ public class InventoryService {
     this.restClient = restClient;
   }
 
+  @CircuitBreaker(name = "cart__inventoryService", fallbackMethod = "fallback")
+  @RateLimiter(name = "cart__inventoryService", fallbackMethod = "fallback")
   public ResponsePayload<ProductResponseDTO> fetchProductById(UUID productId) {
     try {
       return this.restClient
@@ -46,5 +52,15 @@ public class InventoryService {
       logger.error("Error in Inventory Service RestClient -> {}", ex.getMessage());
       throw new InventoryServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }
+  }
+
+  public ResponsePayload<ProductResponseDTO> fallback(UUID productId, CallNotPermittedException ex) {
+    logger.error("Inventory Service Circuit Breaker fallback -> {}", ex.getMessage());
+    throw ex;
+  }
+
+  public ResponsePayload<ProductResponseDTO> fallback(UUID productId, RequestNotPermitted ex) {
+    logger.error("Inventory Service Rate Limiter fallback -> {}", ex.getMessage());
+    throw ex;
   }
 }
