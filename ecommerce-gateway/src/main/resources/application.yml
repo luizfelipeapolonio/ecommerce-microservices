@@ -35,6 +35,14 @@ spring:
             - Path=/api/v1/carts/**,/cart-service/v3/api-docs
             filters:
             - TokenRelay=
+          - id: ecommerce-discount-service
+            uri: lb://ECOMMERCE-DISCOUNT-SERVICE
+            predicates:
+            - Path=/discount-service/v3/api-docs
+          - id: ecommerce-inventory-service
+            uri: lb://ECOMMERCE-INVENTORY-SERVICE
+            predicates:
+            - Path=/inventory-service/v3/api-docs
 
   security:
     oauth2:
@@ -75,4 +83,8 @@ springdoc:
       - name: E-commerce Customer Service
         url: /customer-service/v3/api-docs
       - name: E-commerce Cart Service
-        url: /customer-service/v3/api-docs
+        url: /cart-service/v3/api-docs
+      - name: E-commerce Discount Service
+        url: /discount-service/v3/api-docs
+      - name: E-commerce Inventory Service
+        url: /inventory-service/v3/api-docs

@@ -14,8 +14,12 @@ import org.springframework.security.web.server.util.matcher.ServerWebExchangeMat
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
-  private static final String[] DOCS_WHITELIST = {"/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
-                                                  "/customer-service/v3/api-docs/**"};
+  private static final String[] DOCS_WHITELIST = {
+    "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
+    "/customer-service/v3/api-docs/**", "/cart-service/v3/api-docs/**",
+    "/discount-service/v3/api-docs/**", "/inventory-service/v3/api-docs/**"
+  };
+
   @Bean
   public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
     return http
