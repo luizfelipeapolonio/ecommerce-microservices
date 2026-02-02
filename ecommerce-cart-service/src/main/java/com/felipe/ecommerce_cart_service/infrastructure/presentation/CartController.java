@@ -8,6 +8,7 @@ import com.felipe.ecommerce_cart_service.core.application.usecases.RemoveItemFro
 import com.felipe.ecommerce_cart_service.core.application.usecases.UpdateCartItemUseCase;
 import com.felipe.ecommerce_cart_service.core.domain.Cart;
 import com.felipe.ecommerce_cart_service.core.domain.CartItem;
+import com.felipe.ecommerce_cart_service.infrastructure.config.openapi.CartApi;
 import com.felipe.ecommerce_cart_service.infrastructure.dtos.cart.AddItemToCartDTO;
 import com.felipe.ecommerce_cart_service.infrastructure.dtos.cart.CartItemResponseDTO;
 import com.felipe.ecommerce_cart_service.infrastructure.dtos.cart.CartResponseDTO;
@@ -33,7 +34,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/carts")
-public class CartController {
+public class CartController implements CartApi {
   private final CreateCartUseCase createCartUseCase;
   private final AddItemToCartUseCase addItemToCartUseCase;
   private final RemoveItemFromCartUseCase removeItemFromCartUseCase;
@@ -55,6 +56,7 @@ public class CartController {
     this.updateCartItemUseCase = updateCartItemUseCase;
   }
 
+  @Override
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public ResponsePayload<CartResponseDTO> createCart(@Valid @RequestBody CreateCartDTO cartDTO) {
@@ -67,10 +69,11 @@ public class CartController {
       .build();
   }
 
+  @Override
   @PostMapping("/items")
   @ResponseStatus(HttpStatus.CREATED)
   public ResponsePayload<CartItemResponseDTO> addItemToCart(@AuthenticationPrincipal Jwt jwt,
-                                                    @Valid @RequestBody AddItemToCartDTO itemDTO) {
+                                                            @Valid @RequestBody AddItemToCartDTO itemDTO) {
     final CartItem addedItem = this.addItemToCartUseCase.execute(itemDTO.productId(), itemDTO.quantity(), jwt.getSubject());
     final String message = String.format(
       "Item '%s' adicionado com sucesso no carrinho de id '%s'",
@@ -85,6 +88,7 @@ public class CartController {
       .build();
   }
 
+  @Override
   @GetMapping("/items")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<List<CartItemResponseDTO>> getAllCartItems(@AuthenticationPrincipal Jwt jwt) {
@@ -98,6 +102,7 @@ public class CartController {
       .build();
   }
 
+  @Override
   @DeleteMapping("/items/{itemId}")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<Void> removeItemFromCart(@PathVariable Long itemId,
@@ -111,6 +116,7 @@ public class CartController {
       .build();
   }
 
+  @Override
   @GetMapping("/items/{itemId}")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<CartItemResponseDTO> getCartItemById(@PathVariable Long itemId,
@@ -124,6 +130,7 @@ public class CartController {
       .build();
   }
 
+  @Override
   @PatchMapping("/items/{itemId}")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<CartItemResponseDTO> updateCartItem(@PathVariable Long itemId,
