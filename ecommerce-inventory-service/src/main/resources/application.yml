@@ -61,7 +61,7 @@ management:
 resilience4j:
   circuitbreaker:
     instances:
-      uploadServiceCircuitBreaker:
+      inventory__uploadService:
         registerHealthIndicator: true
         slidingWindowSize: 10
         failureRateThreshold: 50
@@ -73,7 +73,7 @@ resilience4j:
         slowCallRateThreshold: 100
   ratelimiter:
     instances:
-      uploadServiceCircuitBreaker:
+      inventory__uploadService:
         limitRefreshPeriod: 60s
         limitForPeriod: 2
         timeoutDuration: 0s

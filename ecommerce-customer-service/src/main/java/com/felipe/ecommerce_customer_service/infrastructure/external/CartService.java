@@ -1,6 +1,10 @@
 package com.felipe.ecommerce_customer_service.infrastructure.external;
 
 import com.felipe.ecommerce_customer_service.infrastructure.exceptions.CartServiceException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,12 +25,14 @@ public class CartService {
   @Value("${external.services.cart-service.uri}")
   private String cartServiceUri;
   private static final String CLIENT_REGISTRATION_ID = "ecommerce-customer-service";
-  private final Logger logger = LoggerFactory.getLogger(CartService.class);
+  private static final Logger logger = LoggerFactory.getLogger(CartService.class);
 
   public CartService(RestClient restClient) {
     this.restClient = restClient;
   }
 
+  @CircuitBreaker(name = "customer__cartService", fallbackMethod = "fallback")
+  @RateLimiter(name = "customer__cartService", fallbackMethod = "fallback")
   public void createCart(CreateCartDTO createCartDTO) {
     try {
       final String response = this.restClient
@@ -38,11 +44,21 @@ public class CartService {
         .retrieve()
         .body(String.class);
 
-      this.logger.info("Create Cart response: {}", response);
+      logger.info("Create Cart response: {}", response);
     } catch(RestClientException ex) {
-      this.logger.error("RestClient error in createCart: {}", ex.getMessage());
+      logger.error("RestClient error in createCart: {}", ex.getMessage());
       throw new CartServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }
+  }
+
+  public void fallback(CreateCartDTO createCartDTO, CallNotPermittedException ex) {
+    logger.error("Cart Service Circuit Breaker fallback -> {}", ex.getMessage());
+    throw ex;
+  }
+
+  public void fallback(CreateCartDTO createCartDTO, RequestNotPermitted ex) {
+    logger.error("Cart Service Rate Limiter fallback -> {}", ex.getMessage());
+    throw ex;
   }
 
   public static class CreateCartDTO {

@@ -30,14 +30,14 @@ public class InventoryService {
   @Value("${services.inventory-service.url}")
   private String inventoryServiceUrl;
   private static final String CLIENT_REGISTRATION_ID = "ecommerce-discount-service";
-  private final Logger logger = LoggerFactory.getLogger(InventoryService.class);
+  private static final Logger logger = LoggerFactory.getLogger(InventoryService.class);
 
   public InventoryService(RestClient restClient) {
     this.restClient = restClient;
   }
 
-  @CircuitBreaker(name = "inventoryServiceCircuitBreaker", fallbackMethod = "fallback")
-  @RateLimiter(name = "inventoryServiceCircuitBreaker", fallbackMethod = "fallback")
+  @CircuitBreaker(name = "discount__inventoryService", fallbackMethod = "fallback")
+  @RateLimiter(name = "discount__inventoryService", fallbackMethod = "fallback")
   public ResponsePayload<Map<String, Integer>> applyPromotion(PromotionRequest promotionRequest) {
     try {
       return this.restClient
@@ -50,18 +50,18 @@ public class InventoryService {
         .body(new ParameterizedTypeReference<>() {
         });
     } catch(RestClientException ex) {
-      this.logger.error("RestClient error in applyPromotion: {}", ex.getMessage());
+      logger.error("RestClient error in applyPromotion: {}", ex.getMessage());
       throw new InventoryServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }
   }
 
   private ResponsePayload<Map<String, Integer>> fallback(PromotionRequest promotionRequest, CallNotPermittedException ex) {
-    this.logger.error("Circuitbreaker fallback -> {}", ex.getMessage());
+    logger.error("Inventory Service Circuit Breaker fallback -> {}", ex.getMessage());
     throw ex;
   }
 
   private ResponsePayload<Map<String, Integer>> fallback(PromotionRequest promotionRequest, RequestNotPermitted ex) {
-    this.logger.error("RateLimiter fallback -> {}", ex.getMessage());
+    logger.error("Inventory Service RateLimiter fallback -> {}", ex.getMessage());
     throw ex;
   }
 

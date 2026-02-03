@@ -1125,10 +1125,6 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "text": "ecommerce-customer-service",
-          "value": "ecommerce-customer-service"
-        },
         "definition": "label_values(jvm_info,application)",
         "includeAll": false,
         "label": "Application",
@@ -1168,14 +1164,6 @@
         "type": "query"
       },
       {
-        "current": {
-          "text": [
-            "createCustomerCircuitBreaker"
-          ],
-          "value": [
-            "createCustomerCircuitBreaker"
-          ]
-        },
         "definition": "label_values(resilience4j_circuitbreaker_state, name)",
         "includeAll": false,
         "label": "CircuitBreaker Name",

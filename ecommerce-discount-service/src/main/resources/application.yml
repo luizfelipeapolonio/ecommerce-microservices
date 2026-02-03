@@ -53,11 +53,11 @@ management:
     circuitbreakers.enabled: true
     ratelimiters.enabled: true
 
-# === Circuit breaker configuration for 'inventoryServiceCircuitBreaker' ===
+# === Circuit breaker configuration ===
 resilience4j:
   circuitbreaker:
     instances:
-      inventoryServiceCircuitBreaker:
+      discount__inventoryService:
         registerHealthIndicator: true
         slidingWindowSize: 10
         failureRateThreshold: 50
@@ -69,7 +69,7 @@ resilience4j:
         slowCallRateThreshold: 100
   ratelimiter:
     instances:
-      inventoryServiceCircuitBreaker:
+      discount__inventoryService:
         limitRefreshPeriod: 60s
         limitForPeriod: 2
         timeoutDuration: 0s

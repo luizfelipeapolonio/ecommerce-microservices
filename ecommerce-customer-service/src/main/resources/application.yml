@@ -49,11 +49,11 @@ management:
     circuitbreakers.enabled: true
     ratelimiters.enabled: true
 
-# === Circuit breaker configuration for 'createCustomerCircuitBreaker' ===
+# === Circuit breaker configuration ===
 resilience4j:
   circuitbreaker:
     instances:
-      createCustomerCircuitBreaker:
+      customer__cartService:
         registerHealthIndicator: true
         slidingWindowSize: 10
         failureRateThreshold: 50
@@ -70,7 +70,7 @@ resilience4j:
 #        waitDuration: 2000ms
   ratelimiter:
     instances:
-      createCustomerCircuitBreaker:
+      customer__cartService:
         limitRefreshPeriod: 60s
         limitForPeriod: 2
         timeoutDuration: 0s

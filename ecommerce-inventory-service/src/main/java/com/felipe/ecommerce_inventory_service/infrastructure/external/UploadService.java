@@ -33,14 +33,14 @@ public class UploadService {
   @Value("${uploadService.url}")
   private String uploadServiceUrl;
   private static final String CLIENT_REGISTRATION_ID = "ecommerce-inventory-service";
-  private final Logger logger = LoggerFactory.getLogger(UploadService.class);
+  private static final Logger logger = LoggerFactory.getLogger(UploadService.class);
 
   public UploadService(RestClient restClient) {
     this.restClient = restClient;
   }
 
-  @CircuitBreaker(name = "uploadServiceCircuitBreaker", fallbackMethod = "fallback")
-  @RateLimiter(name = "uploadServiceCircuitBreaker", fallbackMethod = "fallback")
+  @CircuitBreaker(name = "inventory__uploadService", fallbackMethod = "fallback")
+  @RateLimiter(name = "inventory__uploadService", fallbackMethod = "fallback")
   public ResponsePayload<List<ImageFileDTO>> upload(ProductData productData, MultipartFile[] images) {
     MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
     parts.add("productData", productData);
@@ -60,16 +60,16 @@ public class UploadService {
         .body(new ParameterizedTypeReference<>() {
         });
     } catch(RestClientException ex) {
-      this.logger.error("RestClient error in upload(): {}", ex.getMessage());
+      logger.error("RestClient error in upload(): {}", ex.getMessage());
       throw new UploadServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }
   }
 
-  @CircuitBreaker(name = "uploadServiceCircuitBreaker", fallbackMethod = "fallback")
-  @RateLimiter(name = "uploadServiceCircuitBreaker", fallbackMethod = "fallback")
+  @CircuitBreaker(name = "inventory__uploadService", fallbackMethod = "fallback")
+  @RateLimiter(name = "inventory__uploadService", fallbackMethod = "fallback")
   public ResponsePayload<List<ImageResponse>> getProductImages(Set<String> productIdsList)  {
     final String productIds = StringUtils.collectionToCommaDelimitedString(productIdsList);
-    this.logger.info("Get product images for productIds: {}", productIds);
+    logger.info("Get product images for productIds: {}", productIds);
 
     try {
       return this.restClient
@@ -82,13 +82,13 @@ public class UploadService {
         .body(new ParameterizedTypeReference<>() {
         });
     } catch(RestClientException ex) {
-      this.logger.error("RestClient error in getProductImages(): {}", ex.getMessage());
+      logger.error("RestClient error in getProductImages(): {}", ex.getMessage());
       throw new UploadServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }
   }
 
-  @CircuitBreaker(name = "uploadServiceCircuitBreaker", fallbackMethod = "fallback")
-  @RateLimiter(name = "uploadServiceCircuitBreaker", fallbackMethod = "fallback")
+  @CircuitBreaker(name = "inventory__uploadService", fallbackMethod = "fallback")
+  @RateLimiter(name = "inventory__uploadService", fallbackMethod = "fallback")
   public ResponsePayload<DeleteImagesResponse> deleteImages(String productId) {
     try {
       return this.restClient
@@ -101,38 +101,38 @@ public class UploadService {
         .body(new ParameterizedTypeReference<>() {
         });
     } catch(RestClientException ex) {
-      this.logger.error("RestClient error in deleteImages(): {}", ex.getMessage());
+      logger.error("RestClient error in deleteImages(): {}", ex.getMessage());
       throw new UploadServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }
   }
 
   private ResponsePayload<List<ImageFileDTO>> fallback(ProductData productData, MultipartFile[] images, CallNotPermittedException ex) {
-    this.logger.error("upload() CircuitBreaker fallback -> {}", ex.getMessage());
+    logger.error("upload() CircuitBreaker fallback -> {}", ex.getMessage());
     throw ex;
   }
 
   private ResponsePayload<List<ImageFileDTO>> fallback(ProductData productData, MultipartFile[] images, RequestNotPermitted ex) {
-    this.logger.error("upload() RateLimiter fallback -> {}", ex.getMessage());
+    logger.error("upload() RateLimiter fallback -> {}", ex.getMessage());
     throw ex;
   }
 
   private ResponsePayload<List<ImageResponse>> fallback(Set<String> productIdsList, CallNotPermittedException ex) {
-    this.logger.error("getProductImages() CircuitBreaker fallback -> {}", ex.getMessage());
+    logger.error("getProductImages() CircuitBreaker fallback -> {}", ex.getMessage());
     throw ex;
   }
 
   private ResponsePayload<List<ImageResponse>> fallback(Set<String> productIdsList, RequestNotPermitted ex) {
-    this.logger.error("getProductImages() RateLimiter fallback -> {}", ex.getMessage());
+    logger.error("getProductImages() RateLimiter fallback -> {}", ex.getMessage());
     throw ex;
   }
 
   private ResponsePayload<DeleteImagesResponse> fallback(String productId, CallNotPermittedException ex) {
-    this.logger.error("deleteImages() CircuitBreaker fallback -> {}", ex.getMessage());
+    logger.error("deleteImages() CircuitBreaker fallback -> {}", ex.getMessage());
     throw ex;
   }
 
   private ResponsePayload<DeleteImagesResponse> fallback(String productId, RequestNotPermitted ex) {
-    this.logger.error("deleteImages() RateLimiter fallback -> {}", ex.getMessage());
+    logger.error("deleteImages() RateLimiter fallback -> {}", ex.getMessage());
     throw ex;
   }
 
