@@ -43,6 +43,12 @@ spring:
             uri: lb://ECOMMERCE-INVENTORY-SERVICE
             predicates:
             - Path=/inventory-service/v3/api-docs
+          - id: ecommerce-order-service
+            uri: lb://ECOMMERCE-ORDER-SERVICE
+            predicates:
+            - Path=/api/v1/orders/**
+            filters:
+            - TokenRelay=
 
   security:
     oauth2:
