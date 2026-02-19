@@ -19,6 +19,7 @@
         <module>ecommerce-upload-service</module>
         <module>ecommerce-discount-service</module>
         <module>ecommerce-cart-service</module>
+        <module>ecommerce-order-service</module>
     </modules>
 
 </project>
