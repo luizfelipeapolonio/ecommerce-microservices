@@ -2,11 +2,15 @@ package com.felipe.ecommerce_inventory_service.infrastructure.persistence.reposi
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ProductEntity;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -15,6 +19,11 @@ import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
   Optional<ProductEntity> findByName(String name);
+
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "2000")})
+  @Query("SELECT p FROM ProductEntity p WHERE p.id = :id")
+  Optional<ProductEntity> findByIdWithLock(UUID id);
 
   @Query("SELECT p FROM ProductEntity p JOIN p.category c WHERE c.name = :name")
   Page<ProductEntity> findByCategoryName(@Param("name") String name, Pageable pageable);

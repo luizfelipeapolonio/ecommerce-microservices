@@ -6,6 +6,8 @@ import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNo
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.InvalidProductQuantityException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.ModelAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.ProductAlreadyExistsException;
+import com.felipe.ecommerce_inventory_service.core.application.exceptions.ReservationAlreadyExistsException;
+import com.felipe.ecommerce_inventory_service.core.application.exceptions.UnavailableProductException;
 import com.felipe.ecommerce_inventory_service.infrastructure.exceptions.MappingFailureException;
 import com.felipe.ecommerce_inventory_service.infrastructure.exceptions.UnprocessableJsonException;
 import com.felipe.ecommerce_inventory_service.infrastructure.exceptions.UploadServiceException;
@@ -27,13 +29,14 @@ import java.util.List;
 
 @RestControllerAdvice
 public class ExceptionControllerAdvice {
-  private final Logger logger = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
+  private static final Logger logger = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
 
   @ExceptionHandler({
     CategoryAlreadyExistsException.class,
     BrandAlreadyExistsException.class,
     ModelAlreadyExistsException.class,
-    ProductAlreadyExistsException.class
+    ProductAlreadyExistsException.class,
+    ReservationAlreadyExistsException.class
   })
   @ResponseStatus(HttpStatus.CONFLICT)
   public ResponsePayload<Void> handleResourceAlreadyExistsException(Exception ex) {
@@ -105,6 +108,16 @@ public class ExceptionControllerAdvice {
       .build();
   }
 
+  @ExceptionHandler(UnavailableProductException.class)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  public ResponsePayload<Void> handleUnavailableProductException(UnavailableProductException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.UNPROCESSABLE_ENTITY)
+      .message(ex.getMessage())
+      .build();
+  }
+
   @ExceptionHandler(InvalidProductQuantityException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponsePayload<Void> handleInvalidProductQuantityException(InvalidProductQuantityException ex) {
@@ -158,7 +171,7 @@ public class ExceptionControllerAdvice {
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ResponsePayload<Void> handleUncaughtException(Exception ex) {
-    this.logger.error("Uncaught exception handler: {}", ex.getMessage());
+    logger.error("Uncaught exception handler: {}", ex.getMessage());
     return new ResponsePayload.Builder<Void>()
       .type(ResponseType.ERROR)
       .code(HttpStatus.INTERNAL_SERVER_ERROR)

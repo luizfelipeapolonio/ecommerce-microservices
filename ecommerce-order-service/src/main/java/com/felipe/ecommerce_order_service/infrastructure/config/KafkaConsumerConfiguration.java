@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_inventory_service.infrastructure.config;
+package com.felipe.ecommerce_order_service.infrastructure.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -28,11 +28,10 @@ public class KafkaConsumerConfiguration {
   public ConsumerFactory<String, Object> consumerFactory() {
     final Map<String, Object> configs = new HashMap<>();
     configs.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.kafkaServer);
-    configs.put(ConsumerConfig.GROUP_ID_CONFIG, "inventory-service");
+    configs.put(ConsumerConfig.GROUP_ID_CONFIG, "order-service");
     configs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     configs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
     configs.put(JsonDeserializer.TYPE_MAPPINGS, DESERIALIZER_TYPE_MAPPINGS);
-    configs.put(JsonDeserializer.REMOVE_TYPE_INFO_HEADERS, false);
     configs.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
     configs.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     return new DefaultKafkaConsumerFactory<>(configs);
@@ -47,10 +46,8 @@ public class KafkaConsumerConfiguration {
 
   private static String typeMappings() {
     String[] types = {
-      "expiredPromotionKafkaDTO:com.felipe.kafka.ExpiredPromotionKafkaDTO",
-      "inventoryTransactionCreateCommand:com.felipe.kafka.saga.commands.InventoryTransactionCreateCommand",
-      "inventoryTransactionCancelCommand:com.felipe.kafka.saga.commands.InventoryTransactionCancelCommand",
+      "inventoryTransactionReply:com.felipe.kafka.saga.replies.InventoryTransactionReply"
     };
-    return String.join(", ", types);
+    return types[0];
   }
 }

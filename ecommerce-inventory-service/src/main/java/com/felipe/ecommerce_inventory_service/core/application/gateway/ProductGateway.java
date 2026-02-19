@@ -14,6 +14,7 @@ public interface ProductGateway {
   ProductResponseDTO createProduct(Product product, UploadFile[] files);
   Optional<Product> findProductByName(String name);
   Optional<Product> findProductById(UUID id);
+  Optional<Product> findProductByIdWithTransactionLock(UUID id);
   Product updateProduct(Product product, UpdateProductDomainDTO productDTO);
   ProductResponseDTO getProduct(Product product);
   PageResponseDTO getProducts(String category, String brand, String model, int page, int elementsQuantity);

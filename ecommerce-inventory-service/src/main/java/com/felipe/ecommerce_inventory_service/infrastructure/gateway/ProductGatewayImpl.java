@@ -89,6 +89,12 @@ public class ProductGatewayImpl implements ProductGateway {
   }
 
   @Override
+  @Transactional
+  public Optional<Product> findProductByIdWithTransactionLock(UUID id) {
+    return this.productRepository.findByIdWithLock(id).map(this.productEntityMapper::toDomain);
+  }
+
+  @Override
   public Product updateProduct(Product product, UpdateProductDomainDTO productDTO) {
     ProductEntity.Builder productEntityBuilder = ProductEntity.mutate(this.productEntityMapper.toEntity(product));
 
