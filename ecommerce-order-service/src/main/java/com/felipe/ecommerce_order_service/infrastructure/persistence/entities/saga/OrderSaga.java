@@ -1,6 +1,6 @@
 package com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga;
 
-import com.felipe.kafka.saga.enums.FailureCode;
+import com.felipe.kafka.saga.replies.ReplyTransaction;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,7 +36,7 @@ public class OrderSaga {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "failure_code", length = 30)
-  private FailureCode failureCode;
+  private ReplyTransaction.FailureCode failureCode;
 
   @Column(name = "failure_reason")
   private String failureReason;
@@ -94,15 +94,15 @@ public class OrderSaga {
     return this;
   }
 
-  public FailureCode getFailureCode() {
+  public ReplyTransaction.FailureCode getFailureCode() {
     return this.failureCode;
   }
 
-  public void setFailureCode(FailureCode failureCode) {
+  public void setFailureCode(ReplyTransaction.FailureCode failureCode) {
     this.failureCode = failureCode;
   }
 
-  public OrderSaga failureCode(FailureCode failureCode) {
+  public OrderSaga failureCode(ReplyTransaction.FailureCode failureCode) {
     this.failureCode = failureCode;
     return this;
   }

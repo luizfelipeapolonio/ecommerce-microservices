@@ -3,6 +3,7 @@ package com.felipe.ecommerce_order_service.infrastructure.persistence.entities.s
 public enum SagaStatus {
   STARTED,
   PROCESSING,
+  COMMITING,
   CANCELLING,
   FAILED,
   COMPLETED

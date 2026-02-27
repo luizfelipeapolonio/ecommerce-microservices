@@ -5,15 +5,15 @@ import com.felipe.ecommerce_inventory_service.core.application.exceptions.Reserv
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.UnavailableProductException;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.reservation.DeleteReservationUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.reservation.ReserveProductUseCase;
+import com.felipe.ecommerce_inventory_service.core.domain.Product;
 import com.felipe.ecommerce_inventory_service.core.domain.reservation.Reservation;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ProductEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.repositories.ProductRepository;
 import com.felipe.kafka.ExpiredPromotionKafkaDTO;
 import com.felipe.kafka.saga.commands.InventoryTransactionCancelCommand;
 import com.felipe.kafka.saga.commands.InventoryTransactionCreateCommand;
-import com.felipe.kafka.saga.enums.FailureCode;
-import com.felipe.kafka.saga.enums.SagaParticipant;
 import com.felipe.kafka.saga.replies.InventoryTransactionReply;
+import com.felipe.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.CompletableFuture;
 
 @Service
-@KafkaListener(id = "inventory-transactions" ,topics = {
+@KafkaListener(id = "inventory-transactions", topics = {
   "expired-promotion",
   "order.order_transaction.inventory.commands"
 }, groupId = "inventory-service")
@@ -70,25 +70,34 @@ public class KafkaService {
       "Command received in Reserve Product -> productId: {} - orderId: {} - command: {}",
       transactionCommand.getProductId(), transactionCommand.getOrderId(), transactionCommand.getCommand().name()
     );
+    InventoryTransactionReply.ProductData productData = new InventoryTransactionReply.ProductData(transactionCommand.getProductId());
     InventoryTransactionReply.Builder replyBuilder = InventoryTransactionReply.builder()
       .withSagaId(transactionCommand.getSagaId())
       .withTransactionId(transactionCommand.getTransactionId())
       .withOrderId(transactionCommand.getOrderId())
-      .withProductId(transactionCommand.getProductId())
+      .withProduct(productData)
       .withCommand(transactionCommand.getCommand())
-      .withParticipant(SagaParticipant.INVENTORY);
+      .withParticipant(InventoryTransactionReply.SagaParticipant.INVENTORY);
 
     CompletableFuture<SendResult<String, InventoryTransactionReply>> sentMessage;
     try {
-      Reservation reservation = this.reserveProductUseCase.execute(
+      Pair<Product, Reservation> reservation = this.reserveProductUseCase.execute(
         transactionCommand.getProductId(), transactionCommand.getOrderId(), transactionCommand.getProductQuantity()
       );
-      replyBuilder.withFailureCode(FailureCode.NO_APPLY)
+
+      productData.setName(reservation.t1().getName())
+        .setUnitPrice(reservation.t1().getUnitPrice().toString())
+        .setWithDiscount(reservation.t1().isItWithDiscount())
+        .setDiscountType(reservation.t1().getDiscountType())
+        .setDiscountValue(reservation.t1().getDiscountValue());
+
+      replyBuilder.withFailureCode(InventoryTransactionReply.FailureCode.NO_APPLY)
         .withFailureMessage(null)
         .success();
-      logger.info("Reservation done -> {}", reservation);
+
+      logger.info("Reservation done -> {}", reservation.t2());
       sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.build());
-    } catch(Exception ex) {
+    } catch (Exception ex) {
       mapBusinessExceptions(ex, replyBuilder);
       logger.error("Error in product reservation: {} - exception: {}", ex.getMessage(), ex.getClass().getName());
       sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.fail().build());
@@ -109,13 +118,13 @@ public class KafkaService {
       .withSagaId(transactionCommand.getSagaId())
       .withTransactionId(transactionCommand.getTransactionId())
       .withOrderId(transactionCommand.getOrderId())
-      .withProductId(transactionCommand.getProductId())
+      .withProduct(new InventoryTransactionReply.ProductData(transactionCommand.getProductId()))
       .withCommand(transactionCommand.getCommand())
-      .withParticipant(SagaParticipant.INVENTORY);
+      .withParticipant(InventoryTransactionReply.SagaParticipant.INVENTORY);
     CompletableFuture<SendResult<String, InventoryTransactionReply>> sentMessage;
 
-    if(transactionCommand.getFailureCode() == FailureCode.BUSINESS_EXCEPTION) {
-      replyBuilder.withFailureCode(FailureCode.NO_APPLY)
+    if (transactionCommand.getFailureCode() == InventoryTransactionReply.FailureCode.BUSINESS_EXCEPTION) {
+      replyBuilder.withFailureCode(InventoryTransactionReply.FailureCode.NO_APPLY)
         .withFailureMessage(null)
         .success();
       logger.info("Reservation cancelled successfully -> failureCode: {}", transactionCommand.getFailureCode());
@@ -124,11 +133,11 @@ public class KafkaService {
     }
     try {
       this.deleteReservationUseCase.execute(transactionCommand.getProductId(), transactionCommand.getOrderId());
-      replyBuilder.withFailureCode(FailureCode.NO_APPLY)
+      replyBuilder.withFailureCode(InventoryTransactionReply.FailureCode.NO_APPLY)
         .withFailureMessage(null)
         .success();
       sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.build());
-    } catch(Exception ex) {
+    } catch (Exception ex) {
       mapBusinessExceptions(ex, replyBuilder);
       logger.error("Error in cancel reservation: {} - exception: {}", ex.getMessage(), ex.getClass().getName());
       sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.fail().build());
@@ -142,17 +151,17 @@ public class KafkaService {
   }
 
   private void mapBusinessExceptions(Exception exception, InventoryTransactionReply.Builder replyBuilder) {
-    switch(exception) {
+    switch (exception) {
       case DataNotFoundException ex -> replyBuilder
-        .withFailureCode(FailureCode.BUSINESS_EXCEPTION)
+        .withFailureCode(InventoryTransactionReply.FailureCode.BUSINESS_EXCEPTION)
         .withFailureMessage(ex.getMessage());
       case ReservationAlreadyExistsException ex -> replyBuilder
-        .withFailureCode(FailureCode.BUSINESS_EXCEPTION)
+        .withFailureCode(InventoryTransactionReply.FailureCode.BUSINESS_EXCEPTION)
         .withFailureMessage(ex.getMessage());
       case UnavailableProductException ex -> replyBuilder
-        .withFailureCode(FailureCode.BUSINESS_EXCEPTION)
+        .withFailureCode(InventoryTransactionReply.FailureCode.BUSINESS_EXCEPTION)
         .withFailureMessage(ex.getMessage());
-      default -> replyBuilder.withFailureCode(FailureCode.INFRASTRUCTURE_EXCEPTION)
+      default -> replyBuilder.withFailureCode(InventoryTransactionReply.FailureCode.INFRASTRUCTURE_EXCEPTION)
         .withFailureMessage(exception.getMessage());
     }
   }

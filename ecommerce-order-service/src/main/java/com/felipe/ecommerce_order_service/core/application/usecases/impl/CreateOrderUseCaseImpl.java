@@ -2,6 +2,7 @@ package com.felipe.ecommerce_order_service.core.application.usecases.impl;
 
 import com.felipe.ecommerce_order_service.core.application.dtos.CreateOrderDTO;
 import com.felipe.ecommerce_order_service.core.application.dtos.CustomerProfileDTO;
+import com.felipe.ecommerce_order_service.core.application.exceptions.CustomerAddressNotDefinedException;
 import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
 import com.felipe.ecommerce_order_service.core.application.gateway.OrderTransactionGateway;
 import com.felipe.ecommerce_order_service.core.application.gateway.OrderGateway;
@@ -27,9 +28,19 @@ public class CreateOrderUseCaseImpl implements CreateOrderUseCase {
   public Map<String, UUID> execute(CreateOrderDTO orderDTO, String customerEmail) {
     // Retrieve authenticated user profile
     CustomerProfileDTO customerProfile = this.customerGateway.fetchAuthCustomerProfile(customerEmail);
+    if (customerProfile.address() == null) {
+      throw new CustomerAddressNotDefinedException(customerProfile.id());
+    }
+
     UUID customerId = UUID.fromString(customerProfile.id());
     Order createdOrder = this.orderGateway.createOrder(customerId, orderDTO.productId(), orderDTO.productQuantity());
-    UUID transactionId = this.orderTransactionGateway.executeOrderTransaction(createdOrder.getId(), orderDTO.productId(), orderDTO.productQuantity());
+    UUID transactionId = this.orderTransactionGateway.executeOrderTransaction(
+        customerProfile,
+        createdOrder.getId(),
+        orderDTO.productId(),
+        orderDTO.productQuantity()
+    );
+
     return Map.of(
       "orderId", createdOrder.getId(),
       "sagaId", transactionId

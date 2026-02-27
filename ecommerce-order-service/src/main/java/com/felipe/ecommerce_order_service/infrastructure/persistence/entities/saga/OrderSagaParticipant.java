@@ -1,6 +1,6 @@
 package com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga;
 
-import com.felipe.kafka.saga.enums.SagaParticipant;
+import com.felipe.kafka.saga.replies.ReplyTransaction;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,7 +23,7 @@ public class OrderSagaParticipant {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private SagaParticipant name;
+  private ReplyTransaction.SagaParticipant name;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -36,7 +36,7 @@ public class OrderSagaParticipant {
   public OrderSagaParticipant() {
   }
 
-  public OrderSagaParticipant(SagaParticipant name) {
+  public OrderSagaParticipant(ReplyTransaction.SagaParticipant name) {
     this.name = name;
   }
 
@@ -48,11 +48,11 @@ public class OrderSagaParticipant {
     this.id = id;
   }
 
-  public SagaParticipant getName() {
+  public ReplyTransaction.SagaParticipant getName() {
     return this.name;
   }
 
-  public void setName(SagaParticipant name) {
+  public void setName(ReplyTransaction.SagaParticipant name) {
     this.name = name;
   }
 

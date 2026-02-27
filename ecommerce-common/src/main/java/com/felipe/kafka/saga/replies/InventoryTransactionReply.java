@@ -2,70 +2,116 @@ package com.felipe.kafka.saga.replies;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import com.felipe.kafka.saga.BaseSagaTransaction;
-import com.felipe.kafka.saga.enums.FailureCode;
-import com.felipe.kafka.saga.enums.SagaParticipant;
 
 import java.util.UUID;
 
 @JsonDeserialize(builder = InventoryTransactionReply.Builder.class)
-public final class InventoryTransactionReply extends BaseSagaTransaction {
-  private final UUID productId;
+public final class InventoryTransactionReply extends ReplyTransaction {
   private final UUID orderId;
-  private final Status status;
-  private final FailureCode failureCode;
-  private final String failureMessage;
-  private final SagaParticipant participant;
-
-  public enum Status {
-    SUCCESS,
-    FAILURE
-  }
+  private final ProductData product;
 
   private InventoryTransactionReply(Builder builder) {
-    super(builder.sagaId, builder.transactionId, builder.command);
-    this.productId = builder.productId;
+    super(
+      builder.sagaId,
+      builder.transactionId,
+      builder.command,
+      builder.status,
+      builder.failureCode,
+      builder.failureMessage,
+      builder.participant
+    );
     this.orderId = builder.orderId;
-    this.status = builder.status;
-    this.failureCode = builder.failureCode;
-    this.failureMessage = builder.failureMessage;
-    this.participant = builder.participant;
-  }
-
-  public UUID getProductId() {
-    return this.productId;
+    this.product = builder.product;
   }
 
   public UUID getOrderId() {
     return this.orderId;
   }
 
-  public Status getStatus() {
-    return this.status;
-  }
-
-  public FailureCode getFailureCode() {
-    return this.failureCode;
-  }
-
-  public String getFailureMessage() {
-    return this.failureMessage;
-  }
-
-  public SagaParticipant getParticipant() {
-    return this.participant;
+  public ProductData getProduct() {
+    return this.product;
   }
 
   public static Builder builder() {
     return new Builder();
   }
 
+  public static class ProductData {
+    private UUID id;
+    private String name;
+    private String unitPrice;
+    private boolean withDiscount;
+    private String discountType;
+    private String discountValue;
+
+    public ProductData() {
+    }
+
+    public ProductData(UUID id) {
+      this.id = id;
+    }
+
+    public UUID getId() {
+      return this.id;
+    }
+
+    public ProductData setId(UUID id) {
+      this.id = id;
+      return this;
+    }
+
+    public String getName() {
+      return this.name;
+    }
+
+    public ProductData setName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public String getUnitPrice() {
+      return this.unitPrice;
+    }
+
+    public ProductData setUnitPrice(String unitPrice) {
+      this.unitPrice = unitPrice;
+      return this;
+    }
+
+    public boolean isItWithDiscount() {
+      return this.withDiscount;
+    }
+
+    public ProductData setWithDiscount(boolean withDiscount) {
+      this.withDiscount = withDiscount;
+      return this;
+    }
+
+    public String getDiscountType() {
+      return this.discountType;
+    }
+
+    public ProductData setDiscountType(String discountType) {
+      this.discountType = discountType;
+      return this;
+    }
+
+    public String getDiscountValue() {
+      return this.discountValue;
+    }
+
+    public ProductData setDiscountValue(String discountValue) {
+      this.discountValue = discountValue;
+      return this;
+    }
+  }
+
   @JsonPOJOBuilder
   public static class Builder {
     private UUID sagaId;
     private UUID transactionId;
-    private UUID productId;
     private UUID orderId;
+    private ProductData product;
     private Command command;
     private Status status;
     private FailureCode failureCode;
@@ -85,13 +131,13 @@ public final class InventoryTransactionReply extends BaseSagaTransaction {
       return this;
     }
 
-    public Builder withProductId(UUID productId) {
-      this.productId = productId;
+    public Builder withOrderId(UUID orderId) {
+      this.orderId = orderId;
       return this;
     }
 
-    public Builder withOrderId(UUID orderId) {
-      this.orderId = orderId;
+    public Builder withProduct(ProductData product) {
+      this.product = product;
       return this;
     }
 

@@ -34,7 +34,7 @@ public final class InventoryTransactionCreateCommand extends BaseSagaTransaction
   }
 
   public static Builder startTransaction(UUID sagaId, UUID transactionId) {
-    return new Builder(sagaId,transactionId);
+    return new Builder(sagaId, transactionId);
   }
 
   public static Builder mutate(InventoryTransactionCreateCommand inventoryCommand) {

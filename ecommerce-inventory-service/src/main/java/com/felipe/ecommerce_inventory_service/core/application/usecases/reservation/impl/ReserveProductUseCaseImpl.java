@@ -8,6 +8,7 @@ import com.felipe.ecommerce_inventory_service.core.application.gateway.Reservati
 import com.felipe.ecommerce_inventory_service.core.application.usecases.reservation.ReserveProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
 import com.felipe.ecommerce_inventory_service.core.domain.reservation.Reservation;
+import com.felipe.utils.Pair;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,11 +24,12 @@ public class ReserveProductUseCaseImpl implements ReserveProductUseCase {
   }
 
   @Override
-  public Reservation execute(UUID productId, UUID orderId, int quantity) {
+  public Pair<Product, Reservation> execute(UUID productId, UUID orderId, int quantity) {
     Product product = this.productGateway.findProductByIdWithTransactionLock(productId)
       .orElseThrow(() -> new DataNotFoundException("Produto de id: '" + productId + "' não encontrado"));
+
     Optional<Reservation> existingReservation = this.reservationGateway.findReservationByProductIdAndOrderId(productId, orderId);
-    if(existingReservation.isPresent()) {
+    if (existingReservation.isPresent()) {
       throw new ReservationAlreadyExistsException(
         String.format("O produto de id '%s' já foi reservado pelo pedido de id '%s'", productId, orderId)
       );
@@ -37,15 +39,16 @@ public class ReserveProductUseCaseImpl implements ReserveProductUseCase {
     // throws exception if:
     // quantity to reserve > product stock quantity
     // reservation quantity + quantity to reserve > product stock quantity
-    if(!isProductAvailable(product.getQuantity(), reservations, quantity)) {
+    if (!isProductAvailable(product.getQuantity(), reservations, quantity)) {
       throw new UnavailableProductException("O produto de id '" + productId + "' não está disponível no estoque");
     }
-    return this.reservationGateway.reserveProduct(productId, orderId, quantity);
+    Reservation reservation = this.reservationGateway.reserveProduct(productId, orderId, quantity);
+    return new Pair<>(product, reservation);
   }
 
   private boolean isProductAvailable(long stockQuantity, List<Reservation> reservations, int quantityToReserve) {
     long reservationQuantity = 0;
-    for(Reservation reservation : reservations) {
+    for (Reservation reservation : reservations) {
       reservationQuantity += reservation.getQuantity();
     }
     long totalReservations = reservationQuantity + quantityToReserve;

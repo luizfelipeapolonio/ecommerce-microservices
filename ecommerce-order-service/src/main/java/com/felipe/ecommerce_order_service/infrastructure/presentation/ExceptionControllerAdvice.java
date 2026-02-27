@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_order_service.infrastructure.presentation;
 
+import com.felipe.ecommerce_order_service.core.application.exceptions.CustomerAddressNotDefinedException;
 import com.felipe.ecommerce_order_service.core.application.exceptions.OrderNotFoundException;
 import com.felipe.ecommerce_order_service.infrastructure.exceptions.SagaNotFoundException;
 import com.felipe.response.ResponsePayload;
@@ -33,6 +34,16 @@ public class ExceptionControllerAdvice {
       .type(ResponseType.ERROR)
       .code(HttpStatus.INTERNAL_SERVER_ERROR)
       .message("Ocorreu um erro interno do servidor! Por favor, tente mais tarde")
+      .build();
+  }
+
+  @ExceptionHandler(CustomerAddressNotDefinedException.class)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  public ResponsePayload<Void> handleCustomerAddressNotDefinedException(CustomerAddressNotDefinedException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.UNPROCESSABLE_ENTITY)
+      .message(ex.getMessage())
       .build();
   }
 }

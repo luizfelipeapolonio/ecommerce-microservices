@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.felipe.kafka.saga.BaseSagaTransaction;
-import com.felipe.kafka.saga.enums.FailureCode;
+import com.felipe.kafka.saga.replies.ReplyTransaction;
 
 import java.util.UUID;
 
@@ -13,7 +13,7 @@ import java.util.UUID;
 public final class InventoryTransactionCancelCommand extends BaseSagaTransaction {
   private final UUID productId;
   private final UUID orderId;
-  private final FailureCode failureCode;
+  private final ReplyTransaction.FailureCode failureCode;
 
   private InventoryTransactionCancelCommand(Builder builder) {
     super(builder.sagaId, builder.transactionId, Command.CANCEL);
@@ -30,7 +30,7 @@ public final class InventoryTransactionCancelCommand extends BaseSagaTransaction
     return this.orderId;
   }
 
-  public FailureCode getFailureCode() {
+  public ReplyTransaction.FailureCode getFailureCode() {
     return this.failureCode;
   }
 
@@ -44,7 +44,7 @@ public final class InventoryTransactionCancelCommand extends BaseSagaTransaction
     private final UUID transactionId;
     private UUID productId;
     private UUID orderId;
-    private FailureCode failureCode;
+    private ReplyTransaction.FailureCode failureCode;
 
     @JsonCreator
     private Builder(@JsonProperty("sagaId") UUID sagaId,@JsonProperty("transactionId") UUID transactionId) {
@@ -62,7 +62,7 @@ public final class InventoryTransactionCancelCommand extends BaseSagaTransaction
       return this;
     }
 
-    public Builder withFailureCode(FailureCode failureCode) {
+    public Builder withFailureCode(ReplyTransaction.FailureCode failureCode) {
       this.failureCode = failureCode;
       return this;
     }
