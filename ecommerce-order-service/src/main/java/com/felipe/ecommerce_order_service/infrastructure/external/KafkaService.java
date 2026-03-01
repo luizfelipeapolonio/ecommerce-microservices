@@ -4,7 +4,7 @@ import com.felipe.ecommerce_order_service.infrastructure.exceptions.SagaNotFound
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.SagaParticipantStatus;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.repositories.OrderSagaRepository;
-import com.felipe.ecommerce_order_service.infrastructure.saga.DefaultSagaStateMachine;
+import com.felipe.ecommerce_order_service.infrastructure.saga.SagaStateMachine;
 import com.felipe.ecommerce_order_service.infrastructure.saga.event.SagaEvent;
 import com.felipe.ecommerce_order_service.infrastructure.saga.SagaTransition;
 import com.felipe.kafka.saga.replies.InventoryTransactionReply;
@@ -17,13 +17,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class KafkaService {
   private final OrderSagaRepository orderSagaRepository;
-  private final DefaultSagaStateMachine defaultSagaStateMachine;
+  private final SagaStateMachine sagaStateMachine;
   private static final Logger logger = LoggerFactory.getLogger(KafkaService.class);
   private static final String ORDER_TRANSACTION_REPLIES_TOPIC = "order.order_transaction.replies";
 
-  public KafkaService(OrderSagaRepository orderSagaRepository, DefaultSagaStateMachine defaultSagaStateMachine) {
+  public KafkaService(OrderSagaRepository orderSagaRepository, SagaStateMachine sagaStateMachine) {
     this.orderSagaRepository = orderSagaRepository;
-    this.defaultSagaStateMachine = defaultSagaStateMachine;
+    this.sagaStateMachine = sagaStateMachine;
   }
 
   @Transactional // Keeps the Hibernate session/persistence context open until the method finishes executing
@@ -44,7 +44,7 @@ public class KafkaService {
       .orElseThrow(() -> new SagaNotFoundException(transactionReply.getSagaId()));
 
     // Handle and mutate saga status
-    SagaTransition transition = this.defaultSagaStateMachine.handle(saga, event);
+    SagaTransition transition = this.sagaStateMachine.handle(saga, event);
     transition.apply(saga); // apply changes made in saga
     this.orderSagaRepository.save(saga);
   }

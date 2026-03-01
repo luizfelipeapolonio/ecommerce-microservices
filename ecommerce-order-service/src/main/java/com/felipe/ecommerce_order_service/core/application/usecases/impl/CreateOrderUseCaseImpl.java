@@ -4,10 +4,8 @@ import com.felipe.ecommerce_order_service.core.application.dtos.CreateOrderDTO;
 import com.felipe.ecommerce_order_service.core.application.dtos.CustomerProfileDTO;
 import com.felipe.ecommerce_order_service.core.application.exceptions.CustomerAddressNotDefinedException;
 import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
-import com.felipe.ecommerce_order_service.core.application.gateway.OrderTransactionGateway;
 import com.felipe.ecommerce_order_service.core.application.gateway.OrderGateway;
 import com.felipe.ecommerce_order_service.core.application.usecases.CreateOrderUseCase;
-import com.felipe.ecommerce_order_service.core.domain.Order;
 
 import java.util.Map;
 import java.util.UUID;
@@ -15,13 +13,10 @@ import java.util.UUID;
 public class CreateOrderUseCaseImpl implements CreateOrderUseCase {
   private final OrderGateway orderGateway;
   private final CustomerGateway customerGateway;
-  private final OrderTransactionGateway orderTransactionGateway;
 
-  public CreateOrderUseCaseImpl(OrderGateway orderGateway, CustomerGateway customerGateway,
-                                OrderTransactionGateway orderTransactionGateway) {
+  public CreateOrderUseCaseImpl(OrderGateway orderGateway, CustomerGateway customerGateway) {
     this.orderGateway = orderGateway;
     this.customerGateway = customerGateway;
-    this.orderTransactionGateway = orderTransactionGateway;
   }
 
   @Override
@@ -31,19 +26,7 @@ public class CreateOrderUseCaseImpl implements CreateOrderUseCase {
     if (customerProfile.address() == null) {
       throw new CustomerAddressNotDefinedException(customerProfile.id());
     }
-
     UUID customerId = UUID.fromString(customerProfile.id());
-    Order createdOrder = this.orderGateway.createOrder(customerId, orderDTO.productId(), orderDTO.productQuantity());
-    UUID transactionId = this.orderTransactionGateway.executeOrderTransaction(
-        customerProfile,
-        createdOrder.getId(),
-        orderDTO.productId(),
-        orderDTO.productQuantity()
-    );
-
-    return Map.of(
-      "orderId", createdOrder.getId(),
-      "sagaId", transactionId
-    );
+    return this.orderGateway.createOrder(customerId, orderDTO.productId(), orderDTO.productQuantity());
   }
 }

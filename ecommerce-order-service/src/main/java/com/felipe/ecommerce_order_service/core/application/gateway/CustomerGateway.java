@@ -4,4 +4,5 @@ import com.felipe.ecommerce_order_service.core.application.dtos.CustomerProfileD
 
 public interface CustomerGateway {
   CustomerProfileDTO fetchAuthCustomerProfile(String customerEmail);
+  CustomerProfileDTO getCurrentAuthCustomer();
 }

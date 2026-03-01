@@ -2,6 +2,7 @@ package com.felipe.ecommerce_order_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_order_service.core.application.exceptions.CustomerAddressNotDefinedException;
 import com.felipe.ecommerce_order_service.core.application.exceptions.OrderNotFoundException;
+import com.felipe.ecommerce_order_service.infrastructure.exceptions.CustomerServiceException;
 import com.felipe.ecommerce_order_service.infrastructure.exceptions.SagaNotFoundException;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
@@ -34,6 +35,16 @@ public class ExceptionControllerAdvice {
       .type(ResponseType.ERROR)
       .code(HttpStatus.INTERNAL_SERVER_ERROR)
       .message("Ocorreu um erro interno do servidor! Por favor, tente mais tarde")
+      .build();
+  }
+
+  @ExceptionHandler(CustomerServiceException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleCustomerServiceException(CustomerServiceException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message(ex.getMessage())
       .build();
   }
 

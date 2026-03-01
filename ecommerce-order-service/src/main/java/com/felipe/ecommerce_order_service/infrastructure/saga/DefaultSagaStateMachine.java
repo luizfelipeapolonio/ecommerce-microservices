@@ -1,5 +1,7 @@
 package com.felipe.ecommerce_order_service.infrastructure.saga;
 
+import com.felipe.ecommerce_order_service.core.application.dtos.CustomerProfileDTO;
+import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
 import com.felipe.ecommerce_order_service.core.application.usecases.DeleteOrderUseCase;
 import com.felipe.ecommerce_order_service.core.domain.Order;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
@@ -12,20 +14,21 @@ import com.felipe.kafka.saga.commands.InventoryTransactionCancelCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 import java.util.function.Consumer;
 
-@Component
 public class DefaultSagaStateMachine implements SagaStateMachine {
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private final DeleteOrderUseCase deleteOrderUseCase;
+  private final CustomerGateway customerGateway;
   private static final Logger logger = LoggerFactory.getLogger(DefaultSagaStateMachine.class);
 
-  public DefaultSagaStateMachine(KafkaTemplate<String, Object> kafkaTemplate, DeleteOrderUseCase deleteOrderUseCase) {
+  public DefaultSagaStateMachine(KafkaTemplate<String, Object> kafkaTemplate, DeleteOrderUseCase deleteOrderUseCase,
+                                 CustomerGateway customerGateway) {
     this.kafkaTemplate = kafkaTemplate;
     this.deleteOrderUseCase = deleteOrderUseCase;
+    this.customerGateway = customerGateway;
   }
 
   @Override
@@ -53,7 +56,10 @@ public class DefaultSagaStateMachine implements SagaStateMachine {
         });
         orderSaga.setStatus(SagaStatus.PROCESSING);
       };
-      action = () -> System.out.println("Trigger payment service");
+      action = () -> {
+        CustomerProfileDTO authCustomer = this.customerGateway.getCurrentAuthCustomer();
+        System.out.printf("Current authenticated customer -> '%s' - '%s'\n", authCustomer.id(), authCustomer.email());
+      };
     }
     if (event instanceof ParticipantFailed failed) {
       sagaMutation = orderSaga -> {

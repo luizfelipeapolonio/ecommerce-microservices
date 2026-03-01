@@ -2,6 +2,7 @@ package com.felipe.ecommerce_order_service.infrastructure.external;
 
 import com.felipe.ecommerce_order_service.core.application.dtos.CustomerProfileDTO;
 import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
+import com.felipe.ecommerce_order_service.infrastructure.exceptions.CustomerServiceException;
 import com.felipe.response.ResponsePayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,9 @@ import static org.springframework.security.oauth2.client.web.client.RequestAttri
 @Service
 public class CustomerService implements CustomerGateway {
   private final RestClient restClient;
-  private final String customerServiceUri = "http://localhost:8081/api/v1/customers";
+  private CustomerProfileDTO currentAuthCustomer;
   private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
+  private static final String CUSTOMER_SERVICE_URI = "http://localhost:8081/api/v1/customers";
   private static final String CLIENT_REGISTRATION_ID = "ecommerce-order-service";
 
   public CustomerService(RestClient restClient) {
@@ -31,7 +33,7 @@ public class CustomerService implements CustomerGateway {
     try {
       final ResponsePayload<CustomerProfileDTO> response = this.restClient
         .get()
-        .uri(URI.create(this.customerServiceUri + "/profile"))
+        .uri(URI.create(CUSTOMER_SERVICE_URI + "/profile"))
         .attributes(clientRegistrationId(CLIENT_REGISTRATION_ID))
         .header("authCustomerEmail", customerEmail)
         .accept(MediaType.APPLICATION_JSON)
@@ -39,10 +41,18 @@ public class CustomerService implements CustomerGateway {
         .body(new ParameterizedTypeReference<>() {});
 
       assert response != null;
+      this.currentAuthCustomer = response.getPayload();
+      logger.info("Setting the current authenticated customer -> id: {} - email: {}",
+        this.currentAuthCustomer.id(), this.currentAuthCustomer.email());
       return response.getPayload();
-    } catch(RestClientException ex) {
+    } catch (RestClientException ex) {
       logger.error("Error in Customer Service RestClient -> {}", ex.getMessage());
-      throw new RuntimeException("Ocorreu um erro ao se comunicar com a aplicação");
+      throw new CustomerServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }
+  }
+
+  @Override
+  public CustomerProfileDTO getCurrentAuthCustomer() {
+    return this.currentAuthCustomer;
   }
 }
