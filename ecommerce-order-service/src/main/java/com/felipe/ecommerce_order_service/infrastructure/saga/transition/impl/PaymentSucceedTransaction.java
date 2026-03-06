@@ -1,0 +1,41 @@
+package com.felipe.ecommerce_order_service.infrastructure.saga.transition.impl;
+
+import com.felipe.ecommerce_order_service.core.application.dtos.UpdateOrderDTO;
+import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
+import com.felipe.ecommerce_order_service.core.domain.Order;
+import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
+import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.SagaStatus;
+import com.felipe.ecommerce_order_service.infrastructure.saga.transition.SagaTransition;
+import com.felipe.kafka.saga.replies.PaymentTransactionReply;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.function.Consumer;
+
+public final class PaymentSucceedTransaction extends SagaTransition {
+  private final PaymentTransactionReply reply;
+  private final UpdateOrderUseCase updateOrderUseCase;
+  private static final Logger logger = LoggerFactory.getLogger(PaymentSucceedTransaction.class);
+
+  public PaymentSucceedTransaction(PaymentTransactionReply reply, UpdateOrderUseCase updateOrderUseCase) {
+    this.reply = reply;
+    this.updateOrderUseCase = updateOrderUseCase;
+  }
+
+  @Override
+  protected Consumer<OrderSaga> sagaMutation() {
+    return saga -> {
+      saga.markParticipantSuccess(reply.getParticipant());
+      saga.setStatus(SagaStatus.WAITING_FOR_PAYMENT);
+    };
+  }
+
+  @Override
+  protected TriggerAction action() {
+    return () -> {
+      UpdateOrderDTO updateDTO = new UpdateOrderDTO(null, null, this.reply.getCheckoutUrl(), null, null);
+      Order updatedOrder = this.updateOrderUseCase.execute(reply.getOrderId(), updateDTO);
+      logger.info("Updated order -> checkoutUrl: {}", updatedOrder.getCheckoutUrl());
+    };
+  }
+}

@@ -1,0 +1,61 @@
+server:
+  port: 8087
+spring:
+  application.name: ecommerce-payment-service
+  output.ansi.enabled: ALWAYS
+  # Externalized Configuration --> https://docs.spring.io/spring-boot/3.5/reference/features/external-config.html#features.external-config.files.importing
+  # Tells Spring to treat the .env file as a standard properties file
+  # The [.properties] hint tells Spring to read the file as a properties file
+  # optional: prevents the application from failing if the file is missing
+  config.import: optional:classpath:.env[.properties]
+
+  # === OAuth2 ====
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180
+
+  # === Database ===
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecommerce_payment_service_db
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate.ddl-auto: validate
+    show-sql: true
+
+  # === Kafka ===
+  kafka:
+    bootstrap-servers: http://localhost:9094
+
+# === Actuator ===
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+
+eureka:
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+springdoc:
+  override-with-generic-response: false
+  api-docs:
+    version: openapi_3_0
+    enabled: true
+    path: /payment-service/v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /payment-service/swagger-ui.html
+
+stripe.key: ${STRIPE_SECRET_KEY}

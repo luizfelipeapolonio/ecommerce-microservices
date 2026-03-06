@@ -4,10 +4,14 @@ import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGatew
 import com.felipe.ecommerce_order_service.core.application.gateway.OrderGateway;
 import com.felipe.ecommerce_order_service.core.application.usecases.CreateOrderUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.DeleteOrderUseCase;
+import com.felipe.ecommerce_order_service.core.application.usecases.GetOrderByIdUseCase;
+import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.CreateOrderUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.DeleteOrderUseCaseImpl;
-import com.felipe.ecommerce_order_service.infrastructure.saga.DefaultSagaStateMachine;
-import com.felipe.ecommerce_order_service.infrastructure.saga.SagaStateMachine;
+import com.felipe.ecommerce_order_service.core.application.usecases.impl.GetOrderByIdUseCaseImpl;
+import com.felipe.ecommerce_order_service.core.application.usecases.impl.UpdateOrderUseCaseImpl;
+import com.felipe.ecommerce_order_service.infrastructure.saga.state.DefaultSagaState;
+import com.felipe.ecommerce_order_service.infrastructure.saga.state.SagaState;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -36,7 +40,17 @@ public class OrderBeans {
   }
 
   @Bean
-  public SagaStateMachine defaultSagaStateMachine(DeleteOrderUseCase deleteOrderUseCase) {
-    return new DefaultSagaStateMachine(this.kafkaTemplate, deleteOrderUseCase, this.customerGateway);
+  public GetOrderByIdUseCase getOrderByIdUseCase() {
+    return new GetOrderByIdUseCaseImpl(this.orderGateway);
+  }
+
+  @Bean
+  public UpdateOrderUseCase updateOrderUseCase() {
+    return new UpdateOrderUseCaseImpl(this.orderGateway);
+  }
+
+  @Bean
+  public SagaState defaultSagaStateMachine(DeleteOrderUseCase deleteOrderUseCase, UpdateOrderUseCase updateOrderUseCase) {
+    return new DefaultSagaState(this.kafkaTemplate, deleteOrderUseCase, updateOrderUseCase, this.customerGateway);
   }
 }

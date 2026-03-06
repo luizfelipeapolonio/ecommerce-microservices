@@ -6,4 +6,8 @@ public class SagaNotFoundException extends RuntimeException {
   public SagaNotFoundException(UUID sagaId) {
     super("Saga with id '" + sagaId + "' not found");
   }
+
+  public SagaNotFoundException(String message) {
+    super(message);
+  }
 }

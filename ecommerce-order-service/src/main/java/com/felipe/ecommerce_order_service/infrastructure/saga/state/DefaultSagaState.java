@@ -1,9 +1,10 @@
-package com.felipe.ecommerce_order_service.infrastructure.saga;
+package com.felipe.ecommerce_order_service.infrastructure.saga.state;
 
 import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
 import com.felipe.ecommerce_order_service.core.application.usecases.DeleteOrderUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
+import com.felipe.ecommerce_order_service.infrastructure.saga.transition.SagaTransition;
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.impl.CancellingTransition;
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.impl.InventoryFailedTransition;
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.impl.InventorySucceededTransition;
@@ -11,9 +12,6 @@ import com.felipe.ecommerce_order_service.infrastructure.saga.transition.impl.Pa
 import com.felipe.kafka.saga.replies.InventoryTransactionReply;
 import com.felipe.kafka.saga.replies.PaymentTransactionReply;
 import com.felipe.kafka.saga.replies.ReplyTransaction;
-import com.felipe.ecommerce_order_service.infrastructure.saga.transition.SagaTransition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 
 public class DefaultSagaState implements SagaState {
@@ -21,7 +19,6 @@ public class DefaultSagaState implements SagaState {
   private final DeleteOrderUseCase deleteOrderUseCase;
   private final UpdateOrderUseCase updateOrderUseCase;
   private final CustomerGateway customerGateway;
-  private static final Logger logger = LoggerFactory.getLogger(DefaultSagaState.class);
 
   public DefaultSagaState(KafkaTemplate<String, Object> kafkaTemplate,
                           DeleteOrderUseCase deleteOrderUseCase,

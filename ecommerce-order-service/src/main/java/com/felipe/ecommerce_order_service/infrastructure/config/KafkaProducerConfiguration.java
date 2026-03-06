@@ -45,6 +45,13 @@ public class KafkaProducerConfiguration {
   }
 
   @Bean
+  public NewTopic orderTransactionPaymentCommands() {
+    return TopicBuilder.name("order.order_transaction.payment.commands")
+      .partitions(2)
+      .build();
+  }
+
+  @Bean
   public NewTopic orderTransactionReplies() {
     return TopicBuilder.name("order.order_transaction.replies")
       .partitions(2)
@@ -55,6 +62,7 @@ public class KafkaProducerConfiguration {
     String[] types = {
       "inventoryTransactionCreateCommand:com.felipe.kafka.saga.commands.InventoryTransactionCreateCommand",
       "inventoryTransactionCancelCommand:com.felipe.kafka.saga.commands.InventoryTransactionCancelCommand",
+      "paymentTransactionCreateCommand:com.felipe.kafka.saga.commands.PaymentTransactionCreateCommand",
     };
     return String.join(", ", types);
   }

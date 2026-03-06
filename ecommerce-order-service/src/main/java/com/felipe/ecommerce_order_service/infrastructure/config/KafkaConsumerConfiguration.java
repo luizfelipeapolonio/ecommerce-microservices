@@ -46,8 +46,9 @@ public class KafkaConsumerConfiguration {
 
   private static String typeMappings() {
     String[] types = {
-      "inventoryTransactionReply:com.felipe.kafka.saga.replies.InventoryTransactionReply"
+      "inventoryTransactionReply:com.felipe.kafka.saga.replies.InventoryTransactionReply",
+      "paymentTransactionReply:com.felipe.kafka.saga.replies.PaymentTransactionReply",
     };
-    return types[0];
+    return String.join(", ", types);
   }
 }

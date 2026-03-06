@@ -87,6 +87,7 @@ public class KafkaService {
 
       productData.setName(reservation.t1().getName())
         .setUnitPrice(reservation.t1().getUnitPrice().toString())
+        .setQuantity(reservation.t2().getQuantity())
         .setWithDiscount(reservation.t1().isItWithDiscount())
         .setDiscountType(reservation.t1().getDiscountType())
         .setDiscountValue(reservation.t1().getDiscountValue());
@@ -100,7 +101,7 @@ public class KafkaService {
     } catch (Exception ex) {
       mapBusinessExceptions(ex, replyBuilder);
       logger.error("Error in product reservation: {} - exception: {}", ex.getMessage(), ex.getClass().getName());
-      sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.fail().build());
+      sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.failure().build());
     }
     sentMessage.whenComplete((result, exception) ->
       logger.info("Reserve product posted on topic \"{}\" successfully -> status: {}",
@@ -140,7 +141,7 @@ public class KafkaService {
     } catch (Exception ex) {
       mapBusinessExceptions(ex, replyBuilder);
       logger.error("Error in cancel reservation: {} - exception: {}", ex.getMessage(), ex.getClass().getName());
-      sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.fail().build());
+      sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.failure().build());
     }
     sentMessage.whenComplete((result, exception) -> {
       logger.info(

@@ -88,4 +88,10 @@ public class OrderGatewayImpl implements OrderGateway {
   public void deleteOrder(UUID orderId) {
     this.orderRepository.deleteById(orderId);
   }
+
+  @Override
+  public Order updateOrder(Order order) {
+    OrderEntity updatedOrder = this.orderEntityMapper.toEntity(order);
+    return this.orderEntityMapper.toDomain(this.orderRepository.save(updatedOrder));
+  }
 }

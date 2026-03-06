@@ -159,4 +159,21 @@ public class OrderSaga {
     participants.add(participant);
     return this;
   }
+
+  public void markParticipantSuccess(ReplyTransaction.SagaParticipant participantName) {
+    mutateParticipant(participantName, SagaParticipantStatus.SUCCESS);
+  }
+
+  public void markParticipantFailed(ReplyTransaction.SagaParticipant participantName) {
+    mutateParticipant(participantName, SagaParticipantStatus.FAILURE);
+  }
+
+  private void mutateParticipant(ReplyTransaction.SagaParticipant participantName, SagaParticipantStatus status) {
+    for (OrderSagaParticipant participant : this.participants) {
+      if (participant.getName() == participantName) {
+        participant.setStatus(status);
+        break;
+      }
+    }
+  }
 }

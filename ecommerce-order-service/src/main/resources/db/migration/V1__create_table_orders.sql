@@ -6,7 +6,10 @@ CREATE TABLE orders (
     final_price      NUMERIC      NOT NULL,
     with_coupon      BOOLEAN      NOT NULL DEFAULT FALSE,
     coupon_id        UUID,
+    checkout_url     TEXT,
+    invoice_url      TEXT,
     customer_id      UUID         NOT NULL,
     status           VARCHAR(20)  NOT NULL,
-    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NOT NULL
 );

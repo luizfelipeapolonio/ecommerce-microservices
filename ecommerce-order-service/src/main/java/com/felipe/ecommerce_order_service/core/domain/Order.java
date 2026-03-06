@@ -14,9 +14,12 @@ public class Order {
   private BigDecimal finalPrice;
   private boolean withCoupon;
   private UUID couponId;
+  private String checkoutUrl;
+  private String invoiceUrl;
   private UUID customerId;
   private String status;
   private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 
   public Order() {
   }
@@ -112,6 +115,32 @@ public class Order {
     return this;
   }
 
+  public String getCheckoutUrl() {
+    return this.checkoutUrl;
+  }
+
+  public void setCheckoutUrl(String checkoutUrl) {
+    this.checkoutUrl = checkoutUrl;
+  }
+
+  public Order checkoutUrl(String checkoutUrl) {
+    this.checkoutUrl = checkoutUrl;
+    return this;
+  }
+
+  public String getInvoiceUrl() {
+    return this.invoiceUrl;
+  }
+
+  public void setInvoiceUrl(String invoiceUrl) {
+    this.invoiceUrl = invoiceUrl;
+  }
+
+  public Order invoiceUrl(String invoiceUrl) {
+    this.invoiceUrl = invoiceUrl;
+    return this;
+  }
+
   public UUID getCustomerId() {
     return this.customerId;
   }
@@ -148,6 +177,19 @@ public class Order {
 
   public Order createdAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
+    return this;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return this.updatedAt;
+  }
+
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  public Order updatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
     return this;
   }
 }

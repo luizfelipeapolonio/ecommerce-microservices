@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -39,6 +40,12 @@ public class OrderEntity {
   @Column(name = "coupon_id")
   private UUID couponId;
 
+  @Column(name = "checkout_url")
+  private String checkoutUrl;
+
+  @Column(name = "invoice_url")
+  private String invoiceUrl;
+
   @Column(name = "customer_id", nullable = false)
   private UUID customerId;
 
@@ -48,6 +55,10 @@ public class OrderEntity {
   @CreationTimestamp
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at", nullable = false)
+  private LocalDateTime updatedAt;
 
   public OrderEntity() {
   }
@@ -143,6 +154,32 @@ public class OrderEntity {
     return this;
   }
 
+  public String getCheckoutUrl() {
+    return this.checkoutUrl;
+  }
+
+  public void setCheckoutUrl(String checkoutUrl) {
+    this.checkoutUrl = checkoutUrl;
+  }
+
+  public OrderEntity checkoutUrl(String checkoutUrl) {
+    this.checkoutUrl = checkoutUrl;
+    return this;
+  }
+
+  public String getInvoiceUrl() {
+    return this.invoiceUrl;
+  }
+
+  public void setInvoiceUrl(String invoiceUrl) {
+    this.invoiceUrl = invoiceUrl;
+  }
+
+  public OrderEntity invoiceUrl(String invoiceUrl) {
+    this.invoiceUrl = invoiceUrl;
+    return this;
+  }
+
   public UUID getCustomerId() {
     return this.customerId;
   }
@@ -179,6 +216,19 @@ public class OrderEntity {
 
   public OrderEntity createdAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
+    return this;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return this.updatedAt;
+  }
+
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  public OrderEntity updatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
     return this;
   }
 }

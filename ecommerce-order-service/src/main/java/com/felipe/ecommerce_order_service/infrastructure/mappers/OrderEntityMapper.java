@@ -17,8 +17,11 @@ public class OrderEntityMapper {
       .finalPrice(orderEntity.getFinalPrice())
       .status(OrderStatus.of(orderEntity.getStatus()))
       .withCoupon(orderEntity.isWithCoupon())
-      .couponId(orderEntity.getCouponId() != null ? orderEntity.getCouponId() : null)
-      .createdAt(orderEntity.getCreatedAt());
+      .couponId(orderEntity.getCouponId())
+      .checkoutUrl(orderEntity.getCheckoutUrl())
+      .invoiceUrl(orderEntity.getInvoiceUrl())
+      .createdAt(orderEntity.getCreatedAt())
+      .updatedAt(orderEntity.getUpdatedAt());
   }
 
   public OrderEntity toEntity(Order order) {
@@ -31,7 +34,10 @@ public class OrderEntityMapper {
       .finalPrice(order.getFinalPrice())
       .status(OrderStatus.of(order.getStatus()))
       .withCoupon(order.isWithCoupon())
-      .couponId(order.getCouponId() != null ? order.getCouponId() : null)
-      .createdAt(order.getCreatedAt());
+      .couponId(order.getCouponId())
+      .checkoutUrl(order.getCheckoutUrl())
+      .invoiceUrl(order.getInvoiceUrl())
+      .createdAt(order.getCreatedAt())
+      .updatedAt(order.getUpdatedAt());
   }
 }

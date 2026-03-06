@@ -7,25 +7,20 @@ import java.util.UUID;
 
 @JsonDeserialize(builder = InventoryTransactionReply.Builder.class)
 public final class InventoryTransactionReply extends ReplyTransaction {
-  private final UUID orderId;
   private final ProductData product;
 
   private InventoryTransactionReply(Builder builder) {
     super(
       builder.sagaId,
       builder.transactionId,
+      builder.orderId,
       builder.command,
       builder.status,
       builder.failureCode,
       builder.failureMessage,
       builder.participant
     );
-    this.orderId = builder.orderId;
     this.product = builder.product;
-  }
-
-  public UUID getOrderId() {
-    return this.orderId;
   }
 
   public ProductData getProduct() {
@@ -40,6 +35,7 @@ public final class InventoryTransactionReply extends ReplyTransaction {
     private UUID id;
     private String name;
     private String unitPrice;
+    private long quantity;
     private boolean withDiscount;
     private String discountType;
     private String discountValue;
@@ -75,6 +71,15 @@ public final class InventoryTransactionReply extends ReplyTransaction {
 
     public ProductData setUnitPrice(String unitPrice) {
       this.unitPrice = unitPrice;
+      return this;
+    }
+
+    public long getQuantity() {
+      return this.quantity;
+    }
+
+    public ProductData setQuantity(long quantity) {
+      this.quantity = quantity;
       return this;
     }
 
@@ -174,7 +179,7 @@ public final class InventoryTransactionReply extends ReplyTransaction {
       return this;
     }
 
-    public Builder fail() {
+    public Builder failure() {
       this.status = Status.FAILURE;
       return this;
     }

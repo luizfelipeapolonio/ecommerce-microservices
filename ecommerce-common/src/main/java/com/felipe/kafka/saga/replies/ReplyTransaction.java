@@ -5,6 +5,7 @@ import com.felipe.kafka.saga.BaseSagaTransaction;
 import java.util.UUID;
 
 public abstract class ReplyTransaction extends BaseSagaTransaction {
+  private final UUID orderId;
   private final Status status;
   private final FailureCode failureCode;
   private final String failureMessage;
@@ -28,12 +29,14 @@ public abstract class ReplyTransaction extends BaseSagaTransaction {
 
   public ReplyTransaction(UUID sagaId,
                           UUID transactionId,
+                          UUID orderId,
                           Command command,
                           Status status,
                           FailureCode failureCode,
                           String failureMessage,
                           SagaParticipant participant) {
     super(sagaId, transactionId, command);
+    this.orderId = orderId;
     this.status = status;
     this.failureCode = failureCode;
     this.failureMessage = failureMessage;
@@ -42,6 +45,10 @@ public abstract class ReplyTransaction extends BaseSagaTransaction {
 
   public Status getStatus() {
     return this.status;
+  }
+
+  public UUID getOrderId() {
+    return this.orderId;
   }
 
   public FailureCode getFailureCode() {
