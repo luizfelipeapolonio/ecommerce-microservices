@@ -26,7 +26,7 @@ public class KafkaService {
       "\nCommand received in Process payment:\norderId: {}\norderAmount: {}\nproductName: {}\nemail: {}",
       paymentCommand.getOrderId(),
       paymentCommand.getOrderAmount(),
-      paymentCommand.getProductName(),
+      paymentCommand.getProduct().name(),
       paymentCommand.getCustomer().email()
     );
     try {

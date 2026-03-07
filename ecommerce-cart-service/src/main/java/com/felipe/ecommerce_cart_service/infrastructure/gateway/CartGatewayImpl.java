@@ -10,7 +10,7 @@ import com.felipe.ecommerce_cart_service.infrastructure.persistence.entities.Car
 import com.felipe.ecommerce_cart_service.infrastructure.persistence.repositories.CartRepository;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.product.ProductResponseDTO;
-import com.felipe.utils.product.PriceCalculator;
+import com.felipe.utils.product.PricingCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -51,9 +51,7 @@ public class CartGatewayImpl implements CartGateway {
     );
 
     final ProductResponseDTO product = response.getPayload();
-    final BigDecimal finalPrice = product.withDiscount() ?
-                                  PriceCalculator.calculateFinalPrice(product.discountType(), product.unitPrice(), product.discountValue(), quantity) :
-                                  PriceCalculator.calculateFinalPrice(product.unitPrice(), quantity);
+    final BigDecimal finalPrice = PricingCalculator.calculateFinalPrice(product.discountType(), product.unitPrice(), product.discountValue(), quantity);
 
     CartItemEntity cartItem = new CartItemEntity()
       .productId(productId)

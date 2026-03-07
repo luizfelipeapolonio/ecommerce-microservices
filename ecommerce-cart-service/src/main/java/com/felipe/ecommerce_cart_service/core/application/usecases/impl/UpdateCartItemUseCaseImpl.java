@@ -8,7 +8,7 @@ import com.felipe.ecommerce_cart_service.core.application.gateway.CustomerGatewa
 import com.felipe.ecommerce_cart_service.core.application.usecases.UpdateCartItemUseCase;
 import com.felipe.ecommerce_cart_service.core.domain.Cart;
 import com.felipe.ecommerce_cart_service.core.domain.CartItem;
-import com.felipe.utils.product.PriceCalculator;
+import com.felipe.utils.product.PricingCalculator;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -34,9 +34,7 @@ public class UpdateCartItemUseCaseImpl implements UpdateCartItemUseCase {
       .filter(item -> item.getId().equals(itemId))
       .findFirst()
       .map(item -> {
-        BigDecimal finalPrice = item.getDiscountType() == null ?
-          PriceCalculator.calculateFinalPrice(item.getUnitPrice().toString(), quantity) :
-          PriceCalculator.calculateFinalPrice(item.getDiscountType(), item.getUnitPrice().toString(), item.getDiscountValue(), quantity);
+        BigDecimal finalPrice = PricingCalculator.calculateFinalPrice(item.getDiscountType(), item.getUnitPrice().toString(), item.getDiscountValue(), quantity);
         item.setFinalPrice(finalPrice);
         item.setQuantity(quantity);
         return item;

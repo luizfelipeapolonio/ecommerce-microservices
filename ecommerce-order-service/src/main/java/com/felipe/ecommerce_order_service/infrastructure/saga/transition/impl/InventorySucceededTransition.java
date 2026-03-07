@@ -7,7 +7,7 @@ import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.sa
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.SagaTransition;
 import com.felipe.kafka.saga.commands.PaymentTransactionCreateCommand;
 import com.felipe.kafka.saga.replies.InventoryTransactionReply;
-import com.felipe.utils.product.PriceCalculator;
+import com.felipe.utils.product.PricingCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -45,10 +45,15 @@ public final class InventorySucceededTransition extends SagaTransition {
       InventoryTransactionReply.ProductData product = reply.getProduct();
 
       PaymentTransactionCreateCommand paymentCommand = PaymentTransactionCreateCommand.builder(reply.getSagaId(), transactionId)
-        .withOrderId(reply.getOrderId())
-        .withProductQuantity(product.getQuantity())
-        .withProductName(product.getName())
+        .withOrderId(this.reply.getOrderId())
         .withOrderAmount(calculateOrderAmount(product))
+        .withProduct(new PaymentTransactionCreateCommand.ProductData(
+          product.getName(),
+          product.getQuantity(),
+          product.getUnitPrice(),
+          product.getDiscountType(),
+          product.getDiscountValue()
+        ))
         .withCustomer(new PaymentTransactionCreateCommand.CustomerData(
           UUID.fromString(authCustomer.id()),
           authCustomer.username(),
@@ -76,8 +81,11 @@ public final class InventorySucceededTransition extends SagaTransition {
   }
 
   private String calculateOrderAmount(InventoryTransactionReply.ProductData product) {
-    return product.isItWithDiscount()
-      ? PriceCalculator.calculateFinalPrice(product.getDiscountType(), product.getUnitPrice(), product.getDiscountValue(), (int) product.getQuantity()).toString()
-      : PriceCalculator.calculateFinalPrice(product.getUnitPrice(), (int) product.getQuantity()).toString();
+    return PricingCalculator.calculateFinalPrice(
+      product.getDiscountType(),
+      product.getUnitPrice(),
+      product.getDiscountValue(),
+      (int) product.getQuantity()
+    ).toString();
   }
 }

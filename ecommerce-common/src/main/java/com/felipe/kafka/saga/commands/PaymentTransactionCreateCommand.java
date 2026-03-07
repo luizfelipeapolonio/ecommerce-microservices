@@ -11,17 +11,15 @@ import java.util.UUID;
 @JsonDeserialize(builder = PaymentTransactionCreateCommand.Builder.class)
 public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
   private final UUID orderId;
-  private final String productName;
-  private final Long productQuantity;
   private final String orderAmount;
+  private final ProductData product;
   private final CustomerData customer;
 
   private PaymentTransactionCreateCommand(Builder builder) {
     super(builder.sagaId, builder.transactionId, Command.CREATE);
     this.orderId = builder.orderId;
-    this.productName = builder.productName;
-    this.productQuantity = builder.productQuantity;
     this.orderAmount = builder.orderAmount;
+    this.product = builder.product;
     this.customer = builder.customer;
   }
 
@@ -29,16 +27,12 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
     return this.orderId;
   }
 
-  public Long getProductQuantity() {
-    return this.productQuantity;
-  }
-
-  public String getProductName() {
-    return this.productName;
-  }
-
   public String getOrderAmount() {
     return this.orderAmount;
+  }
+
+  public ProductData getProduct() {
+    return this.product;
   }
 
   public CustomerData getCustomer() {
@@ -48,6 +42,8 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
   public static Builder builder(UUID sagaId, UUID transactionId) {
     return new Builder(sagaId, transactionId);
   }
+
+  public record ProductData(String name, long quantity, String unitPrice, String discountType, String discountValue) {}
 
   public record CustomerData(UUID id, String name, String email, CustomerAddress address) {}
 
@@ -65,9 +61,8 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
     private final UUID sagaId;
     private final UUID transactionId;
     private UUID orderId;
-    private String productName;
-    private Long productQuantity;
     private String orderAmount;
+    private ProductData product;
     private CustomerData customer;
 
     @JsonCreator
@@ -81,18 +76,13 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
       return this;
     }
 
-    public Builder withProductName(String productName) {
-      this.productName = productName;
-      return this;
-    }
-
-    public Builder withProductQuantity(Long productQuantity) {
-      this.productQuantity = productQuantity;
-      return this;
-    }
-
     public Builder withOrderAmount(String orderAmount) {
       this.orderAmount = orderAmount;
+      return this;
+    }
+
+    public Builder withProduct(ProductData product) {
+      this.product = product;
       return this;
     }
 
