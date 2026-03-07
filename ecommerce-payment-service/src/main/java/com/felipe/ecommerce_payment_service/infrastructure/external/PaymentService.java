@@ -5,13 +5,16 @@ import com.felipe.ecommerce_payment_service.core.domain.Payment;
 import com.felipe.ecommerce_payment_service.infrastructure.exceptions.InsufficientCustomerBalanceException;
 import com.felipe.ecommerce_payment_service.infrastructure.exceptions.UnsuccessfulTransactionException;
 import com.felipe.kafka.saga.commands.PaymentTransactionCreateCommand;
+import com.felipe.utils.product.PricingCalculator;
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Coupon;
 import com.stripe.model.Customer;
 import com.stripe.model.CustomerBalanceTransaction;
 import com.stripe.model.PaymentMethod;
 import com.stripe.model.StripeSearchResult;
 import com.stripe.model.checkout.Session;
+import com.stripe.param.CouponCreateParams;
 import com.stripe.param.CustomerBalanceTransactionCreateParams;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerSearchParams;
@@ -24,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -57,7 +61,7 @@ public class PaymentService {
       );
     }
 
-    SessionCreateParams params = SessionCreateParams.builder()
+    SessionCreateParams.Builder params = SessionCreateParams.builder()
       .setMode(SessionCreateParams.Mode.PAYMENT)
       .setSuccessUrl("http://localhost:8087/success") // TODO: create static pages and redirect to 8080
       .setCancelUrl("http://localhost:8087/cancel")
@@ -70,21 +74,20 @@ public class PaymentService {
         .build())
       .addLineItem(
         SessionCreateParams.LineItem.builder()
-          .setQuantity(paymentCommand.getProductQuantity())
+          .setQuantity(paymentCommand.getProduct().quantity())
           .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
             .setCurrency("brl")
-            .setUnitAmount(formatBigDecimalStringToValidLongValue(paymentCommand.getOrderAmount()))
+            .setUnitAmount(formatBigDecimalStringToValidLongValue(paymentCommand.getProduct().unitPrice()))
             .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
-              .setName(paymentCommand.getProductName())
+              .setName(paymentCommand.getProduct().name())
               .putMetadata("order_id", paymentCommand.getOrderId().toString())
               .build())
             .build())
-          .build()
-      )
-      .build();
+          .build());
+    addDiscountIfApplicable(params, paymentCommand);
 
     try {
-      Session session = this.stripeClient.v1().checkout().sessions().create(params);
+      Session session = this.stripeClient.v1().checkout().sessions().create(params.build());
       Payment createdPayment = this.createPaymentUseCase.execute(
         paymentCommand.getOrderId(),
         paymentCommand.getOrderAmount(),
@@ -93,6 +96,7 @@ public class PaymentService {
       );
       logger.info("Payment domain created successfully -> orderId: {}", createdPayment.getOrderId());
 
+      // TODO: make customer balance only when the payment is approved
       CustomerBalanceTransactionCreateParams balanceParams = CustomerBalanceTransactionCreateParams.builder()
         .setCurrency("brl")
         .setAmount(session.getAmountTotal())
@@ -191,6 +195,35 @@ public class PaymentService {
     } catch (StripeException ex) {
       logger.error("Error in payment method creation -> {}", ex.getStripeError().getMessage());
       throw new UnsuccessfulTransactionException("Stripe error on trying to create payment methods", ex);
+    }
+  }
+
+  private void addDiscountIfApplicable(SessionCreateParams.Builder sessionBuilder, PaymentTransactionCreateCommand paymentCommand) {
+    if (paymentCommand.getProduct().discountType() != null) {
+      PaymentTransactionCreateCommand.ProductData product =  paymentCommand.getProduct();
+      BigDecimal discount = PricingCalculator.calculateDiscount(product.unitPrice(), product.discountType(), product.discountValue());
+
+      CouponCreateParams params = CouponCreateParams.builder()
+        .setDuration(CouponCreateParams.Duration.ONCE)
+        .setCurrency("brl")
+        .setName(
+          product.discountType().equals("fixed_amount")
+          ? "Desconto na compra"
+          : "Desconto de %s%% na compra".formatted(PricingCalculator.formattedDiscountPercentageString(product.discountValue()))
+        )
+        .setAmountOff(formatBigDecimalStringToValidLongValue(discount.toString()))
+        .build();
+
+      try {
+        Coupon coupon = this.stripeClient.v1().coupons().create(params);
+        logger.info("Discount created successfully");
+        sessionBuilder.addDiscount(SessionCreateParams.Discount.builder()
+          .setCoupon(coupon.getId())
+          .build());
+      } catch (StripeException ex) {
+        logger.error("Error in discount creation -> {}", ex.getStripeError().getMessage());
+        throw new UnsuccessfulTransactionException("Stripe error on trying to create discount", ex);
+      }
     }
   }
 
