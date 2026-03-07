@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.function.Consumer;
 
-public final class PaymentSucceedTransaction extends SagaTransition {
+public final class PaymentSucceededTransition extends SagaTransition {
   private final PaymentTransactionReply reply;
   private final UpdateOrderUseCase updateOrderUseCase;
-  private static final Logger logger = LoggerFactory.getLogger(PaymentSucceedTransaction.class);
+  private static final Logger logger = LoggerFactory.getLogger(PaymentSucceededTransition.class);
 
-  public PaymentSucceedTransaction(PaymentTransactionReply reply, UpdateOrderUseCase updateOrderUseCase) {
+  public PaymentSucceededTransition(PaymentTransactionReply reply, UpdateOrderUseCase updateOrderUseCase) {
     this.reply = reply;
     this.updateOrderUseCase = updateOrderUseCase;
   }
