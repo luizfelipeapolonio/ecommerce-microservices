@@ -31,7 +31,7 @@ public final class InventorySucceededTransition extends SagaTransition {
   @Override
   protected Consumer<OrderSaga> sagaMutation() {
     return orderSaga -> {
-      orderSaga.markParticipantSuccess(this.reply.getParticipant());
+      orderSaga.markParticipantSuccess(InventoryTransactionReply.SagaParticipant.INVENTORY);
       orderSaga.setStatus(SagaStatus.PROCESSING);
     };
   }
@@ -85,7 +85,7 @@ public final class InventorySucceededTransition extends SagaTransition {
       product.getDiscountType(),
       product.getUnitPrice(),
       product.getDiscountValue(),
-      (int) product.getQuantity()
+      product.getQuantity()
     ).toString();
   }
 }

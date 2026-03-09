@@ -8,7 +8,7 @@ public class PricingCalculator {
     String discountType,
     String unitPrice,
     String discountValue,
-    int productQuantity
+    long productQuantity
   ) throws PriceCalculationException {
     final BigDecimal price = new BigDecimal(unitPrice);
     final BigDecimal quantity = new BigDecimal(productQuantity);
