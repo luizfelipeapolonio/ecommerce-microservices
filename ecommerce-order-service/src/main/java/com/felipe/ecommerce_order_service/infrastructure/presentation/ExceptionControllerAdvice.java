@@ -4,6 +4,7 @@ import com.felipe.ecommerce_order_service.core.application.exceptions.CustomerAd
 import com.felipe.ecommerce_order_service.core.application.exceptions.OrderNotFoundException;
 import com.felipe.ecommerce_order_service.infrastructure.exceptions.CustomerServiceException;
 import com.felipe.ecommerce_order_service.infrastructure.exceptions.SagaNotFoundException;
+import com.felipe.ecommerce_order_service.infrastructure.exceptions.UnhandledSagaParticipantException;
 import com.felipe.response.ResponsePayload;
 import com.felipe.response.ResponseType;
 import org.slf4j.Logger;
@@ -24,6 +25,17 @@ public class ExceptionControllerAdvice {
       .type(ResponseType.ERROR)
       .code(HttpStatus.NOT_FOUND)
       .message(ex.getMessage())
+      .build();
+  }
+
+  @ExceptionHandler(UnhandledSagaParticipantException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleUnhandledSagaParticipantException(UnhandledSagaParticipantException ex) {
+    logger.error("UnhandledSagaParticipantException handler -> message: {} ", ex.getMessage());
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message("Ocorreu um erro interno do servidor! Por favor, tente mais tarde")
       .build();
   }
 

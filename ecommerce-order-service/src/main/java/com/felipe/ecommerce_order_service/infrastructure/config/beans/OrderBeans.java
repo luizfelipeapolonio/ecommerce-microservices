@@ -10,8 +10,10 @@ import com.felipe.ecommerce_order_service.core.application.usecases.impl.CreateO
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.DeleteOrderUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.GetOrderByIdUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.UpdateOrderUseCaseImpl;
-import com.felipe.ecommerce_order_service.infrastructure.saga.state.DefaultSagaState;
+import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.CancellingStateHandler;
+import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.ProcessingStateHandler;
 import com.felipe.ecommerce_order_service.infrastructure.saga.state.SagaState;
+import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.StartedStateHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -50,7 +52,17 @@ public class OrderBeans {
   }
 
   @Bean
-  public SagaState defaultSagaStateMachine(DeleteOrderUseCase deleteOrderUseCase, UpdateOrderUseCase updateOrderUseCase) {
-    return new DefaultSagaState(this.kafkaTemplate, deleteOrderUseCase, updateOrderUseCase, this.customerGateway);
+  public SagaState startedStateHandler() {
+    return new StartedStateHandler(this.kafkaTemplate, this.customerGateway);
+  }
+
+  @Bean
+  public SagaState processingStateHandler(UpdateOrderUseCase updateOrderUseCase) {
+    return new ProcessingStateHandler(updateOrderUseCase);
+  }
+
+  @Bean
+  public SagaState cancellingStateHandler(DeleteOrderUseCase deleteOrderUseCase) {
+    return new CancellingStateHandler(deleteOrderUseCase);
   }
 }

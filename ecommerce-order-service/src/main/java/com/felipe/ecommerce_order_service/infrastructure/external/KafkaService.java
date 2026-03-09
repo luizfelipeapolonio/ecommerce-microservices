@@ -2,8 +2,7 @@ package com.felipe.ecommerce_order_service.infrastructure.external;
 
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
 import com.felipe.ecommerce_order_service.infrastructure.saga.OrderSagaService;
-import com.felipe.ecommerce_order_service.infrastructure.saga.state.SagaState;
-import com.felipe.ecommerce_order_service.infrastructure.saga.transition.SagaTransition;
+import com.felipe.ecommerce_order_service.infrastructure.saga.SagaOrchestrator;
 import com.felipe.kafka.saga.replies.InventoryTransactionReply;
 import com.felipe.kafka.saga.replies.PaymentTransactionReply;
 import jakarta.transaction.Transactional;
@@ -17,12 +16,12 @@ import org.springframework.stereotype.Service;
 @KafkaListener(id = "order-transactions", topics = "order.order_transaction.replies", groupId = "order-service")
 public class KafkaService {
   private final OrderSagaService orderSagaService;
-  private final SagaState sagaState;
+  private final SagaOrchestrator sagaOrchestrator;
   private static final Logger logger = LoggerFactory.getLogger(KafkaService.class);
 
-  public KafkaService(OrderSagaService orderSagaService, SagaState sagaState) {
+  public KafkaService(OrderSagaService orderSagaService, SagaOrchestrator sagaOrchestrator) {
     this.orderSagaService = orderSagaService;
-    this.sagaState = sagaState;
+    this.sagaOrchestrator = sagaOrchestrator;
   }
 
   @Transactional // Keeps the Hibernate session/persistence context open until the method finishes executing
@@ -39,11 +38,7 @@ public class KafkaService {
       transactionReply.getOrderId()
     );
     OrderSaga saga = this.orderSagaService.findOrderSagaById(transactionReply.getSagaId());
-
-    // Handle and mutate saga status
-    SagaTransition transition = this.sagaState.handle(saga, transactionReply);
-    transition.apply(saga); // apply changes made in saga
-    this.orderSagaService.updateOrderSaga(saga);
+    this.sagaOrchestrator.handle(saga, transactionReply);
   }
 
   @Transactional
@@ -61,9 +56,6 @@ public class KafkaService {
       transactionReply.getOrderId()
     );
     OrderSaga saga = this.orderSagaService.findOrderSagaById(transactionReply.getSagaId());
-
-    SagaTransition transition = this.sagaState.handle(saga, transactionReply);
-    transition.apply(saga);
-    this.orderSagaService.updateOrderSaga(saga);
+    this.sagaOrchestrator.handle(saga, transactionReply);
   }
 }

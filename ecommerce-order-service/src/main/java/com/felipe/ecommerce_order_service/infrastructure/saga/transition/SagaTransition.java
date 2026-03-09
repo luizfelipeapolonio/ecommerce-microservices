@@ -5,19 +5,19 @@ import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.sa
 import java.util.function.Consumer;
 
 public abstract class SagaTransition {
-  private final Consumer<OrderSaga> sagaMutation = sagaMutation();
-  private final TriggerAction action = action();
+  protected abstract Consumer<OrderSaga> sagaMutation();
+  protected abstract TriggerAction action();
 
   @FunctionalInterface
   public interface TriggerAction {
     void trigger();
   }
 
-  protected abstract Consumer<OrderSaga> sagaMutation();
-  protected abstract TriggerAction action();
+  public final void applyChanges(OrderSaga saga) {
+    sagaMutation().accept(saga);
+  }
 
-  public final void apply(OrderSaga saga) {
-    this.sagaMutation.accept(saga);
-    this.action.trigger();
+  public final void triggerAction() {
+    action().trigger();
   }
 }
