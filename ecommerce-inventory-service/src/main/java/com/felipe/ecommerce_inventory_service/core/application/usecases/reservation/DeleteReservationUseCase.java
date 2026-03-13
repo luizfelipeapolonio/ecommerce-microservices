@@ -3,5 +3,5 @@ package com.felipe.ecommerce_inventory_service.core.application.usecases.reserva
 import java.util.UUID;
 
 public interface DeleteReservationUseCase {
-  void execute(UUID productId, UUID orderId);
+  void execute(UUID orderId);
 }

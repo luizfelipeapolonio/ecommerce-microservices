@@ -10,6 +10,7 @@ import com.felipe.kafka.saga.replies.PaymentTransactionReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public final class PaymentSucceededTransition extends SagaTransition {
@@ -33,7 +34,7 @@ public final class PaymentSucceededTransition extends SagaTransition {
   @Override
   protected TriggerAction action() {
     return () -> {
-      UpdateOrderDTO updateDTO = new UpdateOrderDTO(null, null, this.reply.getCheckoutUrl(), null, null);
+      UpdateOrderDTO updateDTO = new UpdateOrderDTO(null, this.reply.getCheckoutUrl(), null, null, List.of());
       Order updatedOrder = this.updateOrderUseCase.execute(reply.getOrderId(), updateDTO);
       logger.info("Updated order -> checkoutUrl: {}", updatedOrder.getCheckoutUrl());
     };

@@ -3,11 +3,12 @@ package com.felipe.kafka.saga.replies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
+import java.util.List;
 import java.util.UUID;
 
 @JsonDeserialize(builder = InventoryTransactionReply.Builder.class)
 public final class InventoryTransactionReply extends ReplyTransaction {
-  private final ProductData product;
+  private final List<ProductData> products;
 
   private InventoryTransactionReply(Builder builder) {
     super(
@@ -20,11 +21,11 @@ public final class InventoryTransactionReply extends ReplyTransaction {
       builder.failureMessage,
       builder.participant
     );
-    this.product = builder.product;
+    this.products = builder.products;
   }
 
-  public ProductData getProduct() {
-    return this.product;
+  public List<ProductData> getProducts() {
+    return this.products;
   }
 
   public static Builder builder() {
@@ -116,7 +117,7 @@ public final class InventoryTransactionReply extends ReplyTransaction {
     private UUID sagaId;
     private UUID transactionId;
     private UUID orderId;
-    private ProductData product;
+    private List<ProductData> products;
     private Command command;
     private Status status;
     private FailureCode failureCode;
@@ -141,8 +142,8 @@ public final class InventoryTransactionReply extends ReplyTransaction {
       return this;
     }
 
-    public Builder withProduct(ProductData product) {
-      this.product = product;
+    public Builder withProducts(List<ProductData> products) {
+      this.products = products;
       return this;
     }
 

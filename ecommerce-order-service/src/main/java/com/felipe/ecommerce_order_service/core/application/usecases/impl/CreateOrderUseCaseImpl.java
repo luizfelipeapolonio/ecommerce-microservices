@@ -27,6 +27,6 @@ public class CreateOrderUseCaseImpl implements CreateOrderUseCase {
       throw new CustomerAddressNotDefinedException(customerProfile.id());
     }
     UUID customerId = UUID.fromString(customerProfile.id());
-    return this.orderGateway.createOrder(customerId, orderDTO.productId(), orderDTO.productQuantity());
+    return this.orderGateway.createOrder(customerId, orderDTO);
   }
 }

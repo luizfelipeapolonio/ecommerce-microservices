@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.gateway;
 
+import com.felipe.ecommerce_inventory_service.core.application.dtos.reservation.ProductReservationDTO;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.ReservationGateway;
 import com.felipe.ecommerce_inventory_service.core.domain.reservation.Reservation;
 import com.felipe.ecommerce_inventory_service.core.domain.reservation.ReservationStatus;
@@ -23,31 +24,45 @@ public class ReservationGatewayImpl implements ReservationGateway {
   }
 
   @Override
-  public Reservation reserveProduct(UUID productId, UUID orderId, int quantity) {
-    ReservationEntity newReservation = new ReservationEntity()
-      .productId(productId)
-      .orderId(orderId)
-      .quantity(quantity)
-      .status(ReservationStatus.RESERVED);
-    ReservationEntity savedReservation = this.reservationRepository.save(newReservation);
-    return this.reservationEntityMapper.toDomain(savedReservation);
+  public List<Reservation> reserveProduct(UUID orderId, List<ProductReservationDTO> reservationDTOs) {
+    List<ReservationEntity> reservations = reservationDTOs
+      .stream()
+      .map(reservationDTO -> {
+        ReservationEntity newReservation = new ReservationEntity()
+          .productId(reservationDTO.productId())
+          .orderId(orderId)
+          .quantity(reservationDTO.quantity())
+          .status(ReservationStatus.RESERVED);
+        return this.reservationRepository.save(newReservation);
+      })
+      .toList();
+    return reservations.stream().map(this.reservationEntityMapper::toDomain).toList();
   }
 
   @Override
-  public List<Reservation> findReservationsByProductId(UUID productId) {
-    return this.reservationRepository.findAllByProductId(productId)
+  public Optional<Reservation> findReservationByOrderId(UUID orderId) {
+    return this.reservationRepository.findByOrderId(orderId).map(this.reservationEntityMapper::toDomain);
+  }
+
+  @Override
+  public List<Reservation> findAllReservationsByOrderId(UUID orderId) {
+    return this.reservationRepository.findAllByOrderId(orderId)
       .stream()
       .map(this.reservationEntityMapper::toDomain)
       .toList();
   }
 
   @Override
-  public Optional<Reservation> findReservationByProductIdAndOrderId(UUID productId, UUID orderId) {
-    return this.reservationRepository.findByProductIdAndOrderId(productId, orderId).map(this.reservationEntityMapper::toDomain);
+  public List<Reservation> findReservationsByProductIds(List<UUID> productIds) {
+    return this.reservationRepository.findByProductIdIn(productIds)
+      .stream()
+      .map(this.reservationEntityMapper::toDomain)
+      .toList();
   }
 
   @Override
-  public void deleteReservation(Long reservationId) {
-    this.reservationRepository.deleteById(reservationId);
+  public void deleteReservations(List<Reservation> reservations) {
+    List<ReservationEntity> entities = reservations.stream().map(this.reservationEntityMapper::toEntity).toList();
+    this.reservationRepository.deleteAll(entities);
   }
 }

@@ -6,31 +6,27 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.felipe.kafka.saga.BaseSagaTransaction;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @JsonDeserialize(builder = InventoryTransactionCreateCommand.Builder.class)
 public final class InventoryTransactionCreateCommand extends BaseSagaTransaction {
-  private final UUID productId;
   private final UUID orderId;
-  private final int productQuantity;
+  private final List<ProductData> products;
 
   private InventoryTransactionCreateCommand(Builder builder) {
     super(builder.sagaId, builder.transactionId, Command.CREATE);
-    this.productId = builder.productId;
     this.orderId = builder.orderId;
-    this.productQuantity = builder.productQuantity;
-  }
-
-  public UUID getProductId() {
-    return this.productId;
+    this.products = builder.products;
   }
 
   public UUID getOrderId() {
     return this.orderId;
   }
 
-  public int getProductQuantity() {
-    return this.productQuantity;
+  public List<ProductData> getProducts() {
+    return this.products;
   }
 
   public static Builder startTransaction(UUID sagaId, UUID transactionId) {
@@ -41,13 +37,14 @@ public final class InventoryTransactionCreateCommand extends BaseSagaTransaction
     return new Builder(inventoryCommand);
   }
 
+  public record ProductData(UUID id, long quantity) {}
+
   @JsonPOJOBuilder
   public static class Builder {
     private final UUID sagaId;
     private final UUID transactionId;
-    private UUID productId;
     private UUID orderId;
-    private int productQuantity;
+    private List<ProductData> products = new ArrayList<>();
 
     @JsonCreator
     private Builder(@JsonProperty("sagaId") UUID sagaId, @JsonProperty("transactionId") UUID transactionId) {
@@ -58,14 +55,8 @@ public final class InventoryTransactionCreateCommand extends BaseSagaTransaction
     public Builder(InventoryTransactionCreateCommand inventoryCommand) {
       this.sagaId = inventoryCommand.getSagaId();
       this.transactionId = inventoryCommand.getTransactionId();
-      this.productId = inventoryCommand.getProductId();
       this.orderId = inventoryCommand.getOrderId();
-      this.productQuantity = inventoryCommand.getProductQuantity();
-    }
-
-    public Builder withProductId(UUID productId) {
-      this.productId = productId;
-      return this;
+      this.products = inventoryCommand.getProducts();
     }
 
     public Builder withOrderId(UUID orderId) {
@@ -73,8 +64,8 @@ public final class InventoryTransactionCreateCommand extends BaseSagaTransaction
       return this;
     }
 
-    public Builder withProductQuantity(int productQuantity) {
-      this.productQuantity = productQuantity;
+    public Builder withProducts(List<ProductData> products) {
+      this.products = products;
       return this;
     }
 

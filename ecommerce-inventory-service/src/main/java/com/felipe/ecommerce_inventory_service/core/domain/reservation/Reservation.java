@@ -7,7 +7,7 @@ public class Reservation {
   private Long id;
   private UUID productId;
   private UUID orderId;
-  private int quantity;
+  private long quantity;
   private String status;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
@@ -54,15 +54,15 @@ public class Reservation {
     return this;
   }
 
-  public int getQuantity() {
+  public long getQuantity() {
     return this.quantity;
   }
 
-  public void setQuantity(int quantity) {
+  public void setQuantity(long quantity) {
     this.quantity = quantity;
   }
 
-  public Reservation quantity(int quantity) {
+  public Reservation quantity(long quantity) {
     this.quantity = quantity;
     return this;
   }

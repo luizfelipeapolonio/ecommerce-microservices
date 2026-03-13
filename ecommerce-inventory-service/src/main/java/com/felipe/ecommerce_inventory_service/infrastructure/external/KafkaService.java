@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.external;
 
+import com.felipe.ecommerce_inventory_service.core.application.dtos.reservation.ProductReservationDTO;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.ReservationAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.UnavailableProductException;
@@ -22,7 +23,11 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @KafkaListener(id = "inventory-transactions", topics = {
@@ -67,32 +72,30 @@ public class KafkaService {
   @KafkaHandler
   void reserveProduct(InventoryTransactionCreateCommand transactionCommand) {
     logger.info(
-      "Command received in Reserve Product -> productId: {} - orderId: {} - command: {}",
-      transactionCommand.getProductId(), transactionCommand.getOrderId(), transactionCommand.getCommand().name()
+      "Command received in Reserve Product -> productQuantity: {} - orderId: {} - command: {}",
+      transactionCommand.getProducts().size(), transactionCommand.getOrderId(), transactionCommand.getCommand().name()
     );
-    InventoryTransactionReply.ProductData productData = new InventoryTransactionReply.ProductData(transactionCommand.getProductId());
     InventoryTransactionReply.Builder replyBuilder = InventoryTransactionReply.builder()
       .withSagaId(transactionCommand.getSagaId())
       .withTransactionId(transactionCommand.getTransactionId())
       .withOrderId(transactionCommand.getOrderId())
-      .withProduct(productData)
       .withCommand(transactionCommand.getCommand())
       .withParticipant(InventoryTransactionReply.SagaParticipant.INVENTORY);
 
     CompletableFuture<SendResult<String, InventoryTransactionReply>> sentMessage;
     try {
-      Pair<Product, Reservation> reservation = this.reserveProductUseCase.execute(
-        transactionCommand.getProductId(), transactionCommand.getOrderId(), transactionCommand.getProductQuantity()
+      List<ProductReservationDTO> reservationDTOs = transactionCommand
+        .getProducts()
+        .stream()
+        .map(product -> new ProductReservationDTO(product.id(), product.quantity()))
+        .toList();
+
+      Pair<List<Product>, List<Reservation>> reservation = this.reserveProductUseCase.execute(
+        transactionCommand.getOrderId(), reservationDTOs
       );
 
-      productData.setName(reservation.t1().getName())
-        .setUnitPrice(reservation.t1().getUnitPrice().toString())
-        .setQuantity(reservation.t2().getQuantity())
-        .setWithDiscount(reservation.t1().isItWithDiscount())
-        .setDiscountType(reservation.t1().getDiscountType())
-        .setDiscountValue(reservation.t1().getDiscountValue());
-
-      replyBuilder.withFailureCode(InventoryTransactionReply.FailureCode.NO_APPLY)
+      replyBuilder.withProducts(inventoryReplyProducts(reservation.t1(), reservation.t2()))
+        .withFailureCode(InventoryTransactionReply.FailureCode.NO_APPLY)
         .withFailureMessage(null)
         .success();
 
@@ -112,28 +115,19 @@ public class KafkaService {
   @KafkaHandler
   void cancelReservation(InventoryTransactionCancelCommand transactionCommand) {
     logger.info(
-      "Command received in Cancel Reservation -> productId: {} - orderId: {} - command: {}",
-      transactionCommand.getProductId(), transactionCommand.getOrderId(), transactionCommand.getCommand().name()
+      "Command received in Cancel Reservation -> orderId: {} - command: {}",
+      transactionCommand.getOrderId(), transactionCommand.getCommand().name()
     );
     InventoryTransactionReply.Builder replyBuilder = InventoryTransactionReply.builder()
       .withSagaId(transactionCommand.getSagaId())
       .withTransactionId(transactionCommand.getTransactionId())
       .withOrderId(transactionCommand.getOrderId())
-      .withProduct(new InventoryTransactionReply.ProductData(transactionCommand.getProductId()))
       .withCommand(transactionCommand.getCommand())
       .withParticipant(InventoryTransactionReply.SagaParticipant.INVENTORY);
-    CompletableFuture<SendResult<String, InventoryTransactionReply>> sentMessage;
 
-    if (transactionCommand.getFailureCode() == InventoryTransactionReply.FailureCode.BUSINESS_EXCEPTION) {
-      replyBuilder.withFailureCode(InventoryTransactionReply.FailureCode.NO_APPLY)
-        .withFailureMessage(null)
-        .success();
-      logger.info("Reservation cancelled successfully -> failureCode: {}", transactionCommand.getFailureCode());
-      this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.build());
-      return;
-    }
+    CompletableFuture<SendResult<String, InventoryTransactionReply>> sentMessage;
     try {
-      this.deleteReservationUseCase.execute(transactionCommand.getProductId(), transactionCommand.getOrderId());
+      this.deleteReservationUseCase.execute(transactionCommand.getOrderId());
       replyBuilder.withFailureCode(InventoryTransactionReply.FailureCode.NO_APPLY)
         .withFailureMessage(null)
         .success();
@@ -165,5 +159,20 @@ public class KafkaService {
       default -> replyBuilder.withFailureCode(InventoryTransactionReply.FailureCode.INFRASTRUCTURE_EXCEPTION)
         .withFailureMessage(exception.getMessage());
     }
+  }
+
+  private List<InventoryTransactionReply.ProductData> inventoryReplyProducts(List<Product> products, List<Reservation> reservationsDone) {
+    Map<UUID, Long> reservations = reservationsDone.stream()
+      .collect(Collectors.toMap(Reservation::getProductId, Reservation::getQuantity));
+
+    return products.stream()
+      .map(product -> new InventoryTransactionReply.ProductData(product.getId())
+        .setName(product.getName())
+        .setQuantity(reservations.get(product.getId()))
+        .setUnitPrice(product.getUnitPrice().toString())
+        .setWithDiscount(product.isItWithDiscount())
+        .setDiscountType(product.getDiscountType())
+        .setDiscountValue(product.getDiscountValue()))
+      .toList();
   }
 }

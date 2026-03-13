@@ -1,17 +1,21 @@
 package com.felipe.ecommerce_order_service.infrastructure.persistence.entities;
 
 import com.felipe.ecommerce_order_service.core.domain.enums.OrderStatus;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -22,17 +26,8 @@ public class OrderEntity {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Column(name = "product_id", nullable = false)
-  private UUID productId;
-
-  @Column(name = "product_name", nullable = false, length = 300)
-  private String productName;
-
-  @Column(name = "product_quantity", nullable = false)
-  private int productQuantity;
-
-  @Column(name = "final_price", nullable = false)
-  private BigDecimal finalPrice;
+  @Column(name = "order_price", nullable = false)
+  private BigDecimal orderPrice;
 
   @Column(name = "with_coupon", nullable = false)
   private boolean withCoupon = false;
@@ -60,6 +55,9 @@ public class OrderEntity {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
+  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<OrderItemEntity> items = new ArrayList<>();
+
   public OrderEntity() {
   }
 
@@ -76,55 +74,16 @@ public class OrderEntity {
     return this;
   }
 
-  public UUID getProductId() {
-    return this.productId;
+  public BigDecimal getOrderPrice() {
+    return this.orderPrice;
   }
 
-  public void setProductId(UUID productId) {
-    this.productId = productId;
+  public void setOrderPrice(BigDecimal orderPrice) {
+    this.orderPrice = orderPrice;
   }
 
-  public OrderEntity productId(UUID productId) {
-    this.productId = productId;
-    return this;
-  }
-
-  public String getProductName() {
-    return this.productName;
-  }
-
-  public void setProductName(String productName) {
-    this.productName = productName;
-  }
-
-  public OrderEntity productName(String productName) {
-    this.productName = productName;
-    return this;
-  }
-
-  public int getProductQuantity() {
-    return this.productQuantity;
-  }
-
-  public void setProductQuantity(int productQuantity) {
-    this.productQuantity = productQuantity;
-  }
-
-  public OrderEntity productQuantity(int productQuantity) {
-    this.productQuantity = productQuantity;
-    return this;
-  }
-
-  public BigDecimal getFinalPrice() {
-    return this.finalPrice;
-  }
-
-  public void setFinalPrice(BigDecimal finalPrice) {
-    this.finalPrice = finalPrice;
-  }
-
-  public OrderEntity finalPrice(BigDecimal finalPrice) {
-    this.finalPrice = finalPrice;
+  public OrderEntity orderPrice(BigDecimal orderPrice) {
+    this.orderPrice = orderPrice;
     return this;
   }
 
@@ -230,5 +189,18 @@ public class OrderEntity {
   public OrderEntity updatedAt(LocalDateTime updatedAt) {
     this.updatedAt = updatedAt;
     return this;
+  }
+
+  public List<OrderItemEntity> getItems() {
+    return this.items;
+  }
+
+  public void setItems(List<OrderItemEntity> items) {
+    this.items = items;
+  }
+
+  public void addItem(OrderItemEntity item) {
+    item.setOrder(this);
+    this.items.add(item);
   }
 }

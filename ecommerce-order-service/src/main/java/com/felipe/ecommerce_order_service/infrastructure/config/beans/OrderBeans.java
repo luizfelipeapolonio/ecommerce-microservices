@@ -58,7 +58,7 @@ public class OrderBeans {
 
   @Bean
   public SagaState processingStateHandler(UpdateOrderUseCase updateOrderUseCase) {
-    return new ProcessingStateHandler(updateOrderUseCase);
+    return new ProcessingStateHandler(updateOrderUseCase, this.kafkaTemplate);
   }
 
   @Bean

@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -42,18 +44,21 @@ public final class InventorySucceededTransition extends SagaTransition {
       CustomerProfileDTO authCustomer = this.customerGateway.getCurrentAuthCustomer();
       logger.info("Authenticated customer -> id: {} - email: {}", authCustomer.id(), authCustomer.email());
       UUID transactionId = UUID.randomUUID();
-      InventoryTransactionReply.ProductData product = reply.getProduct();
+      List<PaymentTransactionCreateCommand.ProductData> products = this.reply.getProducts()
+        .stream()
+        .map(productData -> new PaymentTransactionCreateCommand.ProductData(
+          productData.getName(),
+          productData.getQuantity(),
+          productData.getUnitPrice(),
+          productData.getDiscountType(),
+          productData.getDiscountValue()
+        ))
+        .toList();
 
       PaymentTransactionCreateCommand paymentCommand = PaymentTransactionCreateCommand.builder(reply.getSagaId(), transactionId)
         .withOrderId(this.reply.getOrderId())
-        .withOrderAmount(calculateOrderAmount(product))
-        .withProduct(new PaymentTransactionCreateCommand.ProductData(
-          product.getName(),
-          product.getQuantity(),
-          product.getUnitPrice(),
-          product.getDiscountType(),
-          product.getDiscountValue()
-        ))
+        .withOrderAmount(calculateOrderAmount(products))
+        .withProducts(products)
         .withCustomer(new PaymentTransactionCreateCommand.CustomerData(
           UUID.fromString(authCustomer.id()),
           authCustomer.username(),
@@ -80,12 +85,17 @@ public final class InventorySucceededTransition extends SagaTransition {
     };
   }
 
-  private String calculateOrderAmount(InventoryTransactionReply.ProductData product) {
-    return PricingCalculator.calculateFinalPrice(
-      product.getDiscountType(),
-      product.getUnitPrice(),
-      product.getDiscountValue(),
-      product.getQuantity()
-    ).toString();
+  private String calculateOrderAmount(List<PaymentTransactionCreateCommand.ProductData> products) {
+    BigDecimal orderAmount = new BigDecimal("0.00");
+    for (var product : products) {
+      BigDecimal price = PricingCalculator.calculateFinalPrice(
+        product.discountType(),
+        product.unitPrice(),
+        product.discountValue(),
+        product.quantity()
+      );
+      orderAmount = orderAmount.add(price);
+    }
+    return orderAmount.toString();
   }
 }

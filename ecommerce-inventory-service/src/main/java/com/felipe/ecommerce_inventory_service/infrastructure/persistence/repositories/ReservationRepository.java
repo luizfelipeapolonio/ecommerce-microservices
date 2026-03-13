@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ReservationRepository extends JpaRepository<ReservationEntity, Long> {
-  List<ReservationEntity> findAllByProductId(UUID productId);
-  Optional<ReservationEntity> findByProductIdAndOrderId(UUID productId, UUID orderId);
+  List<ReservationEntity> findAllByOrderId(UUID orderId);
+  List<ReservationEntity> findByProductIdIn(List<UUID> productIds);
+  Optional<ReservationEntity> findByOrderId(UUID orderId);
 }

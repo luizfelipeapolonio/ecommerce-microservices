@@ -24,10 +24,10 @@ public class ReservationEntity {
   @Column(name = "product_id", nullable = false)
   private UUID productId;
 
-  @Column(name = "order_id", nullable = false, unique = true)
+  @Column(name = "order_id", nullable = false)
   private UUID orderId;
 
-  private int quantity;
+  private long quantity;
 
   @Column(nullable = false)
   private String status;
@@ -82,15 +82,15 @@ public class ReservationEntity {
     return this;
   }
 
-  public int getQuantity() {
+  public long getQuantity() {
     return this.quantity;
   }
 
-  public void setQuantity(int quantity) {
+  public void setQuantity(long quantity) {
     this.quantity = quantity;
   }
 
-  public ReservationEntity quantity(int quantity) {
+  public ReservationEntity quantity(long quantity) {
     this.quantity = quantity;
     return this;
   }

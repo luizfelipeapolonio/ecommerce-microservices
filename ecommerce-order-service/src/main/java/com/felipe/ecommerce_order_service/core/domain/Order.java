@@ -4,14 +4,16 @@ import com.felipe.ecommerce_order_service.core.domain.enums.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Order {
   private UUID id;
-  private UUID productId;
-  private String productName;
-  private int productQuantity;
-  private BigDecimal finalPrice;
+  private BigDecimal orderPrice;
   private boolean withCoupon;
   private UUID couponId;
   private String checkoutUrl;
@@ -20,6 +22,7 @@ public class Order {
   private String status;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
+  private List<OrderItem> items = new ArrayList<>();
 
   public Order() {
   }
@@ -37,55 +40,16 @@ public class Order {
     return this;
   }
 
-  public UUID getProductId() {
-    return this.productId;
+  public BigDecimal getOrderPrice() {
+    return this.orderPrice;
   }
 
-  public void setProductId(UUID productId) {
-    this.productId = productId;
+  public void setOrderPrice(BigDecimal orderPrice) {
+    this.orderPrice = orderPrice;
   }
 
-  public Order  productId(UUID productId) {
-    this.productId = productId;
-    return this;
-  }
-
-  public String getProductName() {
-    return this.productName;
-  }
-
-  public void setProductName(String productName) {
-    this.productName = productName;
-  }
-
-  public Order productName(String productName) {
-    this.productName = productName;
-    return this;
-  }
-
-  public int getProductQuantity() {
-    return this.productQuantity;
-  }
-
-  public void setProductQuantity(int productQuantity) {
-    this.productQuantity = productQuantity;
-  }
-
-  public Order productQuantity(int productQuantity) {
-    this.productQuantity = productQuantity;
-    return this;
-  }
-
-  public BigDecimal getFinalPrice() {
-    return this.finalPrice;
-  }
-
-  public void setFinalPrice(BigDecimal finalPrice) {
-    this.finalPrice = finalPrice;
-  }
-
-  public Order finalPrice(BigDecimal finalPrice) {
-    this.finalPrice = finalPrice;
+  public Order orderPrice(BigDecimal orderPrice) {
+    this.orderPrice = orderPrice;
     return this;
   }
 
@@ -191,5 +155,26 @@ public class Order {
   public Order updatedAt(LocalDateTime updatedAt) {
     this.updatedAt = updatedAt;
     return this;
+  }
+
+  public List<OrderItem> getItems() {
+    return this.items;
+  }
+
+  public void setItems(List<OrderItem> items) {
+    this.items = items;
+  }
+
+  public void addItem(OrderItem item) {
+    item.setOrder(this);
+    this.items.add(item);
+  }
+
+  public Map<UUID, OrderItem> getItemsMap() {
+    return this.items.stream()
+      .collect(Collectors.toMap(
+        OrderItem::getProductId,
+        Function.identity())
+      );
   }
 }

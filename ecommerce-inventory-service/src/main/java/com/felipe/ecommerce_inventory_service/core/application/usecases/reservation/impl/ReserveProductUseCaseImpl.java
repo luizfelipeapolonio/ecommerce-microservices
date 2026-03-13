@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_inventory_service.core.application.usecases.reservation.impl;
 
+import com.felipe.ecommerce_inventory_service.core.application.dtos.reservation.ProductReservationDTO;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.ReservationAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.UnavailableProductException;
@@ -11,8 +12,10 @@ import com.felipe.ecommerce_inventory_service.core.domain.reservation.Reservatio
 import com.felipe.utils.Pair;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ReserveProductUseCaseImpl implements ReserveProductUseCase {
   private final ReservationGateway reservationGateway;
@@ -24,29 +27,48 @@ public class ReserveProductUseCaseImpl implements ReserveProductUseCase {
   }
 
   @Override
-  public Pair<Product, Reservation> execute(UUID productId, UUID orderId, int quantity) {
-    Product product = this.productGateway.findProductByIdWithTransactionLock(productId)
-      .orElseThrow(() -> new DataNotFoundException("Produto de id: '" + productId + "' não encontrado"));
+  public Pair<List<Product>, List<Reservation>> execute(UUID orderId, List<ProductReservationDTO> reservationDTOs) {
+    List<Product> products = reservationDTOs.stream()
+      .map(reservation ->
+        this.productGateway.findProductByIdWithTransactionLock(reservation.productId())
+          .orElseThrow(() -> new DataNotFoundException("Produto de id: '" + reservation.productId() + "' não encontrado")))
+      .toList();
 
-    Optional<Reservation> existingReservation = this.reservationGateway.findReservationByProductIdAndOrderId(productId, orderId);
+    Optional<Reservation> existingReservation = this.reservationGateway.findReservationByOrderId(orderId);
     if (existingReservation.isPresent()) {
       throw new ReservationAlreadyExistsException(
-        String.format("O produto de id '%s' já foi reservado pelo pedido de id '%s'", productId, orderId)
+        String.format("A reserva dos produtos do pedido de id '%s' já existe", orderId)
       );
     }
-    List<Reservation> reservations = this.reservationGateway.findReservationsByProductId(productId);
+    List<UUID> productIds = products.stream().map(Product::getId).toList();
+    List<Reservation> reservations = this.reservationGateway.findReservationsByProductIds(productIds);
 
     // throws exception if:
     // quantity to reserve > product stock quantity
     // reservation quantity + quantity to reserve > product stock quantity
-    if (!isProductAvailable(product.getQuantity(), reservations, quantity)) {
-      throw new UnavailableProductException("O produto de id '" + productId + "' não está disponível no estoque");
-    }
-    Reservation reservation = this.reservationGateway.reserveProduct(productId, orderId, quantity);
-    return new Pair<>(product, reservation);
+    checkIfProductsAreAvailable(products, reservations, reservationDTOs);
+    List<Reservation> reservationsDone = this.reservationGateway.reserveProduct(orderId, reservationDTOs);
+    return new Pair<>(products, reservationsDone);
   }
 
-  private boolean isProductAvailable(long stockQuantity, List<Reservation> reservations, int quantityToReserve) {
+  private void checkIfProductsAreAvailable(List<Product> products, List<Reservation> reservations, List<ProductReservationDTO> dtos) {
+    Map<UUID, Long> reservationsQuantity = dtos.stream()
+      .collect(Collectors.toMap(
+        ProductReservationDTO::productId,
+        ProductReservationDTO::quantity
+      ));
+
+    for (Product product : products) {
+      long stockQuantity = product.getQuantity();
+      long quantityToReserve = reservationsQuantity.get(product.getId());
+
+      if (!isProductAvailable(stockQuantity, reservations, quantityToReserve)) {
+        throw new UnavailableProductException("O produto de id '" + product.getId() + "' não está disponível no estoque");
+      }
+    }
+  }
+
+  private boolean isProductAvailable(long stockQuantity, List<Reservation> reservations, long quantityToReserve) {
     long reservationQuantity = 0;
     for (Reservation reservation : reservations) {
       reservationQuantity += reservation.getQuantity();

@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_order_service.core.application.gateway;
 
+import com.felipe.ecommerce_order_service.core.application.dtos.CreateOrderDTO;
 import com.felipe.ecommerce_order_service.core.domain.Order;
 
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface OrderGateway {
-  Map<String, UUID> createOrder(UUID customerId, UUID productId, int productQuantity);
+  Map<String, UUID> createOrder(UUID customerId, CreateOrderDTO orderDTO);
   Optional<Order> findOrderById(UUID orderId);
   void deleteOrder(UUID orderId);
   Order updateOrder(Order order);

@@ -1,37 +1,38 @@
 package com.felipe.ecommerce_order_service.infrastructure.mappers;
 
 import com.felipe.ecommerce_order_service.core.domain.Order;
+import com.felipe.ecommerce_order_service.core.domain.OrderItem;
 import com.felipe.ecommerce_order_service.core.domain.enums.OrderStatus;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.OrderEntity;
+import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.OrderItemEntity;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OrderEntityMapper {
-  public Order toDomain(OrderEntity orderEntity) {
-    return new Order()
-      .id(orderEntity.getId())
-      .customerId(orderEntity.getCustomerId())
-      .productId(orderEntity.getProductId())
-      .productName(orderEntity.getProductName())
-      .productQuantity(orderEntity.getProductQuantity())
-      .finalPrice(orderEntity.getFinalPrice())
-      .status(OrderStatus.of(orderEntity.getStatus()))
-      .withCoupon(orderEntity.isWithCoupon())
-      .couponId(orderEntity.getCouponId())
-      .checkoutUrl(orderEntity.getCheckoutUrl())
-      .invoiceUrl(orderEntity.getInvoiceUrl())
-      .createdAt(orderEntity.getCreatedAt())
-      .updatedAt(orderEntity.getUpdatedAt());
+  public Order toDomain(OrderEntity entity) {
+    Order order = new Order()
+      .id(entity.getId())
+      .customerId(entity.getCustomerId())
+      .orderPrice(entity.getOrderPrice())
+      .status(OrderStatus.of(entity.getStatus()))
+      .withCoupon(entity.isWithCoupon())
+      .couponId(entity.getCouponId())
+      .checkoutUrl(entity.getCheckoutUrl())
+      .invoiceUrl(entity.getInvoiceUrl())
+      .createdAt(entity.getCreatedAt())
+      .updatedAt(entity.getUpdatedAt());
+    entity.getItems().forEach(itemEntity -> {
+      OrderItem orderItem = toOrderItemDomain(itemEntity);
+      order.addItem(orderItem);
+    });
+    return order;
   }
 
   public OrderEntity toEntity(Order order) {
-    return new OrderEntity()
+    OrderEntity orderEntity = new OrderEntity()
       .id(order.getId())
       .customerId(order.getCustomerId())
-      .productId(order.getProductId())
-      .productName(order.getProductName())
-      .productQuantity(order.getProductQuantity())
-      .finalPrice(order.getFinalPrice())
+      .orderPrice(order.getOrderPrice())
       .status(OrderStatus.of(order.getStatus()))
       .withCoupon(order.isWithCoupon())
       .couponId(order.getCouponId())
@@ -39,5 +40,30 @@ public class OrderEntityMapper {
       .invoiceUrl(order.getInvoiceUrl())
       .createdAt(order.getCreatedAt())
       .updatedAt(order.getUpdatedAt());
+    order.getItems().forEach(item -> {
+      OrderItemEntity itemEntity = toOrderItemEntity(item);
+      orderEntity.addItem(itemEntity);
+    });
+    return orderEntity;
+  }
+
+  private OrderItem toOrderItemDomain(OrderItemEntity entity) {
+    return new OrderItem()
+      .id(entity.getId())
+      .productId(entity.getProductId())
+      .productName(entity.getProductName())
+      .quantity(entity.getQuantity())
+      .finalPrice(entity.getFinalPrice())
+      .addedAt(entity.getAddedAt());
+  }
+
+  private OrderItemEntity toOrderItemEntity(OrderItem item) {
+    return new OrderItemEntity()
+      .id(item.getId())
+      .productId(item.getProductId())
+      .productName(item.getProductName())
+      .quantity(item.getQuantity())
+      .finalPrice(item.getFinalPrice())
+      .addedAt(item.getAddedAt());
   }
 }

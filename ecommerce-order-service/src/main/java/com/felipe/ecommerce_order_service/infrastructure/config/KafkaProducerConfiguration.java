@@ -62,7 +62,7 @@ public class KafkaProducerConfiguration {
     String[] types = {
       "inventoryTransactionCreateCommand:com.felipe.kafka.saga.commands.InventoryTransactionCreateCommand",
       "inventoryTransactionCancelCommand:com.felipe.kafka.saga.commands.InventoryTransactionCancelCommand",
-      "paymentTransactionCreateCommand:com.felipe.kafka.saga.commands.PaymentTransactionCreateCommand",
+      "paymentTransactionCreateCommand:com.felipe.kafka.saga.commands.PaymentTransactionCreateCommand"
     };
     return String.join(", ", types);
   }

@@ -6,20 +6,21 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.felipe.kafka.saga.BaseSagaTransaction;
 
+import java.util.List;
 import java.util.UUID;
 
 @JsonDeserialize(builder = PaymentTransactionCreateCommand.Builder.class)
 public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
   private final UUID orderId;
   private final String orderAmount;
-  private final ProductData product;
+  private final List<ProductData> products;
   private final CustomerData customer;
 
   private PaymentTransactionCreateCommand(Builder builder) {
     super(builder.sagaId, builder.transactionId, Command.CREATE);
     this.orderId = builder.orderId;
     this.orderAmount = builder.orderAmount;
-    this.product = builder.product;
+    this.products = builder.products;
     this.customer = builder.customer;
   }
 
@@ -31,8 +32,8 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
     return this.orderAmount;
   }
 
-  public ProductData getProduct() {
-    return this.product;
+  public List<ProductData> getProducts() {
+    return this.products;
   }
 
   public CustomerData getCustomer() {
@@ -62,7 +63,7 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
     private final UUID transactionId;
     private UUID orderId;
     private String orderAmount;
-    private ProductData product;
+    private List<ProductData> products;
     private CustomerData customer;
 
     @JsonCreator
@@ -81,8 +82,8 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
       return this;
     }
 
-    public Builder withProduct(ProductData product) {
-      this.product = product;
+    public Builder withProducts(List<ProductData> products) {
+      this.products = products;
       return this;
     }
 

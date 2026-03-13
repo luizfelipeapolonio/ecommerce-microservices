@@ -1,10 +1,12 @@
 package com.felipe.ecommerce_order_service.infrastructure.gateway;
 
+import com.felipe.ecommerce_order_service.core.application.dtos.CreateOrderDTO;
 import com.felipe.ecommerce_order_service.core.application.gateway.OrderGateway;
 import com.felipe.ecommerce_order_service.core.domain.Order;
 import com.felipe.ecommerce_order_service.core.domain.enums.OrderStatus;
 import com.felipe.ecommerce_order_service.infrastructure.mappers.OrderEntityMapper;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.OrderEntity;
+import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.OrderItemEntity;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSagaParticipant;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.SagaStatus;
@@ -18,6 +20,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,14 +44,19 @@ public class OrderGatewayImpl implements OrderGateway {
   }
 
   @Override
-  public Map<String, UUID> createOrder(UUID customerId, UUID productId, int productQuantity) {
+  public Map<String, UUID> createOrder(UUID customerId, CreateOrderDTO orderDTO) {
     OrderEntity newOrder = new OrderEntity()
       .customerId(customerId)
-      .productId(productId)
-      .productQuantity(productQuantity)
       .status(OrderStatus.PENDING)
-      .productName("PENDING")
-      .finalPrice(new BigDecimal("0.00"));
+      .orderPrice(new BigDecimal("0.00"));
+
+    orderDTO.products().forEach(product ->
+      newOrder.addItem(new OrderItemEntity()
+        .productName("PENDING")
+        .productId(product.id())
+        .quantity(product.quantity())
+        .finalPrice(new BigDecimal("0.00"))
+      ));
     OrderEntity savedOrder = this.orderRepository.save(newOrder);
 
     // Start saga
@@ -57,21 +65,10 @@ public class OrderGatewayImpl implements OrderGateway {
       .status(SagaStatus.STARTED)
       .addParticipant(new OrderSagaParticipant(ReplyTransaction.SagaParticipant.INVENTORY))
       .addParticipant(new OrderSagaParticipant(ReplyTransaction.SagaParticipant.PAYMENT));
+
     OrderSaga createdSaga = this.orderSagaRepository.save(newSaga);
     UUID transactionId = UUID.randomUUID();
-
-    InventoryTransactionCreateCommand inventoryCommand = InventoryTransactionCreateCommand.startTransaction(createdSaga.getId(), transactionId)
-      .withProductId(productId)
-      .withOrderId(savedOrder.getId())
-      .withProductQuantity(productQuantity)
-      .build();
-
-    this.kafkaTemplate.send("order.order_transaction.inventory.commands", inventoryCommand)
-      .whenComplete((result, exception) -> {
-        if (exception == null) {
-          logger.info("Create Order posted in topic \"{}\" successfully", result.getRecordMetadata().topic());
-        }
-      });
+    postInventoryTransactionCommand(createdSaga.getId(), transactionId, savedOrder);
 
     return Map.of(
       "orderId", savedOrder.getId(),
@@ -93,5 +90,27 @@ public class OrderGatewayImpl implements OrderGateway {
   public Order updateOrder(Order order) {
     OrderEntity updatedOrder = this.orderEntityMapper.toEntity(order);
     return this.orderEntityMapper.toDomain(this.orderRepository.save(updatedOrder));
+  }
+
+  private List<InventoryTransactionCreateCommand.ProductData> inventoryTransactionProducts(OrderEntity order) {
+    return order.getItems()
+      .stream()
+      .map(item -> new InventoryTransactionCreateCommand.ProductData(item.getProductId(), item.getQuantity()))
+      .toList();
+  }
+
+  private void postInventoryTransactionCommand(UUID sagaId, UUID transactionId, OrderEntity order) {
+    List<InventoryTransactionCreateCommand.ProductData> products = inventoryTransactionProducts(order);
+    InventoryTransactionCreateCommand inventoryCommand = InventoryTransactionCreateCommand.startTransaction(sagaId, transactionId)
+      .withOrderId(order.getId())
+      .withProducts(products)
+      .build();
+
+    this.kafkaTemplate.send("order.order_transaction.inventory.commands", inventoryCommand)
+      .whenComplete((result, exception) -> {
+        if (exception == null) {
+          logger.info("Create Order posted in topic \"{}\" successfully", result.getRecordMetadata().topic());
+        }
+      });
   }
 }

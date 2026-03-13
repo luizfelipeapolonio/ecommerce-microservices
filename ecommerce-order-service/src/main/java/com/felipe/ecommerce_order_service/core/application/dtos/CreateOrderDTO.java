@@ -1,9 +1,8 @@
 package com.felipe.ecommerce_order_service.core.application.dtos;
 
-import java.util.UUID;
+import java.util.List;
 
 public interface CreateOrderDTO {
-  UUID productId();
-  int productQuantity();
+  List<? extends CreateOrderProductDTO> products();
   String couponCode();
 }

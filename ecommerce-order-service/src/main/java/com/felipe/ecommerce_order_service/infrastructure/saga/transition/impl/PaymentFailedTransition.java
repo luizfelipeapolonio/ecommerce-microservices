@@ -4,7 +4,7 @@ import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.sa
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.SagaStatus;
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.SagaTransition;
 import com.felipe.kafka.saga.commands.InventoryTransactionCancelCommand;
-import com.felipe.kafka.saga.replies.InventoryTransactionReply;
+import com.felipe.kafka.saga.replies.PaymentTransactionReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -12,12 +12,12 @@ import org.springframework.kafka.core.KafkaTemplate;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public final class InventoryFailedTransition extends SagaTransition {
-  private final InventoryTransactionReply reply;
+public final class PaymentFailedTransition extends SagaTransition {
+  private final PaymentTransactionReply reply;
   private final KafkaTemplate<String, Object> kafkaTemplate;
-  private static final Logger logger = LoggerFactory.getLogger(InventoryFailedTransition.class);
+  private static final Logger logger = LoggerFactory.getLogger(PaymentFailedTransition.class);
 
-  public InventoryFailedTransition(InventoryTransactionReply reply, KafkaTemplate<String, Object> kafkaTemplate) {
+  public PaymentFailedTransition(PaymentTransactionReply reply, KafkaTemplate<String, Object> kafkaTemplate) {
     this.reply = reply;
     this.kafkaTemplate = kafkaTemplate;
   }
@@ -25,7 +25,7 @@ public final class InventoryFailedTransition extends SagaTransition {
   @Override
   protected Consumer<OrderSaga> sagaMutation() {
     return saga -> {
-      saga.markParticipantFailed(this.reply.getParticipant());
+      saga.markParticipantFailed(PaymentTransactionReply.SagaParticipant.PAYMENT);
       saga.setStatus(SagaStatus.CANCELLING);
       saga.setFailureCode(this.reply.getFailureCode());
       saga.setFailureReason(this.reply.getFailureMessage());
@@ -36,16 +36,17 @@ public final class InventoryFailedTransition extends SagaTransition {
   protected TriggerAction action() {
     return () -> {
       UUID transactionId = UUID.randomUUID();
+      UUID sagaId = this.reply.getSagaId();
 
-      InventoryTransactionCancelCommand inventoryCommand = InventoryTransactionCancelCommand.builder(reply.getSagaId(), transactionId)
-        .withOrderId(reply.getOrderId())
-        .withFailureCode(reply.getFailureCode())
+      InventoryTransactionCancelCommand inventoryCommand = InventoryTransactionCancelCommand.builder(sagaId, transactionId)
+        .withFailureCode(this.reply.getFailureCode())
+        .withOrderId(this.reply.getOrderId())
         .build();
 
       this.kafkaTemplate.send("order.order_transaction.inventory.commands", inventoryCommand)
         .whenComplete((result, exception) -> {
           if (exception == null) {
-            logger.info("Cancel Order posted in topic \"{}\" successfully", result.getRecordMetadata().topic());
+            logger.info("Cancel command posted on topic \"{}\" successfully", result.getRecordMetadata().topic());
           }
         });
     };

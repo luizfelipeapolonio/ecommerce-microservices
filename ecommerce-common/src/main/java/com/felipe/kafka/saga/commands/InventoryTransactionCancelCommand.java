@@ -11,19 +11,13 @@ import java.util.UUID;
 
 @JsonDeserialize(builder = InventoryTransactionCancelCommand.Builder.class)
 public final class InventoryTransactionCancelCommand extends BaseSagaTransaction {
-  private final UUID productId;
   private final UUID orderId;
   private final ReplyTransaction.FailureCode failureCode;
 
   private InventoryTransactionCancelCommand(Builder builder) {
     super(builder.sagaId, builder.transactionId, Command.CANCEL);
-    this.productId = builder.productId;
     this.orderId = builder.orderId;
     this.failureCode = builder.failureCode;
-  }
-
-  public UUID getProductId() {
-    return this.productId;
   }
 
   public UUID getOrderId() {
@@ -42,7 +36,6 @@ public final class InventoryTransactionCancelCommand extends BaseSagaTransaction
   public static class Builder {
     private final UUID sagaId;
     private final UUID transactionId;
-    private UUID productId;
     private UUID orderId;
     private ReplyTransaction.FailureCode failureCode;
 
@@ -50,11 +43,6 @@ public final class InventoryTransactionCancelCommand extends BaseSagaTransaction
     private Builder(@JsonProperty("sagaId") UUID sagaId,@JsonProperty("transactionId") UUID transactionId) {
       this.sagaId = sagaId;
       this.transactionId = transactionId;
-    }
-
-    public Builder withProductId(UUID productId) {
-      this.productId = productId;
-      return this;
     }
 
     public Builder withOrderId(UUID orderId) {

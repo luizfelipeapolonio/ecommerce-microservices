@@ -28,7 +28,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PaymentService {
@@ -71,19 +74,8 @@ public class PaymentService {
       .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BOLETO)
       .setInvoiceCreation(SessionCreateParams.InvoiceCreation.builder()
         .setEnabled(true)
-        .build())
-      .addLineItem(
-        SessionCreateParams.LineItem.builder()
-          .setQuantity(paymentCommand.getProduct().quantity())
-          .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
-            .setCurrency("brl")
-            .setUnitAmount(formatBigDecimalStringToValidLongValue(paymentCommand.getProduct().unitPrice()))
-            .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
-              .setName(paymentCommand.getProduct().name())
-              .putMetadata("order_id", paymentCommand.getOrderId().toString())
-              .build())
-            .build())
-          .build());
+        .build());
+    addLineItemsToSession(paymentCommand.getOrderId(), params, paymentCommand.getProducts());
     addDiscountIfApplicable(params, paymentCommand);
 
     try {
@@ -198,32 +190,79 @@ public class PaymentService {
     }
   }
 
-  private void addDiscountIfApplicable(SessionCreateParams.Builder sessionBuilder, PaymentTransactionCreateCommand paymentCommand) {
-    if (paymentCommand.getProduct().discountType() != null) {
-      PaymentTransactionCreateCommand.ProductData product =  paymentCommand.getProduct();
-      BigDecimal discount = PricingCalculator.calculateDiscount(product.unitPrice(), product.discountType(), product.discountValue());
+  private void addLineItemsToSession(UUID orderId, SessionCreateParams.Builder sessionBuilder, List<PaymentTransactionCreateCommand.ProductData> products) {
+    products.forEach(product -> {
+      String productDescription = null;
+      if (product.discountType() != null) {
+        productDescription = generateProductDescription(product);
+      }
 
+      sessionBuilder.addLineItem(
+        SessionCreateParams.LineItem.builder()
+          .setQuantity(product.quantity())
+          .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
+            .setCurrency("brl")
+            .setUnitAmount(formatBigDecimalStringToValidLongValue(product.unitPrice()))
+            .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
+              .setDescription(productDescription)
+              .setName(product.name())
+              .putMetadata("order_id", orderId.toString())
+              .build())
+            .build())
+          .build());
+    });
+  }
+
+  private String generateProductDescription(PaymentTransactionCreateCommand.ProductData product) {
+    BigDecimal productPrice = new BigDecimal(product.unitPrice())
+      .multiply(new BigDecimal(product.quantity()))
+      .setScale(2, RoundingMode.HALF_DOWN);
+    BigDecimal discount = PricingCalculator.calculateDiscount(product.unitPrice(), product.discountType(), product.discountValue());
+    BigDecimal finalPrice = PricingCalculator.calculateFinalPrice(product.discountType(), product.unitPrice(), product.discountValue(), product.quantity());
+
+    return product.discountType().equals("fixed_amount")
+      ? "Desconto na compra de R$ %s - De R$ %s por R$ %s".formatted(discount.toPlainString(), productPrice.toPlainString(), finalPrice.toPlainString())
+      : "Desconto de %s%% (R$ %s) na compra - De R$ %s por R$ %s".formatted(
+      PricingCalculator.formattedDiscountPercentageString(product.discountValue()),
+      discount.toPlainString(),
+      productPrice.toPlainString(),
+      finalPrice.toPlainString()
+    );
+  }
+
+  private Optional<String> calculateDiscountIfApplicable(PaymentTransactionCreateCommand paymentCommand) {
+    String discountInitialValue = "0.00";
+    BigDecimal discountAmount = new BigDecimal(discountInitialValue);
+    for (var product : paymentCommand.getProducts()) {
+      if (product.discountType() != null) {
+        BigDecimal discount = PricingCalculator.calculateDiscount(product.unitPrice(), product.discountType(), product.discountValue());
+        discountAmount = discountAmount.add(discount);
+      }
+    }
+    return discountAmount.toPlainString().equals(discountInitialValue)
+      ? Optional.empty()
+      : Optional.of(discountAmount.toPlainString());
+  }
+
+  private void addDiscountIfApplicable(SessionCreateParams.Builder sessionBuilder, PaymentTransactionCreateCommand paymentCommand) {
+    Optional<String> discountAmount = calculateDiscountIfApplicable(paymentCommand);
+    if (discountAmount.isEmpty()) return;
+    try {
       CouponCreateParams params = CouponCreateParams.builder()
         .setDuration(CouponCreateParams.Duration.ONCE)
         .setCurrency("brl")
-        .setName(
-          product.discountType().equals("fixed_amount")
-          ? "Desconto na compra"
-          : "Desconto de %s%% na compra".formatted(PricingCalculator.formattedDiscountPercentageString(product.discountValue()))
-        )
-        .setAmountOff(formatBigDecimalStringToValidLongValue(discount.toString()))
+        .setName("Desconto total na compra")
+        .setAmountOff(formatBigDecimalStringToValidLongValue(discountAmount.get()))
         .build();
 
-      try {
-        Coupon coupon = this.stripeClient.v1().coupons().create(params);
-        logger.info("Discount created successfully");
-        sessionBuilder.addDiscount(SessionCreateParams.Discount.builder()
-          .setCoupon(coupon.getId())
-          .build());
-      } catch (StripeException ex) {
-        logger.error("Error in discount creation -> {}", ex.getStripeError().getMessage());
-        throw new UnsuccessfulTransactionException("Stripe error on trying to create discount", ex);
-      }
+      Coupon coupon = this.stripeClient.v1().coupons().create(params);
+      logger.info("Discount created successfully");
+      sessionBuilder.addDiscount(SessionCreateParams.Discount.builder()
+        .setCoupon(coupon.getId())
+        .build());
+    } catch (StripeException ex) {
+      logger.error("Error in discount creation -> {}", ex.getStripeError().getMessage());
+      throw new UnsuccessfulTransactionException("Stripe error on trying to create discount", ex);
     }
   }
 
