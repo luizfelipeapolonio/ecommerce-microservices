@@ -15,11 +15,14 @@ public class CreatePaymentUseCaseImpl implements CreatePaymentUseCase {
   }
 
   @Override
-  public Payment execute(UUID orderId, String orderAmount, UUID customerId, String checkoutId) {
+  public Payment execute(UUID orderId, UUID sagaId, UUID transactionId, String orderAmount, UUID customerId, String stripeCustomerId, String checkoutId) {
     Payment payment = new Payment()
       .orderId(orderId)
+      .sagaId(sagaId)
+      .transactionId(transactionId)
       .orderAmount(new BigDecimal(orderAmount))
       .customerId(customerId)
+      .stripeCustomerId(stripeCustomerId)
       .checkoutId(checkoutId);
     return this.paymentGateway.createPayment(payment);
   }

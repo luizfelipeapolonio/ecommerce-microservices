@@ -33,7 +33,7 @@ public final class InventorySucceededTransition extends SagaTransition {
   @Override
   protected Consumer<OrderSaga> sagaMutation() {
     return orderSaga -> {
-      orderSaga.markParticipantSuccess(InventoryTransactionReply.SagaParticipant.INVENTORY);
+      orderSaga.markParticipantProcessing(InventoryTransactionReply.SagaParticipant.INVENTORY);
       orderSaga.setStatus(SagaStatus.PROCESSING);
     };
   }

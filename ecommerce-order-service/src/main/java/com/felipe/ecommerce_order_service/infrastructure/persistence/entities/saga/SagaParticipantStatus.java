@@ -2,6 +2,7 @@ package com.felipe.ecommerce_order_service.infrastructure.persistence.entities.s
 
 public enum SagaParticipantStatus {
   SUCCESS,
+  PROCESSING,
   PENDING,
   FAILURE
 }

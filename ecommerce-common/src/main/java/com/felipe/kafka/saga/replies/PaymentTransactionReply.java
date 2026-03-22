@@ -8,6 +8,7 @@ import java.util.UUID;
 @JsonDeserialize(builder = PaymentTransactionReply.Builder.class)
 public final class PaymentTransactionReply extends ReplyTransaction {
   private final String checkoutUrl;
+  private final String invoiceUrl;
 
   private PaymentTransactionReply(Builder builder) {
     super(
@@ -21,10 +22,15 @@ public final class PaymentTransactionReply extends ReplyTransaction {
       builder.participant
     );
     this.checkoutUrl = builder.checkoutUrl;
+    this.invoiceUrl = builder.invoiceUrl;
   }
 
   public String getCheckoutUrl() {
     return this.checkoutUrl;
+  }
+
+  public String getInvoiceUrl() {
+    return this.invoiceUrl;
   }
 
   public static Builder builder() {
@@ -34,6 +40,7 @@ public final class PaymentTransactionReply extends ReplyTransaction {
   @JsonPOJOBuilder
   public static class Builder {
     private String checkoutUrl;
+    private String invoiceUrl;
     private UUID sagaId;
     private UUID transactionId;
     private UUID orderId;
@@ -48,6 +55,11 @@ public final class PaymentTransactionReply extends ReplyTransaction {
 
     public Builder withCheckoutUrl(String checkoutUrl) {
       this.checkoutUrl = checkoutUrl;
+      return this;
+    }
+
+    public Builder withInvoiceUrl(String invoiceUrl) {
+      this.invoiceUrl = invoiceUrl;
       return this;
     }
 

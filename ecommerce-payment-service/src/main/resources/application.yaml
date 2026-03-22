@@ -1,5 +1,10 @@
 server:
   port: 8087
+logging:
+  group:
+    infra-external: com.felipe.ecommerce_payment_service.infrastructure.external.EventHandler
+  level:
+    infra-external: debug
 spring:
   application.name: ecommerce-payment-service
   output.ansi.enabled: ALWAYS
@@ -58,4 +63,6 @@ springdoc:
     enabled: true
     path: /payment-service/swagger-ui.html
 
-stripe.key: ${STRIPE_SECRET_KEY}
+stripe:
+  key: ${STRIPE_SECRET_KEY}
+  webhook.key: ${STRIPE_WEBHOOK_KEY}

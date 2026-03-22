@@ -31,7 +31,7 @@ public class SecurityConfiguration {
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers(HttpMethod.GET, DOCS_WHITELIST).permitAll()
         .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-        .requestMatchers("/stripe/**").hasAnyAuthority("ROLE_ADMIN", "SCOPE_admin")
+        .requestMatchers("/webhooks/**").permitAll()
         .anyRequest().hasAuthority("SCOPE_admin"))
       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .oauth2ResourceServer(oauth2 -> oauth2

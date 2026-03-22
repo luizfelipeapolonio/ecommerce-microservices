@@ -50,6 +50,7 @@ public class KafkaConsumerConfiguration {
       "expiredPromotionKafkaDTO:com.felipe.kafka.ExpiredPromotionKafkaDTO",
       "inventoryTransactionCreateCommand:com.felipe.kafka.saga.commands.InventoryTransactionCreateCommand",
       "inventoryTransactionCancelCommand:com.felipe.kafka.saga.commands.InventoryTransactionCancelCommand",
+      "inventoryTransactionCommitCommand:com.felipe.kafka.saga.commands.InventoryTransactionCommitCommand"
     };
     return String.join(", ", types);
   }

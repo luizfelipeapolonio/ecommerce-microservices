@@ -33,6 +33,15 @@ public class PaymentEntity {
   @Column(name = "customer_id", nullable = false)
   private UUID customerId;
 
+  @Column(name = "stripe_customer_id", nullable = false)
+  private String stripeCustomerId;
+
+  @Column(name = "saga_id", nullable = false)
+  private UUID sagaId;
+
+  @Column(name = "transaction_id", nullable = false)
+  private UUID transactionId;
+
   @Column(name = "checkout_id", nullable = false)
   private String checkoutId;
 
@@ -100,6 +109,45 @@ public class PaymentEntity {
 
   public PaymentEntity customerId(UUID customerId) {
     this.customerId = customerId;
+    return this;
+  }
+
+  public String getStripeCustomerId() {
+    return this.stripeCustomerId;
+  }
+
+  public void setStripeCustomerId(String stripeCustomerId) {
+    this.stripeCustomerId = stripeCustomerId;
+  }
+
+  public PaymentEntity stripeCustomerId(String stripeCustomerId) {
+    this.stripeCustomerId = stripeCustomerId;
+    return this;
+  }
+
+  public UUID getSagaId() {
+    return this.sagaId;
+  }
+
+  public void setSagaId(UUID sagaId) {
+    this.sagaId = sagaId;
+  }
+
+  public PaymentEntity sagaId(UUID sagaId) {
+    this.sagaId = sagaId;
+    return this;
+  }
+
+  public UUID getTransactionId() {
+    return this.transactionId;
+  }
+
+  public void setTransactionId(UUID transactionId) {
+    this.transactionId = transactionId;
+  }
+
+  public PaymentEntity transactionId(UUID transactionId) {
+    this.transactionId = transactionId;
     return this;
   }
 

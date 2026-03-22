@@ -73,6 +73,9 @@ public class PaymentService {
       .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
       .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BOLETO)
       .setInvoiceCreation(SessionCreateParams.InvoiceCreation.builder()
+        .setInvoiceData(SessionCreateParams.InvoiceCreation.InvoiceData.builder()
+          .putMetadata("order_id", paymentCommand.getOrderId().toString())
+          .build())
         .setEnabled(true)
         .build());
     addLineItemsToSession(paymentCommand.getOrderId(), params, paymentCommand.getProducts());
@@ -82,24 +85,33 @@ public class PaymentService {
       Session session = this.stripeClient.v1().checkout().sessions().create(params.build());
       Payment createdPayment = this.createPaymentUseCase.execute(
         paymentCommand.getOrderId(),
+        paymentCommand.getSagaId(),
+        paymentCommand.getTransactionId(),
         paymentCommand.getOrderAmount(),
         paymentCommand.getCustomer().id(),
+        customer.getId(),
         session.getId()
       );
       logger.info("Payment domain created successfully -> orderId: {}", createdPayment.getOrderId());
-
-      // TODO: make customer balance only when the payment is approved
-      CustomerBalanceTransactionCreateParams balanceParams = CustomerBalanceTransactionCreateParams.builder()
-        .setCurrency("brl")
-        .setAmount(session.getAmountTotal())
-        .build();
-
-      CustomerBalanceTransaction balanceTransaction = this.stripeClient.v1().customers().balanceTransactions().create(customer.getId(), balanceParams);
-      logger.info("Customer balance executed -> id: {} - amount: {}", balanceTransaction.getCustomer(), balanceTransaction.getAmount());
       return session.getUrl();
     } catch (StripeException ex) {
       logger.error("Error in payment execution -> {}", ex.getStripeError().getMessage());
       throw new UnsuccessfulTransactionException("Stripe error on trying to execute payment", ex);
+    }
+  }
+
+  public void processCustomerBalance(String customerId, long amountTotal) {
+    try {
+      CustomerBalanceTransactionCreateParams balanceParams = CustomerBalanceTransactionCreateParams.builder()
+        .setCurrency("brl")
+        .setAmount(amountTotal)
+        .build();
+
+      CustomerBalanceTransaction balanceTransaction = this.stripeClient.v1().customers().balanceTransactions().create(customerId, balanceParams);
+      logger.info("Customer balance executed -> id: {} - amount: {}", balanceTransaction.getCustomer(), balanceTransaction.getAmount());
+    } catch (StripeException ex) {
+      logger.error("Error in customer balance execution -> {}", ex.getStripeError().getMessage());
+      throw new UnsuccessfulTransactionException("Stripe error on trying to execute customer balance", ex);
     }
   }
 
@@ -266,7 +278,7 @@ public class PaymentService {
     }
   }
 
-  private Long formatBigDecimalStringToValidLongValue(String value) {
+  public Long formatBigDecimalStringToValidLongValue(String value) {
     return Long.parseLong(value.replace(".", ""));
   }
 

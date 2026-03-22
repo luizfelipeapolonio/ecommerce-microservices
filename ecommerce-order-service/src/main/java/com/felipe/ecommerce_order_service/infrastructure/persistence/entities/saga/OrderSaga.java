@@ -168,6 +168,10 @@ public class OrderSaga {
     mutateParticipant(participantName, SagaParticipantStatus.FAILURE);
   }
 
+  public void markParticipantProcessing(ReplyTransaction.SagaParticipant participantName) {
+    mutateParticipant(participantName, SagaParticipantStatus.PROCESSING);
+  }
+
   private void mutateParticipant(ReplyTransaction.SagaParticipant participantName, SagaParticipantStatus status) {
     for (OrderSagaParticipant participant : this.participants) {
       if (participant.getName() == participantName) {

@@ -45,8 +45,8 @@ public class ReservationGatewayImpl implements ReservationGateway {
   }
 
   @Override
-  public List<Reservation> findAllReservationsByOrderId(UUID orderId) {
-    return this.reservationRepository.findAllByOrderId(orderId)
+  public List<Reservation> findAllReservationsByOrderIdAndStatus(UUID orderId, ReservationStatus status) {
+    return this.reservationRepository.findAllByOrderIdAndStatus(orderId, status.getText())
       .stream()
       .map(this.reservationEntityMapper::toDomain)
       .toList();
@@ -58,6 +58,14 @@ public class ReservationGatewayImpl implements ReservationGateway {
       .stream()
       .map(this.reservationEntityMapper::toDomain)
       .toList();
+  }
+
+  @Override
+  public void updateReservations(List<Reservation> reservations) {
+    reservations.forEach(reservation -> {
+      ReservationEntity entity = this.reservationEntityMapper.toEntity(reservation);
+      this.reservationRepository.save(entity);
+    });
   }
 
   @Override

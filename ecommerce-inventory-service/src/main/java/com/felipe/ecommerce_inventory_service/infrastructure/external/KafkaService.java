@@ -4,6 +4,7 @@ import com.felipe.ecommerce_inventory_service.core.application.dtos.reservation.
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.ReservationAlreadyExistsException;
 import com.felipe.ecommerce_inventory_service.core.application.exceptions.UnavailableProductException;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.reservation.CommitReservationUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.reservation.DeleteReservationUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.reservation.ReserveProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
@@ -12,6 +13,7 @@ import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entitie
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.repositories.ProductRepository;
 import com.felipe.kafka.ExpiredPromotionKafkaDTO;
 import com.felipe.kafka.saga.commands.InventoryTransactionCancelCommand;
+import com.felipe.kafka.saga.commands.InventoryTransactionCommitCommand;
 import com.felipe.kafka.saga.commands.InventoryTransactionCreateCommand;
 import com.felipe.kafka.saga.replies.InventoryTransactionReply;
 import com.felipe.utils.Pair;
@@ -38,6 +40,7 @@ public class KafkaService {
   private final ProductRepository productRepository;
   private final ReserveProductUseCase reserveProductUseCase;
   private final DeleteReservationUseCase deleteReservationUseCase;
+  private final CommitReservationUseCase commitReservationUseCase;
   private final KafkaTemplate<String, InventoryTransactionReply> kafkaTemplate;
   private static final Logger logger = LoggerFactory.getLogger(KafkaService.class);
   private static final String ORDER_TRANSACTION_REPLIES_TOPIC = "order.order_transaction.replies";
@@ -45,11 +48,13 @@ public class KafkaService {
   public KafkaService(ProductRepository productRepository,
                       ReserveProductUseCase reserveProductUseCase,
                       DeleteReservationUseCase deleteReservationUseCase,
+                      CommitReservationUseCase commitReservationUseCase,
                       KafkaTemplate<String, InventoryTransactionReply> kafkaTemplate) {
     this.productRepository = productRepository;
     this.reserveProductUseCase = reserveProductUseCase;
-    this.kafkaTemplate = kafkaTemplate;
     this.deleteReservationUseCase = deleteReservationUseCase;
+    this.commitReservationUseCase = commitReservationUseCase;
+    this.kafkaTemplate = kafkaTemplate;
   }
 
   @KafkaHandler
@@ -137,12 +142,42 @@ public class KafkaService {
       logger.error("Error in cancel reservation: {} - exception: {}", ex.getMessage(), ex.getClass().getName());
       sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.failure().build());
     }
-    sentMessage.whenComplete((result, exception) -> {
+    sentMessage.whenComplete((result, exception) ->
       logger.info(
         "Cancel reservation posted on topic \"{}\" successfully -> status: {}",
         result.getRecordMetadata().topic(), result.getProducerRecord().value().getStatus().name()
-      );
-    });
+      ));
+  }
+
+  @KafkaHandler
+  void commitReservation(InventoryTransactionCommitCommand transactionCommand) {
+    logger.info(
+      "\nCommand received in Commit Reservation:\norderId: {}\n sagaId: {}\ncommand: {}",
+      transactionCommand.getOrderId(), transactionCommand.getSagaId(), transactionCommand.getCommand().name()
+    );
+    InventoryTransactionReply.Builder replyBuilder = InventoryTransactionReply.builder()
+      .withSagaId(transactionCommand.getSagaId())
+      .withTransactionId(transactionCommand.getTransactionId())
+      .withOrderId(transactionCommand.getOrderId())
+      .withCommand(transactionCommand.getCommand())
+      .withParticipant(InventoryTransactionReply.SagaParticipant.INVENTORY);
+
+    CompletableFuture<SendResult<String, InventoryTransactionReply>> sentMessage;
+    try {
+      this.commitReservationUseCase.execute(transactionCommand.getOrderId());
+      replyBuilder.withFailureCode(InventoryTransactionReply.FailureCode.NO_APPLY)
+        .withFailureMessage(null)
+        .success();
+      sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.build());
+    } catch (Exception ex) {
+      mapBusinessExceptions(ex, replyBuilder);
+      logger.error("Error in commit reservation: {} - exception: {}", ex.getMessage(), ex.getClass().getName());
+      sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLIES_TOPIC, replyBuilder.failure().build());
+    }
+    sentMessage.whenComplete((result, exception) ->
+      logger.info("Commit reservation posted on topic \"{}\" successfully -> status: {}",
+        result.getRecordMetadata().topic(), result.getProducerRecord().value().getStatus().name()
+      ));
   }
 
   private void mapBusinessExceptions(Exception exception, InventoryTransactionReply.Builder replyBuilder) {

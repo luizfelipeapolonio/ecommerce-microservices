@@ -4,7 +4,7 @@ import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.sa
 
 import java.util.UUID;
 
-public record OrderStatusDTO(UUID orderId, SagaStatus status, String checkoutUrl, String invoiceUrl) {
+public record OrderStatusDTO(UUID orderId, SagaStatus status, String failureReason, String checkoutUrl, String invoiceUrl) {
   public OrderStatusDTO {
     checkoutUrl = checkoutUrl == null ? "NOT_AVAILABLE" : checkoutUrl;
     invoiceUrl = invoiceUrl == null ? "NOT_AVAILABLE" : invoiceUrl;

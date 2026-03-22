@@ -22,6 +22,7 @@ public class KafkaConsumerConfiguration {
 
   @Value("${spring.kafka.bootstrap-servers}")
   private String kafkaServer;
+  private static final String DESERIALIZER_TYPE_MAPPINGS = typeMappings();
 
   @Bean
   public ConsumerFactory<String, Object> consumerFactory() {
@@ -30,7 +31,7 @@ public class KafkaConsumerConfiguration {
     configs.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-service");
     configs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     configs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-    configs.put(JsonDeserializer.TYPE_MAPPINGS, "paymentTransactionCreateCommand:com.felipe.kafka.saga.commands.PaymentTransactionCreateCommand");
+    configs.put(JsonDeserializer.TYPE_MAPPINGS, DESERIALIZER_TYPE_MAPPINGS);
     configs.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
     configs.put(JsonDeserializer.REMOVE_TYPE_INFO_HEADERS, false);
     configs.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -42,5 +43,13 @@ public class KafkaConsumerConfiguration {
     ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(consumerFactory());
     return factory;
+  }
+
+  private static String typeMappings() {
+    String[] types = {
+      "paymentTransactionCreateCommand:com.felipe.kafka.saga.commands.PaymentTransactionCreateCommand",
+      "paymentTransactionCancelCommand:com.felipe.kafka.saga.commands.PaymentTransactionCancelCommand"
+    };
+    return String.join(", ", types);
   }
 }

@@ -3,7 +3,8 @@ package com.felipe.ecommerce_order_service.core.domain.enums;
 public enum OrderStatus {
   CREATED("created"),
   PENDING("pending"),
-  CANCELLED("cancelled");
+  CANCELLED("cancelled"),
+  FINISHED("finished");
 
   private final String text;
 
@@ -20,6 +21,7 @@ public enum OrderStatus {
       case "created" -> CREATED;
       case "pending" -> PENDING;
       case "cancelled" -> CANCELLED;
+      case "finished" -> FINISHED;
       default -> throw new IllegalArgumentException("");
     };
   }

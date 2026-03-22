@@ -7,6 +7,9 @@ import com.felipe.ecommerce_payment_service.infrastructure.persistence.entities.
 import com.felipe.ecommerce_payment_service.infrastructure.persistence.repositories.PaymentRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Component
 public class PaymentGatewayImpl implements PaymentGateway {
   private final PaymentRepository paymentRepository;
@@ -21,5 +24,16 @@ public class PaymentGatewayImpl implements PaymentGateway {
   public Payment createPayment(Payment payment) {
     PaymentEntity entity = this.paymentEntityMapper.toEntity(payment);
     return this.paymentEntityMapper.toDomain(this.paymentRepository.save(entity));
+  }
+
+  @Override
+  public Payment updatePayment(Payment payment) {
+    PaymentEntity entity = this.paymentEntityMapper.toEntity(payment);
+    return this.paymentEntityMapper.toDomain(this.paymentRepository.save(entity));
+  }
+
+  @Override
+  public Optional<Payment> findPaymentByOrderId(UUID orderId) {
+    return this.paymentRepository.findByOrderId(orderId).map(this.paymentEntityMapper::toDomain);
   }
 }

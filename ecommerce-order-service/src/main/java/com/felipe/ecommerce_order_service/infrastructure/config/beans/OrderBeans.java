@@ -4,16 +4,20 @@ import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGatew
 import com.felipe.ecommerce_order_service.core.application.gateway.OrderGateway;
 import com.felipe.ecommerce_order_service.core.application.usecases.CreateOrderUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.DeleteOrderUseCase;
+import com.felipe.ecommerce_order_service.core.application.usecases.FindOrderByIdUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.GetOrderByIdUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.CreateOrderUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.DeleteOrderUseCaseImpl;
+import com.felipe.ecommerce_order_service.core.application.usecases.impl.FindOrderByIdUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.GetOrderByIdUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.UpdateOrderUseCaseImpl;
 import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.CancellingStateHandler;
+import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.CommitingStateHandler;
 import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.ProcessingStateHandler;
 import com.felipe.ecommerce_order_service.infrastructure.saga.state.SagaState;
 import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.StartedStateHandler;
+import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.WaitingForPaymentStateHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -47,6 +51,11 @@ public class OrderBeans {
   }
 
   @Bean
+  public FindOrderByIdUseCase findOrderByIdUseCase() {
+    return new FindOrderByIdUseCaseImpl(this.orderGateway);
+  }
+
+  @Bean
   public UpdateOrderUseCase updateOrderUseCase() {
     return new UpdateOrderUseCaseImpl(this.orderGateway);
   }
@@ -59,6 +68,16 @@ public class OrderBeans {
   @Bean
   public SagaState processingStateHandler(UpdateOrderUseCase updateOrderUseCase) {
     return new ProcessingStateHandler(updateOrderUseCase, this.kafkaTemplate);
+  }
+
+  @Bean
+  public SagaState waitingForPaymentStateHandler(UpdateOrderUseCase updateOrderUseCase) {
+    return new WaitingForPaymentStateHandler(updateOrderUseCase, this.kafkaTemplate);
+  }
+
+  @Bean
+  public SagaState commitingStateHandler(UpdateOrderUseCase updateOrderUseCase) {
+    return new CommitingStateHandler(updateOrderUseCase, this.kafkaTemplate);
   }
 
   @Bean

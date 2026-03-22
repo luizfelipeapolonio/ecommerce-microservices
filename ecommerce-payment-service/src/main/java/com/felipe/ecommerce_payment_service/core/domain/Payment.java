@@ -9,6 +9,9 @@ public class Payment {
   private UUID orderId;
   private BigDecimal orderAmount;
   private UUID customerId;
+  private String stripeCustomerId;
+  private UUID sagaId;
+  private UUID transactionId;
   private String checkoutId;
   private PaymentStatus status = PaymentStatus.PENDING;
   private LocalDateTime createdAt;
@@ -66,6 +69,45 @@ public class Payment {
 
   public Payment customerId(UUID customerId) {
     this.customerId = customerId;
+    return this;
+  }
+
+  public String getStripeCustomerId() {
+    return this.stripeCustomerId;
+  }
+
+  public void setStripeCustomerId(String stripeCustomerId) {
+    this.stripeCustomerId = stripeCustomerId;
+  }
+
+  public Payment stripeCustomerId(String stripeCustomerId) {
+    this.stripeCustomerId = stripeCustomerId;
+    return this;
+  }
+
+  public UUID getSagaId() {
+    return this.sagaId;
+  }
+
+  public void setSagaId(UUID sagaId) {
+    this.sagaId = sagaId;
+  }
+
+  public Payment sagaId(UUID sagaId) {
+    this.sagaId = sagaId;
+    return this;
+  }
+
+  public UUID getTransactionId() {
+    return this.transactionId;
+  }
+
+  public void setTransactionId(UUID transactionId) {
+    this.transactionId = transactionId;
+  }
+
+  public Payment transactionId(UUID transactionId) {
+    this.transactionId = transactionId;
     return this;
   }
 

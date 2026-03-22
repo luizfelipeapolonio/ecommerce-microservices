@@ -1,7 +1,7 @@
 package com.felipe.ecommerce_order_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_order_service.core.application.usecases.CreateOrderUseCase;
-import com.felipe.ecommerce_order_service.core.application.usecases.GetOrderByIdUseCase;
+import com.felipe.ecommerce_order_service.core.application.usecases.FindOrderByIdUseCase;
 import com.felipe.ecommerce_order_service.core.domain.Order;
 import com.felipe.ecommerce_order_service.infrastructure.dtos.CreateOrderDTOImpl;
 import com.felipe.ecommerce_order_service.infrastructure.dtos.OrderStatusDTO;
@@ -22,19 +22,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/orders")
 public class OrderController {
   private final CreateOrderUseCase createOrderUseCase;
-  private final GetOrderByIdUseCase getOrderByIdUseCase;
+  private final FindOrderByIdUseCase findOrderByIdUseCase;
   private final OrderSagaService orderSagaService;
 
-  public OrderController(CreateOrderUseCase createOrderUseCase, GetOrderByIdUseCase getOrderByIdUseCase,
+  public OrderController(CreateOrderUseCase createOrderUseCase, FindOrderByIdUseCase findOrderByIdUseCase,
                          OrderSagaService orderSagaService) {
     this.createOrderUseCase = createOrderUseCase;
-    this.getOrderByIdUseCase = getOrderByIdUseCase;
+    this.findOrderByIdUseCase = findOrderByIdUseCase;
     this.orderSagaService = orderSagaService;
   }
 
@@ -57,9 +58,15 @@ public class OrderController {
   @GetMapping("/{orderId}/status")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<OrderStatusDTO> getOrderStatus(@PathVariable UUID orderId) {
-    Order order = this.getOrderByIdUseCase.execute(orderId);
+    Optional<Order> order = this.findOrderByIdUseCase.execute(orderId);
     OrderSaga saga = this.orderSagaService.findOrderSagaByOrderId(orderId);
-    OrderStatusDTO statusDTO = new OrderStatusDTO(order.getId(), saga.getStatus(), order.getCheckoutUrl(), order.getInvoiceUrl());
+    OrderStatusDTO statusDTO = new OrderStatusDTO(
+      orderId,
+      saga.getStatus(),
+      saga.getFailureReason(),
+      order.map(Order::getCheckoutUrl).orElse(null),
+      order.map(Order::getInvoiceUrl).orElse(null)
+    );
     return new ResponsePayload.Builder<OrderStatusDTO>()
       .type(ResponseType.SUCCESS)
       .code(HttpStatus.OK)
