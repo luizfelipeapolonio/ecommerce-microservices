@@ -42,7 +42,7 @@ public class StartedStateHandler implements SagaState {
     InventoryTransactionReply inventoryReply = (InventoryTransactionReply) reply;
     return switch (reply.getStatus()) {
       case SUCCESS -> new InventorySucceededTransition(inventoryReply, this.customerGateway, this.updateOrderUseCase, this.kafkaTemplate);
-      case FAILURE ->  new InventoryFailedTransition(inventoryReply, this.kafkaTemplate);
+      case FAILURE -> new InventoryFailedTransition(inventoryReply, this.kafkaTemplate);
     };
   }
 }

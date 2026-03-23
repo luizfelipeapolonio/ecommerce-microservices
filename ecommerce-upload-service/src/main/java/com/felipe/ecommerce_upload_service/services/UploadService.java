@@ -117,16 +117,13 @@ public class UploadService {
     if (!foundImages.isEmpty()) {
       for (Image image : foundImages) {
         final Path imageToDeletePath = Paths.get(this.rootUploadPath.toString(), image.getPath());
-
         try {
           final boolean isImageFileDeleted = Files.deleteIfExists(imageToDeletePath);
-
           if (!isImageFileDeleted) {
             this.logger.error("Error on deleting image. Image file was not found - Path: {}", imageToDeletePath);
             throw new ImageFileNotFoundException("Não foi possível excluir! Imagem '" + image.getName() + "' não encontrada");
           }
           this.logger.info("Deleted image file on path: {}", imageToDeletePath);
-
         } catch (IOException ex) {
           this.logger.error("Error on deleting image file. Path: {}", imageToDeletePath, ex);
           throw new DeleteFailureException("Ocorreu um erro ao excluir a imagem '" + image.getName() + "'", ex);
