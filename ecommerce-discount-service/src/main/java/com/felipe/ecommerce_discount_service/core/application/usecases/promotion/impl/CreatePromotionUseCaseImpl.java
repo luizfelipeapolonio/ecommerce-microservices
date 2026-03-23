@@ -31,7 +31,7 @@ public class CreatePromotionUseCaseImpl implements CreatePromotionUseCase {
   @Override
   public Optional<Promotion> execute(CreatePromotionDTO promotionDTO) {
     final LocalDateTime endDate = convertEndDate(promotionDTO.endDate());
-    if(endDate.isBefore(LocalDateTime.now())) {
+    if (endDate.isBefore(LocalDateTime.now())) {
       throw new InvalidEndDateException(endDate.toString());
     }
 
@@ -39,7 +39,7 @@ public class CreatePromotionUseCaseImpl implements CreatePromotionUseCase {
     final DiscountType discountType = DiscountType.of(promotionDTO.discountType());
 
     // The promotion minimum price for fixed_amount should be the discount value plus 10
-    if(discountType == DiscountType.FIXED_AMOUNT) {
+    if (discountType == DiscountType.FIXED_AMOUNT) {
       final BigDecimal discountValue = new BigDecimal(promotionDTO.discountValue());
       promotionBuilder.minimumPrice(discountValue.add(new BigDecimal("10.00")));
     } else {

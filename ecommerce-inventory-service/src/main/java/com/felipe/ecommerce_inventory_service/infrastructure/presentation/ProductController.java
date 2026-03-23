@@ -314,12 +314,12 @@ public class ProductController implements ProductApi {
     try {
       CreateProductDTO convertedObject = this.objectMapper.readValue(json, CreateProductDTO.class);
       Set<ConstraintViolation<CreateProductDTO>> violations = this.validator.validate(convertedObject);
-      if(!violations.isEmpty()) {
+      if (!violations.isEmpty()) {
         throw new ConstraintViolationException(violations);
       }
       return convertedObject;
 
-    } catch(JsonProcessingException ex) {
+    } catch (JsonProcessingException ex) {
       this.logger.error("Error on convert JSON 'productDTO' to CreateProductDTO: {}", ex.getMessage(), ex);
       throw new UnprocessableJsonException("Não foi possível converter JSON em objeto", ex);
     }

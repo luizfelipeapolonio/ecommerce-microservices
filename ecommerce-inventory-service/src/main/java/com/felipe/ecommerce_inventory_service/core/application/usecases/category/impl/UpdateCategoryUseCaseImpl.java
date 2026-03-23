@@ -21,7 +21,7 @@ public class UpdateCategoryUseCaseImpl implements UpdateCategoryUseCase {
       .orElseThrow(() -> new DataNotFoundException("Categoria de id '" + id + "' não encontrada"));
 
     Optional<Category> existingCategory = this.categoryGateway.findCategoryByName(updatedName);
-    if(existingCategory.isPresent()) {
+    if (existingCategory.isPresent()) {
       throw new CategoryAlreadyExistsException(updatedName);
     }
 

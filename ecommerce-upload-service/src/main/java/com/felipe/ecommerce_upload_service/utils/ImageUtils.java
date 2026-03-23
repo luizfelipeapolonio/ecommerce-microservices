@@ -13,13 +13,13 @@ public class ImageUtils {
     String unitAcronym = "B";
     String convertedValue = String.valueOf(bytes);
 
-    if(bytes >= UNIT_KILOBYTE_IN_BYTES && bytes < UNIT_MEGABYTE_IN_BYTES) {
+    if (bytes >= UNIT_KILOBYTE_IN_BYTES && bytes < UNIT_MEGABYTE_IN_BYTES) {
       unitAcronym = "KB";
       double kilobytes = (double) bytes / UNIT_KILOBYTE_IN_BYTES;
       convertedValue = new BigDecimal(kilobytes).setScale(2, RoundingMode.HALF_UP).toString();
     }
 
-    if(bytes >= UNIT_MEGABYTE_IN_BYTES) {
+    if (bytes >= UNIT_MEGABYTE_IN_BYTES) {
       unitAcronym = "MB";
       double megabytes = bytes * UNIT_BYTE_IN_MEGABYTES;
       convertedValue = new BigDecimal(megabytes).setScale(2, RoundingMode.HALF_UP).toString();

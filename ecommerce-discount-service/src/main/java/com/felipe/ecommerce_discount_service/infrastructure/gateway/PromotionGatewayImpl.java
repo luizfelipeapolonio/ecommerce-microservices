@@ -56,7 +56,7 @@ public class PromotionGatewayImpl implements PromotionGateway {
     final ResponsePayload<Map<String, Integer>> appliedPromotionResponse = this.inventoryService.applyPromotion(promotionRequest);
     this.logger.info("Applied promotion response message: {}", appliedPromotionResponse.getMessage());
 
-    if(appliedPromotionResponse.getPayload().get("appliedPromotionQuantity") == 0) {
+    if (appliedPromotionResponse.getPayload().get("appliedPromotionQuantity") == 0) {
       return Optional.empty();
     }
 
@@ -78,7 +78,7 @@ public class PromotionGatewayImpl implements PromotionGateway {
     this.promotionRepository.delete(promotionEntity);
     this.promotionSchedulerService.cancelScheduledPromotion(promotionEntity);
 
-    if(promotion.isActive()) {
+    if (promotion.isActive()) {
       this.kafkaTemplate.send("expired-promotion", new ExpiredPromotionKafkaDTO(promotion.getId().toString()));
       this.logger.info("cancelScheduledPromotion - Promotion \"{}\" to remove posted on topic", promotion.getId());
     }

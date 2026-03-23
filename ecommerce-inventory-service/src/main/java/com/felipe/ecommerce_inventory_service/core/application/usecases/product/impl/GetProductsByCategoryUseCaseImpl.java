@@ -21,7 +21,7 @@ public class GetProductsByCategoryUseCaseImpl implements GetProductsByCategoryUs
   @Override
   public PageResponseDTO execute(String categoryName, int page, int elementsQuantity) {
     Optional<Category> existingCategory = this.categoryGateway.findCategoryByName(categoryName);
-    if(existingCategory.isEmpty()) {
+    if (existingCategory.isEmpty()) {
       throw new DataNotFoundException("Categoria '" + categoryName + "' não encontrada");
     }
     return this.productGateway.getProductsByCategory(categoryName, page, elementsQuantity);

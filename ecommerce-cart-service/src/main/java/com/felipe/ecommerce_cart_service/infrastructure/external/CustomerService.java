@@ -51,7 +51,7 @@ public class CustomerService implements CustomerGateway {
 
       assert response != null;
       return response.getPayload();
-    } catch(RestClientException ex) {
+    } catch (RestClientException ex) {
       logger.error("Error in Customer Service RestClient -> {}", ex.getMessage());
       throw new CustomerServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }

@@ -26,7 +26,7 @@ public class StorageConfiguration {
       if (Files.exists(this.imageStorageLocation)) return;
       final Path root = Files.createDirectory(this.imageStorageLocation);
       this.logger.info("Upload directory successfully created on: {}", root.toAbsolutePath());
-    } catch(IOException ex) {
+    } catch (IOException ex) {
       this.logger.error("Error on upload directory creation: {}", ex.getMessage(), ex);
       throw new UploadDirectoryInitializationException(ex);
     }

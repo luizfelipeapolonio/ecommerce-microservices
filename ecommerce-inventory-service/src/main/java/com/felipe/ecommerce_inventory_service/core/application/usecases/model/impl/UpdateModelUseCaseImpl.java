@@ -21,7 +21,7 @@ public class UpdateModelUseCaseImpl implements UpdateModelUseCase {
       .orElseThrow(() -> new DataNotFoundException("Modelo de id '" + id + "' não encontrado"));
 
     Optional<Model> existingModel = this.modelGateway.findModelByName(name);
-    if(existingModel.isPresent()) {
+    if (existingModel.isPresent()) {
       throw new ModelAlreadyExistsException(name);
     }
     return this.modelGateway.updateModel(model, name, description);

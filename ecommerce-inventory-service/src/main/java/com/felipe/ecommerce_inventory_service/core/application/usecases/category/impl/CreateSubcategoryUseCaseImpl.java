@@ -18,7 +18,7 @@ public class CreateSubcategoryUseCaseImpl implements CreateSubcategoryUseCase {
   @Override
   public Category execute(Long parentCategoryId, String subcategoryName) {
     Optional<Category> existingCategory = this.categoryGateway.findCategoryByName(subcategoryName);
-    if(existingCategory.isPresent()) {
+    if (existingCategory.isPresent()) {
       throw new CategoryAlreadyExistsException(subcategoryName);
     }
 

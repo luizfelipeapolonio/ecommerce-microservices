@@ -47,7 +47,7 @@ public class PromotionSchedulerService {
   public void cancelScheduledPromotion(PromotionEntity promotion) {
     final ScheduledFuture<?> scheduledPromotion = this.scheduledPromotionsToExpire.get(promotion.getId());
 
-    if(scheduledPromotion != null) {
+    if (scheduledPromotion != null) {
       scheduledPromotion.cancel(true);
       this.scheduledPromotionsToExpire.remove(promotion.getId());
       this.logger.info("cancelScheduledPromotion - Cancelling Scheduled Promotion: {}", promotion.getName());
@@ -73,7 +73,7 @@ public class PromotionSchedulerService {
       // Sending the expired promotion to the Kafka topic
       this.kafkaTemplate.send("expired-promotion", new ExpiredPromotionKafkaDTO(expiredPromotion.getId().toString()))
         .whenComplete((result, ex) -> {
-          if(ex != null) {
+          if (ex != null) {
             throw new KafkaProducerException(
               result.getProducerRecord(),
               "Something went wrong while trying to post to a kafka topic",

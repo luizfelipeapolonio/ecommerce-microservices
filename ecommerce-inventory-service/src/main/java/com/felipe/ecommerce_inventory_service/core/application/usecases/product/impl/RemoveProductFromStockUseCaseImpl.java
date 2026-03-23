@@ -20,7 +20,7 @@ public class RemoveProductFromStockUseCaseImpl implements RemoveProductFromStock
     final Product product = this.productGateway.findProductById(productId)
       .orElseThrow(() -> new DataNotFoundException("Produto de id: '" + productId + "' não encontrado"));
 
-    if(quantity > product.getQuantity()) {
+    if (quantity > product.getQuantity()) {
       throw new InvalidProductQuantityException(
         "Quantidade inválida! " +
         "A quantidade de produtos para remover do estoque não deve ser maior do que a quantidade atual de produtos disponíveis"

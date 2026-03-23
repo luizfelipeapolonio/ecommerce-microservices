@@ -45,7 +45,7 @@ public class CartService {
         .body(String.class);
 
       logger.info("Create Cart response: {}", response);
-    } catch(RestClientException ex) {
+    } catch (RestClientException ex) {
       logger.error("RestClient error in createCart: {}", ex.getMessage());
       throw new CartServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }

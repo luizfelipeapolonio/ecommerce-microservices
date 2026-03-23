@@ -34,7 +34,7 @@ public class AddItemToCartUseCaseImpl implements AddItemToCartUseCase {
       .stream()
       .anyMatch(item -> item.getProductId().equals(productId));
 
-    if(isItemAlreadyInCart) {
+    if (isItemAlreadyInCart) {
       throw new CartItemAlreadyExistsException("O produto de id '" + productId + "' já está no carrinho");
     }
 

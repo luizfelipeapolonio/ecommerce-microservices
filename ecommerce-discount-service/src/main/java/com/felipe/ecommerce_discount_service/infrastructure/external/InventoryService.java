@@ -49,7 +49,7 @@ public class InventoryService {
         .retrieve()
         .body(new ParameterizedTypeReference<>() {
         });
-    } catch(RestClientException ex) {
+    } catch (RestClientException ex) {
       logger.error("RestClient error in applyPromotion: {}", ex.getMessage());
       throw new InventoryServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }

@@ -21,7 +21,7 @@ public class CreateCustomerUseCaseImpl implements CreateCustomerUseCase {
   @Override
   public Customer execute(Customer customer, String password) {
     Optional<Customer> existingCustomer = this.customerGateway.findByEmail(customer.getEmail());
-    if(existingCustomer.isPresent()) {
+    if (existingCustomer.isPresent()) {
       throw new EmailAlreadyExistsException(customer.getEmail());
     }
 

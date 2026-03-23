@@ -98,16 +98,16 @@ public class ProductGatewayImpl implements ProductGateway {
   public Product updateProduct(Product product, UpdateProductDomainDTO productDTO) {
     ProductEntity.Builder productEntityBuilder = ProductEntity.mutate(this.productEntityMapper.toEntity(product));
 
-    if(productDTO.name() != null) {
+    if (productDTO.name() != null) {
       productEntityBuilder.name(productDTO.name());
     }
-    if(productDTO.description() != null) {
+    if (productDTO.description() != null) {
       productEntityBuilder.description(productDTO.description());
     }
-    if(productDTO.unitPrice() != null) {
+    if (productDTO.unitPrice() != null) {
       productEntityBuilder.unitPrice(new BigDecimal(productDTO.unitPrice()));
     }
-    if(productDTO.quantity() != null) {
+    if (productDTO.quantity() != null) {
       productEntityBuilder.quantity(productDTO.quantity());
     }
 
@@ -209,21 +209,21 @@ public class ProductGatewayImpl implements ProductGateway {
                                           null;
     int appliedPromotionCount = 0;
 
-    if(promotionDTO.promotionScope().equals("all")) {
-      for(PromotionAppliesToDTO promotion : promotionDTO.targets()) {
-        if(promotion.target().equals("category")) {
+    if (promotionDTO.promotionScope().equals("all")) {
+      for (PromotionAppliesToDTO promotion : promotionDTO.targets()) {
+        if (promotion.target().equals("category")) {
           final int appliedPromotionQuantity = this.productRepository.applyPromotionToCategory(promotionDTO, fixedAmountMaxDiscount, promotion.targetId());
           appliedPromotionCount += appliedPromotionQuantity;
         }
-        if(promotion.target().equals("brand")) {
+        if (promotion.target().equals("brand")) {
           final int appliedPromotionQuantity = this.productRepository.applyPromotionToBrand(promotionDTO, fixedAmountMaxDiscount, promotion.targetId());
           appliedPromotionCount += appliedPromotionQuantity;
         }
-        if(promotion.target().equals("model")) {
+        if (promotion.target().equals("model")) {
           final int appliedPromotionQuantity = this.productRepository.applyPromotionToModel(promotionDTO, fixedAmountMaxDiscount, promotion.targetId());
           appliedPromotionCount += appliedPromotionQuantity;
         }
-        if(promotion.target().equals("product")) {
+        if (promotion.target().equals("product")) {
           final int appliedPromotionQuantity = this.productRepository.applyPromotionToProduct(
             promotionDTO,
             fixedAmountMaxDiscount,
@@ -235,14 +235,14 @@ public class ProductGatewayImpl implements ProductGateway {
     } else {
       String categoryId = null, brandId = null, modelId = null;
 
-      for(PromotionAppliesToDTO promotion : promotionDTO.targets()) {
-        if(promotion.target().equals("category")) {
+      for (PromotionAppliesToDTO promotion : promotionDTO.targets()) {
+        if (promotion.target().equals("category")) {
           categoryId = promotion.targetId();
         }
-        if(promotion.target().equals("brand")) {
+        if (promotion.target().equals("brand")) {
           brandId = promotion.targetId();
         }
-        if(promotion.target().equals("model")) {
+        if (promotion.target().equals("model")) {
           modelId = promotion.targetId();
         }
       }

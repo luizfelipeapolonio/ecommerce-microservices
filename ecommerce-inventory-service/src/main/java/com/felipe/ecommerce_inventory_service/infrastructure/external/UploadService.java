@@ -45,7 +45,7 @@ public class UploadService {
     MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
     parts.add("productData", productData);
 
-    for(MultipartFile image : images) {
+    for (MultipartFile image : images) {
       parts.add("images", image.getResource());
     }
 
@@ -59,7 +59,7 @@ public class UploadService {
         .retrieve()
         .body(new ParameterizedTypeReference<>() {
         });
-    } catch(RestClientException ex) {
+    } catch (RestClientException ex) {
       logger.error("RestClient error in upload(): {}", ex.getMessage());
       throw new UploadServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }
@@ -81,7 +81,7 @@ public class UploadService {
         .retrieve()
         .body(new ParameterizedTypeReference<>() {
         });
-    } catch(RestClientException ex) {
+    } catch (RestClientException ex) {
       logger.error("RestClient error in getProductImages(): {}", ex.getMessage());
       throw new UploadServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }
@@ -100,7 +100,7 @@ public class UploadService {
         .retrieve()
         .body(new ParameterizedTypeReference<>() {
         });
-    } catch(RestClientException ex) {
+    } catch (RestClientException ex) {
       logger.error("RestClient error in deleteImages(): {}", ex.getMessage());
       throw new UploadServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }

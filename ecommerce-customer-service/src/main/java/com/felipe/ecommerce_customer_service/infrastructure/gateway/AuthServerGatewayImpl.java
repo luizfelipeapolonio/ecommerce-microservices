@@ -42,7 +42,7 @@ public class AuthServerGatewayImpl implements AuthServerGateway {
         .body(String.class);
 
       this.logger.info("Auth Server rest client response -> {}", body);
-    } catch(RestClientException ex) {
+    } catch (RestClientException ex) {
       this.logger.error("Auth Server rest client call -> {}", ex.getMessage());
       throw new AuthServerException("Ocorreu um erro ao se comunicar com o servidor", ex);
     }

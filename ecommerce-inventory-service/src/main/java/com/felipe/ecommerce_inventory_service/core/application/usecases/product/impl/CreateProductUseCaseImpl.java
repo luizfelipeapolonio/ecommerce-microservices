@@ -36,7 +36,7 @@ public class CreateProductUseCaseImpl implements CreateProductUseCase {
   @Override
   public ProductResponseDTO execute(CreateProductDomainDTO productDTO, UploadFile[] files) {
     Optional<Product> existingProduct = this.productGateway.findProductByName(productDTO.name());
-    if(existingProduct.isPresent()) {
+    if (existingProduct.isPresent()) {
       throw new ProductAlreadyExistsException(productDTO.name());
     }
 

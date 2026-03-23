@@ -21,7 +21,7 @@ public class GetProductsByModelUseCaseImpl implements GetProductsByModelUseCase 
   @Override
   public PageResponseDTO execute(String modelName, String brandName, int page, int elementsQuantity) {
     Optional<Model> existingModel = this.modelGateway.findModelByNameAndBrandName(modelName, brandName);
-    if(existingModel.isEmpty()) {
+    if (existingModel.isEmpty()) {
       throw new DataNotFoundException("Modelo '" + modelName + "' da marca '" + brandName + "' não encontrado");
     }
     return this.productGateway.getProductsByModel(modelName, brandName, page, elementsQuantity);

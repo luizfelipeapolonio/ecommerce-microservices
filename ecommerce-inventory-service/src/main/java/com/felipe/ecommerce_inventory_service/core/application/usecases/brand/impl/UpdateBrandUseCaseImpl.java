@@ -21,7 +21,7 @@ public class UpdateBrandUseCaseImpl implements UpdateBrandUseCase {
       .orElseThrow(() -> new DataNotFoundException("Marca de id '" + id + "' não encontrada"));
 
     Optional<Brand> existingBrand = this.brandGateway.findBrandByName(name);
-    if(existingBrand.isPresent()) {
+    if (existingBrand.isPresent()) {
       throw new BrandAlreadyExistsException(name);
     }
     return this.brandGateway.updateBrand(brand, name, description);

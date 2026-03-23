@@ -23,7 +23,7 @@ public class CreateModelUseCaseImpl implements CreateModelUseCase {
     Brand brand = this.getBrandByIdUseCase.execute(brandId);
 
     Optional<Model> existingModel = this.modelGateway.findModelByName(name);
-    if(existingModel.isPresent()) {
+    if (existingModel.isPresent()) {
       throw new ModelAlreadyExistsException(name);
     }
 

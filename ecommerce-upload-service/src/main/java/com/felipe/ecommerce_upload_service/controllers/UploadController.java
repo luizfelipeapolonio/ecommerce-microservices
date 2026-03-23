@@ -55,7 +55,7 @@ public class UploadController {
         .payload(savedImages)
         .build();
 
-    } catch(JsonProcessingException ex) {
+    } catch (JsonProcessingException ex) {
       this.logger.error("Error on convert JSON 'productData' to ProductUploadDTO: {}", ex.getMessage(), ex);
       throw new UnprocessableJsonException("Não foi possível converter JSON para objeto", ex);
     }

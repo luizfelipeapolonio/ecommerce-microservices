@@ -44,10 +44,10 @@ public class BrandGatewayImpl implements BrandGateway {
   @Override
   public Brand updateBrand(Brand brand, String name, String description) {
     BrandEntity.Builder brandBuilder = BrandEntity.mutate(this.brandEntityMapper.toEntity(brand));
-    if(name != null) {
+    if (name != null) {
       brandBuilder.name(name);
     }
-    if(description != null) {
+    if (description != null) {
       brandBuilder.description(description);
     }
     BrandEntity updatedBrand = this.brandRepository.save(brandBuilder.build());

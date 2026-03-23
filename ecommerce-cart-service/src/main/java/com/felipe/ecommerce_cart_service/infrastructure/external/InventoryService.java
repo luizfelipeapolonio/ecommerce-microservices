@@ -48,7 +48,7 @@ public class InventoryService {
         .body(new ParameterizedTypeReference<>() {
         });
 
-    } catch(RestClientException ex) {
+    } catch (RestClientException ex) {
       logger.error("Error in Inventory Service RestClient -> {}", ex.getMessage());
       throw new InventoryServiceException("Ocorreu um erro ao se comunicar com a aplicação");
     }

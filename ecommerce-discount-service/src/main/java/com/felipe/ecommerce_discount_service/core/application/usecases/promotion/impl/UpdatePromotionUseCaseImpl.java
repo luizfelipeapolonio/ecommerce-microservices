@@ -26,16 +26,16 @@ public class UpdatePromotionUseCaseImpl implements UpdatePromotionUseCase {
       .map(foundPromotion -> {
         final Promotion.Builder promotionBuilder = Promotion.mutate(foundPromotion);
 
-        if(promotionDTO.name() != null) {
+        if (promotionDTO.name() != null) {
           promotionBuilder.name(promotionDTO.name());
         }
-        if(promotionDTO.description() != null) {
+        if (promotionDTO.description() != null) {
           promotionBuilder.description(promotionDTO.description());
         }
-        if(promotionDTO.endDate() != null) {
+        if (promotionDTO.endDate() != null) {
           final LocalDateTime updatedEndDate = convertEndDate(promotionDTO.endDate());
 
-          if(updatedEndDate.isBefore(LocalDateTime.now())) {
+          if (updatedEndDate.isBefore(LocalDateTime.now())) {
             throw new InvalidEndDateException(updatedEndDate.toString());
           }
           promotionBuilder.endDate(updatedEndDate);

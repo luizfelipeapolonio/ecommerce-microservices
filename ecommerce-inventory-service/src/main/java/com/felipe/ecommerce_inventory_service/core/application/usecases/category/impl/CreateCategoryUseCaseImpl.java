@@ -17,7 +17,7 @@ public class CreateCategoryUseCaseImpl implements CreateCategoryUseCase {
   @Override
   public Category execute(String name) {
     Optional<Category> existingCategory = this.categoryGateway.findCategoryByName(name);
-    if(existingCategory.isPresent()) {
+    if (existingCategory.isPresent()) {
       throw new CategoryAlreadyExistsException(name);
     }
     return this.categoryGateway.createCategory(name);

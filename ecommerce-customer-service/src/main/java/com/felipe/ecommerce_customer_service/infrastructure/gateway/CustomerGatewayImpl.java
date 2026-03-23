@@ -49,13 +49,13 @@ public class CustomerGatewayImpl implements CustomerGateway {
     CustomerEntity customerProfile = this.customerMapper.toEntity(customer);
     CustomerEntity.Builder customerBuilder = CustomerEntity.mutate(customerProfile);
 
-    if(customerDTO.username() != null) {
+    if (customerDTO.username() != null) {
       customerBuilder.username(customerDTO.username());
     }
-    if(customerDTO.firstName() != null) {
+    if (customerDTO.firstName() != null) {
       customerBuilder.firstName(customerDTO.firstName());
     }
-    if(customerDTO.lastName() != null) {
+    if (customerDTO.lastName() != null) {
       customerBuilder.lastName(customerDTO.lastName());
     }
 
@@ -81,28 +81,28 @@ public class CustomerGatewayImpl implements CustomerGateway {
     AddressEntity addressEntity = customerEntity.getAddress();
     AddressEntity.Builder addressBuilder = AddressEntity.mutate(addressEntity);
 
-    if(address.getStreet() != null) {
+    if (address.getStreet() != null) {
       addressBuilder.street(address.getStreet());
     }
-    if(address.getNumber() != null) {
+    if (address.getNumber() != null) {
       addressBuilder.number(address.getNumber());
     }
-    if(address.getComplement() != null) {
+    if (address.getComplement() != null) {
       addressBuilder.complement(address.getComplement());
     }
-    if(address.getDistrict() != null) {
+    if (address.getDistrict() != null) {
       addressBuilder.district(address.getDistrict());
     }
-    if(address.getZipcode() != null) {
+    if (address.getZipcode() != null) {
       addressBuilder.zipcode(address.getZipcode());
     }
-    if(address.getCity() != null) {
+    if (address.getCity() != null) {
       addressBuilder.city(address.getCity());
     }
-    if(address.getState() != null) {
+    if (address.getState() != null) {
       addressBuilder.state(address.getState());
     }
-    if(address.getCountry() != null) {
+    if (address.getCountry() != null) {
       addressBuilder.country(address.getCountry());
     }
 

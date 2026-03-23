@@ -22,9 +22,9 @@ public class UpdateProductUseCaseImpl implements UpdateProductUseCase {
     Product product = this.productGateway.findProductById(productId)
       .orElseThrow(() -> new DataNotFoundException("Produto de id '" + productId + "' não encontrado"));
 
-    if(productDTO.name() != null) {
+    if (productDTO.name() != null) {
       Optional<Product> existingProduct = this.productGateway.findProductByName(productDTO.name());
-      if(existingProduct.isPresent()) {
+      if (existingProduct.isPresent()) {
         throw new ProductAlreadyExistsException(productDTO.name());
       }
     }

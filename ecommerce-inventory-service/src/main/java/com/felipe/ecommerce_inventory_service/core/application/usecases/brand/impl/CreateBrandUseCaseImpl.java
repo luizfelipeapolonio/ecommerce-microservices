@@ -17,7 +17,7 @@ public class CreateBrandUseCaseImpl implements CreateBrandUseCase {
   @Override
   public Brand execute(String name, String description) {
     Optional<Brand> existingBrand = this.brandGateway.findBrandByName(name);
-    if(existingBrand.isPresent()) {
+    if (existingBrand.isPresent()) {
       throw new BrandAlreadyExistsException(name);
     }
     return this.brandGateway.createBrand(name, description);

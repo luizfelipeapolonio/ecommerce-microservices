@@ -44,19 +44,19 @@ public class UploadService {
   }
 
   public List<Image> saveAll(ProductUploadDTO productData, MultipartFile[] images) {
-    if(!wrongFiles.isEmpty()) {
+    if (!wrongFiles.isEmpty()) {
       this.logger.debug("=== Cleaning wrong files ===");
       this.wrongFiles.clear();
     }
 
-    if(!isAllFilesValid(images)) {
+    if (!isAllFilesValid(images)) {
       this.logger.debug("save() - wrong files quantity: {}", wrongFiles.size());
       throw new InvalidFileTypeException(wrongFiles);
     }
 
     final List<Image> savedImages = new ArrayList<>(images.length);
 
-    for(int i = 0; i < images.length; i++) {
+    for (int i = 0; i < images.length; i++) {
       final String imageName = generateImageName(productData.productName(), images[i]);
       final String imagePath = "/" + imageName;
 
@@ -82,7 +82,7 @@ public class UploadService {
         Files.copy(images[i].getInputStream(), this.rootUploadPath.resolve(savedImage.getName()));
         this.logger.info("Image file successfully saved. Index: {} - Original name: {}", i, images[i].getOriginalFilename());
 
-      } catch(IOException ex) {
+      } catch (IOException ex) {
         this.logger.error(
           "Error on save image file. Image original name: {} - Image index: {}", images[i].getOriginalFilename(), i, ex
         );
@@ -114,14 +114,14 @@ public class UploadService {
     this.logger.info("Found {} images of product with id '{}'", foundImages.size(), productId);
     int deletedImagesCount = 0;
 
-    if(!foundImages.isEmpty()) {
+    if (!foundImages.isEmpty()) {
       for (Image image : foundImages) {
         final Path imageToDeletePath = Paths.get(this.rootUploadPath.toString(), image.getPath());
 
         try {
           final boolean isImageFileDeleted = Files.deleteIfExists(imageToDeletePath);
 
-          if(!isImageFileDeleted) {
+          if (!isImageFileDeleted) {
             this.logger.error("Error on deleting image. Image file was not found - Path: {}", imageToDeletePath);
             throw new ImageFileNotFoundException("Não foi possível excluir! Imagem '" + image.getName() + "' não encontrada");
           }
@@ -153,7 +153,7 @@ public class UploadService {
     final String png = MimeTypeUtils.IMAGE_PNG_VALUE;
     final String jpeg = MimeTypeUtils.IMAGE_JPEG_VALUE;
     final String contentType = file.getContentType();
-    if(contentType == null) return false;
+    if (contentType == null) return false;
     return contentType.equals(png) || contentType.equals(jpeg);
   }
 
@@ -161,8 +161,8 @@ public class UploadService {
     int wrongFilesCount = 0;
     this.logger.debug("isAllFilesValid() - wrong files count: {} at start", wrongFilesCount);
 
-    for(int i = 0; i < files.length; i++) {
-      if(!isFileTypeValid(files[i])) {
+    for (int i = 0; i < files.length; i++) {
+      if (!isFileTypeValid(files[i])) {
         final String contentType = files[i].getContentType();
         final String fileName = files[i].getOriginalFilename();
         wrongFiles.put(i, String.format("%s-%s", contentType, fileName));

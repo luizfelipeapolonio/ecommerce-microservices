@@ -21,7 +21,7 @@ public class GetProductsByBrandUseCaseImpl implements GetProductsByBrandUseCase 
   @Override
   public PageResponseDTO execute(String brandName, int page, int elementsQuantity) {
     Optional<Brand> existingBrand = this.brandGateway.findBrandByName(brandName);
-    if(existingBrand.isEmpty()) {
+    if (existingBrand.isEmpty()) {
       throw new DataNotFoundException("Marca '" + brandName + "' não encontrada");
     }
     return this.productGateway.getProductsByBrand(brandName, page, elementsQuantity);

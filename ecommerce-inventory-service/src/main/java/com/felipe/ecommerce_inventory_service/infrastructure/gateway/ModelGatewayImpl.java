@@ -54,10 +54,10 @@ public class ModelGatewayImpl implements ModelGateway {
   @Override
   public Model updateModel(Model model, String name, String description) {
     ModelEntity.Builder modelBuilder = ModelEntity.mutate(this.modelEntityMapper.toEntity(model));
-    if(name != null) {
+    if (name != null) {
       modelBuilder.name(name);
     }
-    if(description != null) {
+    if (description != null) {
       modelBuilder.description(description);
     }
     ModelEntity updatedModel = this.modelRepository.save(modelBuilder.build());
