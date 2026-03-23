@@ -61,8 +61,8 @@ public class OrderBeans {
   }
 
   @Bean
-  public SagaState startedStateHandler() {
-    return new StartedStateHandler(this.kafkaTemplate, this.customerGateway);
+  public SagaState startedStateHandler(UpdateOrderUseCase updateOrderUseCase) {
+    return new StartedStateHandler(this.kafkaTemplate, this.customerGateway, updateOrderUseCase);
   }
 
   @Bean

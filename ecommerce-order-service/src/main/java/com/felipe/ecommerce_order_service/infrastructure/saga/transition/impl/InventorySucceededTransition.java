@@ -1,7 +1,10 @@
 package com.felipe.ecommerce_order_service.infrastructure.saga.transition.impl;
 
 import com.felipe.ecommerce_order_service.core.application.dtos.CustomerProfileDTO;
+import com.felipe.ecommerce_order_service.core.application.dtos.UpdateOrderDTO;
+import com.felipe.ecommerce_order_service.core.application.dtos.UpdateProductDTO;
 import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
+import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.SagaStatus;
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.SagaTransition;
@@ -20,13 +23,17 @@ import java.util.function.Consumer;
 public final class InventorySucceededTransition extends SagaTransition {
   private final InventoryTransactionReply reply;
   private final CustomerGateway customerGateway;
+  private final UpdateOrderUseCase updateOrderUseCase;
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private static final Logger logger = LoggerFactory.getLogger(InventorySucceededTransition.class);
 
-  public InventorySucceededTransition(InventoryTransactionReply reply, CustomerGateway customerGateway,
+  public InventorySucceededTransition(InventoryTransactionReply reply,
+                                      CustomerGateway customerGateway,
+                                      UpdateOrderUseCase updateOrderUseCase,
                                       KafkaTemplate<String, Object> kafkaTemplate) {
     this.reply = reply;
     this.customerGateway = customerGateway;
+    this.updateOrderUseCase = updateOrderUseCase;
     this.kafkaTemplate = kafkaTemplate;
   }
 
@@ -54,10 +61,14 @@ public final class InventorySucceededTransition extends SagaTransition {
           productData.getDiscountValue()
         ))
         .toList();
+      String orderAmount = calculateOrderAmount(products);
+      // Updating order data
+      UpdateOrderDTO updateOrderDTO = convertToUpdateOrderDTO(this.reply, orderAmount);
+      this.updateOrderUseCase.execute(this.reply.getOrderId(), updateOrderDTO);
 
       PaymentTransactionCreateCommand paymentCommand = PaymentTransactionCreateCommand.builder(reply.getSagaId(), transactionId)
         .withOrderId(this.reply.getOrderId())
-        .withOrderAmount(calculateOrderAmount(products))
+        .withOrderAmount(orderAmount)
         .withProducts(products)
         .withCustomer(new PaymentTransactionCreateCommand.CustomerData(
           UUID.fromString(authCustomer.id()),
@@ -97,5 +108,21 @@ public final class InventorySucceededTransition extends SagaTransition {
       orderAmount = orderAmount.add(price);
     }
     return orderAmount.toString();
+  }
+
+  private UpdateOrderDTO convertToUpdateOrderDTO(InventoryTransactionReply reply, String orderAmount) {
+    List<UpdateProductDTO> productsDTO = reply.getProducts()
+      .stream()
+      .map(product -> {
+        BigDecimal finalPrice = PricingCalculator.calculateFinalPrice(
+          product.getDiscountType(),
+          product.getUnitPrice(),
+          product.getDiscountValue(),
+          product.getQuantity()
+        );
+        return new UpdateProductDTO(product.getId(), product.getName(), finalPrice);
+      })
+      .toList();
+    return new UpdateOrderDTO(null, null, null, orderAmount, productsDTO);
   }
 }

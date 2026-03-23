@@ -1,6 +1,7 @@
 package com.felipe.ecommerce_order_service.infrastructure.saga.state.impl;
 
 import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
+import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
 import com.felipe.ecommerce_order_service.infrastructure.exceptions.UnhandledSagaParticipantException;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.SagaStatus;
@@ -15,10 +16,13 @@ import org.springframework.kafka.core.KafkaTemplate;
 public class StartedStateHandler implements SagaState {
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private final CustomerGateway customerGateway;
+  private final UpdateOrderUseCase updateOrderUseCase;
 
-  public StartedStateHandler(KafkaTemplate<String, Object> kafkaTemplate, CustomerGateway customerGateway) {
+  public StartedStateHandler(KafkaTemplate<String, Object> kafkaTemplate, CustomerGateway customerGateway,
+                             UpdateOrderUseCase updateOrderUseCase) {
     this.kafkaTemplate = kafkaTemplate;
     this.customerGateway = customerGateway;
+    this.updateOrderUseCase = updateOrderUseCase;
   }
 
   @Override
@@ -37,7 +41,7 @@ public class StartedStateHandler implements SagaState {
   private SagaTransition handleInventoryStarted(ReplyTransaction reply) {
     InventoryTransactionReply inventoryReply = (InventoryTransactionReply) reply;
     return switch (reply.getStatus()) {
-      case SUCCESS -> new InventorySucceededTransition(inventoryReply, this.customerGateway, this.kafkaTemplate);
+      case SUCCESS -> new InventorySucceededTransition(inventoryReply, this.customerGateway, this.updateOrderUseCase, this.kafkaTemplate);
       case FAILURE ->  new InventoryFailedTransition(inventoryReply, this.kafkaTemplate);
     };
   }
