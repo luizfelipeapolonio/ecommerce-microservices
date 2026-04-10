@@ -48,6 +48,8 @@ public class OrderGatewayImpl implements OrderGateway {
     OrderEntity newOrder = new OrderEntity()
       .customerId(customerId)
       .status(OrderStatus.PENDING)
+      .withCoupon(orderDTO.couponCode() != null)
+      .couponCode(orderDTO.couponCode() == null ?  null : orderDTO.couponCode())
       .orderPrice(new BigDecimal("0.00"));
 
     orderDTO.products().forEach(product ->
@@ -64,7 +66,8 @@ public class OrderGatewayImpl implements OrderGateway {
       .orderId(savedOrder.getId())
       .status(SagaStatus.STARTED)
       .addParticipant(new OrderSagaParticipant(ReplyTransaction.SagaParticipant.INVENTORY))
-      .addParticipant(new OrderSagaParticipant(ReplyTransaction.SagaParticipant.PAYMENT));
+      .addParticipant(new OrderSagaParticipant(ReplyTransaction.SagaParticipant.PAYMENT))
+      .addParticipant(new OrderSagaParticipant(ReplyTransaction.SagaParticipant.DISCOUNT));
 
     OrderSaga createdSaga = this.orderSagaRepository.save(newSaga);
     UUID transactionId = UUID.randomUUID();
@@ -79,6 +82,11 @@ public class OrderGatewayImpl implements OrderGateway {
   @Override
   public Optional<Order> findOrderById(UUID orderId) {
     return this.orderRepository.findById(orderId).map(this.orderEntityMapper::toDomain);
+  }
+
+  @Override
+  public Optional<Order> findOrderByIdWithItems(UUID orderId) {
+    return this.orderRepository.findByIdWithItems(orderId).map(this.orderEntityMapper::toDomain);
   }
 
   @Override
@@ -101,7 +109,8 @@ public class OrderGatewayImpl implements OrderGateway {
 
   private void postInventoryTransactionCommand(UUID sagaId, UUID transactionId, OrderEntity order) {
     List<InventoryTransactionCreateCommand.ProductData> products = inventoryTransactionProducts(order);
-    InventoryTransactionCreateCommand inventoryCommand = InventoryTransactionCreateCommand.startTransaction(sagaId, transactionId)
+    InventoryTransactionCreateCommand inventoryCommand = InventoryTransactionCreateCommand
+      .startTransaction(sagaId, transactionId)
       .withOrderId(order.getId())
       .withProducts(products)
       .build();

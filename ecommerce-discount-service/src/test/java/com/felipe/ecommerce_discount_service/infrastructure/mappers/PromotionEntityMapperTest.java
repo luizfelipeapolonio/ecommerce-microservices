@@ -2,8 +2,8 @@ package com.felipe.ecommerce_discount_service.infrastructure.mappers;
 
 import com.felipe.ecommerce_discount_service.core.domain.Promotion;
 import com.felipe.ecommerce_discount_service.core.domain.PromotionAppliesTo;
-import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionAppliesToEntity;
-import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionEntity;
+import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionAppliesToEntity;
+import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionEntity;
 import com.felipe.ecommerce_discount_service.testutils.DataMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

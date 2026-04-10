@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_discount_service.core.application.dtos.promotion;
+package com.felipe.ecommerce_discount_service.core.application.dtos;
 
 public interface EndDateDTO {
   int dayOfMonth();

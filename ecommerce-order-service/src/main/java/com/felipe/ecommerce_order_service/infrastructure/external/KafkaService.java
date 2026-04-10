@@ -3,6 +3,7 @@ package com.felipe.ecommerce_order_service.infrastructure.external;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
 import com.felipe.ecommerce_order_service.infrastructure.saga.OrderSagaService;
 import com.felipe.ecommerce_order_service.infrastructure.saga.SagaOrchestrator;
+import com.felipe.kafka.saga.replies.DiscountTransactionReply;
 import com.felipe.kafka.saga.replies.InventoryTransactionReply;
 import com.felipe.kafka.saga.replies.PaymentTransactionReply;
 import jakarta.transaction.Transactional;
@@ -47,6 +48,24 @@ public class KafkaService {
     logger.info(
       "\nReceived reply:\ncheckoutUrl: {}\nstatus: {}\nparticipant: {}\ncommand: {}\nfailureCode: {}\nfailureMessage: {}\ntransactionId: {}\norderId: {}",
       transactionReply.getCheckoutUrl(),
+      transactionReply.getStatus(),
+      transactionReply.getParticipant(),
+      transactionReply.getCommand(),
+      transactionReply.getFailureCode(),
+      transactionReply.getFailureMessage(),
+      transactionReply.getTransactionId(),
+      transactionReply.getOrderId()
+    );
+    OrderSaga saga = this.orderSagaService.findOrderSagaById(transactionReply.getSagaId());
+    this.sagaOrchestrator.handle(saga, transactionReply);
+  }
+
+  @Transactional
+  @KafkaHandler
+  void discountTransactionReplies(DiscountTransactionReply transactionReply) {
+    logger.info(
+      "\nReceived reply:\ncouponCode: {}\nstatus: {}\nparticipant: {}\ncommand: {}\nfailureCode: {}\nfailureMessage: {}\ntransactionId: {}\norderId: {}",
+      transactionReply.getCouponCode(),
       transactionReply.getStatus(),
       transactionReply.getParticipant(),
       transactionReply.getCommand(),

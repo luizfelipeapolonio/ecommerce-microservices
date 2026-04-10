@@ -1,5 +1,7 @@
 package com.felipe.ecommerce_discount_service.core.application.dtos.promotion;
 
+import com.felipe.ecommerce_discount_service.core.application.dtos.EndDateDTO;
+
 import java.util.List;
 
 public interface CreatePromotionDTO {

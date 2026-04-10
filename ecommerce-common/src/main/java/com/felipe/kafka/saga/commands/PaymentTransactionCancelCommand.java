@@ -21,7 +21,7 @@ public final class PaymentTransactionCancelCommand extends BaseSagaTransaction {
     return this.orderId;
   }
 
-  public static Builder builder(UUID sagaId, UUID transactionId) {
+  public static Builder startTransaction(UUID sagaId, UUID transactionId) {
     return new Builder(sagaId, transactionId);
   }
 

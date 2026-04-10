@@ -24,7 +24,8 @@ public abstract class ReplyTransaction extends BaseSagaTransaction {
 
   public enum SagaParticipant {
     INVENTORY,
-    PAYMENT
+    PAYMENT,
+    DISCOUNT
   }
 
   public ReplyTransaction(UUID sagaId,

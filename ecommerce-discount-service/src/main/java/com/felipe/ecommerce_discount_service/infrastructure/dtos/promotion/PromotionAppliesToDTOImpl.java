@@ -1,7 +1,7 @@
 package com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion;
 
 import com.felipe.ecommerce_discount_service.core.application.dtos.promotion.PromotionAppliesToDTO;
-import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionAppliesToEntity;
+import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionAppliesToEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

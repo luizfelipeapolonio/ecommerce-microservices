@@ -2,7 +2,9 @@ package com.felipe.ecommerce_order_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_order_service.core.application.exceptions.CustomerAddressNotDefinedException;
 import com.felipe.ecommerce_order_service.core.application.exceptions.OrderNotFoundException;
+import com.felipe.ecommerce_order_service.infrastructure.exceptions.CouponServiceException;
 import com.felipe.ecommerce_order_service.infrastructure.exceptions.CustomerServiceException;
+import com.felipe.ecommerce_order_service.infrastructure.exceptions.InvalidCouponException;
 import com.felipe.ecommerce_order_service.infrastructure.exceptions.SagaNotFoundException;
 import com.felipe.ecommerce_order_service.infrastructure.exceptions.UnhandledSagaParticipantException;
 import com.felipe.response.ResponsePayload;
@@ -56,6 +58,26 @@ public class ExceptionControllerAdvice {
     return new ResponsePayload.Builder<Void>()
       .type(ResponseType.ERROR)
       .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message(ex.getMessage())
+      .build();
+  }
+
+  @ExceptionHandler(CouponServiceException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponsePayload<Void> handleCouponServiceException(CouponServiceException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.INTERNAL_SERVER_ERROR)
+      .message(ex.getMessage())
+      .build();
+  }
+
+  @ExceptionHandler(InvalidCouponException.class)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  public ResponsePayload<Void> handleInvalidCouponException(InvalidCouponException ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.UNPROCESSABLE_ENTITY)
       .message(ex.getMessage())
       .build();
   }

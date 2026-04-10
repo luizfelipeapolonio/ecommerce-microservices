@@ -251,6 +251,10 @@ public class PaymentService {
         discountAmount = discountAmount.add(discount);
       }
     }
+    if (paymentCommand.getCoupon() != null) {
+      String couponDiscountAmount = paymentCommand.getCoupon().discountAmount();
+      discountAmount = discountAmount.add(new BigDecimal(couponDiscountAmount));
+    }
     return discountAmount.toPlainString().equals(discountInitialValue)
       ? Optional.empty()
       : Optional.of(discountAmount.toPlainString());
@@ -263,7 +267,11 @@ public class PaymentService {
       CouponCreateParams params = CouponCreateParams.builder()
         .setDuration(CouponCreateParams.Duration.ONCE)
         .setCurrency("brl")
-        .setName("Desconto total na compra")
+        .setName(
+          paymentCommand.getCoupon() == null
+            ? "Desconto na compra"
+            : "Desconto na compra - Cupom '%s'".formatted(paymentCommand.getCoupon().code())
+        )
         .setAmountOff(formatBigDecimalStringToValidLongValue(discountAmount.get()))
         .build();
 

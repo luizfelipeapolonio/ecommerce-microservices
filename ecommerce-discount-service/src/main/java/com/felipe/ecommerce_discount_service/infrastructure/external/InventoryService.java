@@ -2,7 +2,7 @@ package com.felipe.ecommerce_discount_service.infrastructure.external;
 
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.PromotionAppliesToDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.exceptions.InventoryServiceException;
-import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionEntity;
+import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionEntity;
 import com.felipe.response.ResponsePayload;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;

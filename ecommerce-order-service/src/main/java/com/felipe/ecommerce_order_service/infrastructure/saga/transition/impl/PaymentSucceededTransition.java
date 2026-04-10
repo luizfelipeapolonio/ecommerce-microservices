@@ -34,7 +34,7 @@ public final class PaymentSucceededTransition extends SagaTransition {
   @Override
   protected TriggerAction action() {
     return () -> {
-      UpdateOrderDTO updateDTO = new UpdateOrderDTO(null, this.reply.getCheckoutUrl(), null, null, List.of());
+      UpdateOrderDTO updateDTO = new UpdateOrderDTO(null, this.reply.getCheckoutUrl(), null, this.reply.getOrderAmount(), List.of());
       Order updatedOrder = this.updateOrderUseCase.execute(this.reply.getOrderId(), updateDTO);
       logger.info("Updated order -> checkoutUrl: {}", updatedOrder.getCheckoutUrl());
     };

@@ -32,8 +32,8 @@ public class OrderEntity {
   @Column(name = "with_coupon", nullable = false)
   private boolean withCoupon = false;
 
-  @Column(name = "coupon_id")
-  private UUID couponId;
+  @Column(name = "coupon_code", length = 150)
+  private String couponCode;
 
   @Column(name = "checkout_url")
   private String checkoutUrl;
@@ -100,16 +100,16 @@ public class OrderEntity {
     return this;
   }
 
-  public UUID getCouponId() {
-    return this.couponId;
+  public String getCouponCode() {
+    return this.couponCode;
   }
 
-  public void setCouponId(UUID couponId) {
-    this.couponId = couponId;
+  public void setCouponCode(String couponCode) {
+    this.couponCode = couponCode;
   }
 
-  public OrderEntity couponId(UUID couponId) {
-    this.couponId = couponId;
+  public OrderEntity couponCode(String couponCode) {
+    this.couponCode = couponCode;
     return this;
   }
 

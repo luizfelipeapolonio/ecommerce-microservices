@@ -29,6 +29,9 @@ public class OrderSagaParticipant {
   @Column(nullable = false)
   private SagaParticipantStatus status = SagaParticipantStatus.PENDING;
 
+  @Column(columnDefinition = "TEXT")
+  private String details;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "saga_id", nullable = false)
   private OrderSaga saga;
@@ -62,6 +65,14 @@ public class OrderSagaParticipant {
 
   public void setStatus(SagaParticipantStatus status) {
     this.status = status;
+  }
+
+  public String getDetails() {
+    return this.details;
+  }
+
+  public void setDetails(String details) {
+    this.details = details;
   }
 
   public OrderSaga getSaga() {

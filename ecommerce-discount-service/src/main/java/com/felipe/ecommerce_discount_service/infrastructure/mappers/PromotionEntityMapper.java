@@ -5,8 +5,8 @@ import com.felipe.ecommerce_discount_service.core.domain.Promotion;
 import com.felipe.ecommerce_discount_service.core.domain.enums.PromotionAppliesTarget;
 import com.felipe.ecommerce_discount_service.core.domain.PromotionAppliesTo;
 import com.felipe.ecommerce_discount_service.core.domain.enums.PromotionScope;
-import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionAppliesToEntity;
-import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionEntity;
+import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionAppliesToEntity;
+import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

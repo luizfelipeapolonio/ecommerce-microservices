@@ -45,7 +45,8 @@ public final class PaymentCompletedTransition extends SagaTransition {
       logger.info("Updated order -> invoiceUrl: {}", updatedOrder.getInvoiceUrl());
       UUID transactionId = UUID.randomUUID();
 
-      InventoryTransactionCommitCommand inventoryCommand = InventoryTransactionCommitCommand.builder(this.reply.getSagaId(), transactionId)
+      InventoryTransactionCommitCommand inventoryCommand = InventoryTransactionCommitCommand
+        .startTransaction(this.reply.getSagaId(), transactionId)
         .withOrderId(this.reply.getOrderId())
         .build();
 

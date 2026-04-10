@@ -1,11 +1,14 @@
 package com.felipe.ecommerce_discount_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_discount_service.core.application.exceptions.DataNotFoundException;
+import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidCouponException;
 import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidDiscountTypeException;
 import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidEndDateException;
 import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidPromotionAppliesTargetException;
 import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidPromotionScopeException;
+import com.felipe.ecommerce_discount_service.core.application.exceptions.MinimumPriceException;
 import com.felipe.ecommerce_discount_service.infrastructure.exceptions.CreatePromotionDTOValidationException;
+import com.felipe.ecommerce_discount_service.infrastructure.exceptions.InvalidRequestParamException;
 import com.felipe.ecommerce_discount_service.infrastructure.exceptions.InventoryServiceException;
 import com.felipe.response.CustomValidationErrors;
 import com.felipe.response.ResponsePayload;
@@ -26,7 +29,7 @@ import java.util.List;
 
 @RestControllerAdvice
 public class ExceptionControllerAdvice {
-  private final Logger logger = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
+  private static final Logger logger = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -42,6 +45,32 @@ public class ExceptionControllerAdvice {
       .code(HttpStatus.UNPROCESSABLE_ENTITY)
       .message("Erros de validação")
       .payload(errors)
+      .build();
+  }
+
+  @ExceptionHandler(InvalidRequestParamException.class)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  public ResponsePayload<CustomValidationErrors> handleInvalidRequestParamException(InvalidRequestParamException ex) {
+    CustomValidationErrors error = new CustomValidationErrors();
+    error.setField(ex.getParamName());
+    error.setCause(ex.getMessage());
+    error.setRejectedValue(ex.getRejectedValue());
+
+    return new ResponsePayload.Builder<CustomValidationErrors>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.UNPROCESSABLE_ENTITY)
+      .message("Erro de validação")
+      .payload(error)
+      .build();
+  }
+
+  @ExceptionHandler({InvalidCouponException.class, MinimumPriceException.class})
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  public ResponsePayload<Void> handleCouponExceptions(Exception ex) {
+    return new ResponsePayload.Builder<Void>()
+      .type(ResponseType.ERROR)
+      .code(HttpStatus.UNPROCESSABLE_ENTITY)
+      .message(ex.getMessage())
       .build();
   }
 
@@ -113,7 +142,7 @@ public class ExceptionControllerAdvice {
   @ExceptionHandler(KafkaProducerException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ResponsePayload<Void> handleKafkaProducerException(KafkaProducerException ex) {
-    this.logger.error(
+    logger.error(
       "Message: {} \nFailed on topic: {}\nWith the value: {}",
       ex.getMessage(),
       ex.getFailedProducerRecord().topic(),
@@ -160,7 +189,7 @@ public class ExceptionControllerAdvice {
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ResponsePayload<Void> handleUncaughtException(Exception ex) {
-    this.logger.error("Uncaught exception handler: {}", ex.getMessage());
+    logger.error("Uncaught exception handler: {}", ex.getMessage());
     return new ResponsePayload.Builder<Void>()
       .type(ResponseType.ERROR)
       .code(HttpStatus.INTERNAL_SERVER_ERROR)

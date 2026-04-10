@@ -54,6 +54,7 @@ public class KafkaService {
     try {
       String checkoutUrl = this.paymentService.processPayment(paymentCommand);
       replyBuilder.withCheckoutUrl(checkoutUrl)
+        .withOrderAmount(paymentCommand.getOrderAmount())
         .withFailureCode(ReplyTransaction.FailureCode.NO_APPLY)
         .withFailureMessage(null)
         .success();

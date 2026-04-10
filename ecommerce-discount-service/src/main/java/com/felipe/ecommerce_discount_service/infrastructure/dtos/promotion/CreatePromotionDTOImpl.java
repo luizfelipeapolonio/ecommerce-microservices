@@ -1,6 +1,7 @@
 package com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion;
 
 import com.felipe.ecommerce_discount_service.core.application.dtos.promotion.CreatePromotionDTO;
+import com.felipe.ecommerce_discount_service.infrastructure.dtos.EndDateDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.exceptions.CreatePromotionDTOValidationException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;

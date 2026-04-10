@@ -5,9 +5,12 @@ import com.felipe.ecommerce_order_service.core.application.dtos.UpdateOrderDTO;
 import com.felipe.ecommerce_order_service.core.application.dtos.UpdateProductDTO;
 import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
 import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
+import com.felipe.ecommerce_order_service.core.domain.Order;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.SagaStatus;
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.SagaTransition;
+import com.felipe.ecommerce_order_service.infrastructure.saga.utils.InventoryTransitionDataHolder;
+import com.felipe.kafka.saga.commands.DiscountTransactionCreateCommand;
 import com.felipe.kafka.saga.commands.PaymentTransactionCreateCommand;
 import com.felipe.kafka.saga.replies.InventoryTransactionReply;
 import com.felipe.utils.product.PricingCalculator;
@@ -24,16 +27,19 @@ public final class InventorySucceededTransition extends SagaTransition {
   private final InventoryTransactionReply reply;
   private final CustomerGateway customerGateway;
   private final UpdateOrderUseCase updateOrderUseCase;
+  private final InventoryTransitionDataHolder inventoryTransitionDataHolder;
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private static final Logger logger = LoggerFactory.getLogger(InventorySucceededTransition.class);
 
   public InventorySucceededTransition(InventoryTransactionReply reply,
                                       CustomerGateway customerGateway,
                                       UpdateOrderUseCase updateOrderUseCase,
+                                      InventoryTransitionDataHolder inventoryTransitionDataHolder,
                                       KafkaTemplate<String, Object> kafkaTemplate) {
     this.reply = reply;
     this.customerGateway = customerGateway;
     this.updateOrderUseCase = updateOrderUseCase;
+    this.inventoryTransitionDataHolder = inventoryTransitionDataHolder;
     this.kafkaTemplate = kafkaTemplate;
   }
 
@@ -51,6 +57,7 @@ public final class InventorySucceededTransition extends SagaTransition {
       CustomerProfileDTO authCustomer = this.customerGateway.getCurrentAuthCustomer();
       logger.info("Authenticated customer -> id: {} - email: {}", authCustomer.id(), authCustomer.email());
       UUID transactionId = UUID.randomUUID();
+      UUID authCustomerId = UUID.fromString(authCustomer.id());
       List<PaymentTransactionCreateCommand.ProductData> products = this.reply.getProducts()
         .stream()
         .map(productData -> new PaymentTransactionCreateCommand.ProductData(
@@ -64,35 +71,61 @@ public final class InventorySucceededTransition extends SagaTransition {
       String orderAmount = calculateOrderAmount(products);
       // Updating order data
       UpdateOrderDTO updateOrderDTO = convertToUpdateOrderDTO(this.reply, orderAmount);
-      this.updateOrderUseCase.execute(this.reply.getOrderId(), updateOrderDTO);
+      Order updatedOrder = this.updateOrderUseCase.execute(this.reply.getOrderId(), updateOrderDTO);
 
-      PaymentTransactionCreateCommand paymentCommand = PaymentTransactionCreateCommand.builder(reply.getSagaId(), transactionId)
-        .withOrderId(this.reply.getOrderId())
-        .withOrderAmount(orderAmount)
-        .withProducts(products)
-        .withCustomer(new PaymentTransactionCreateCommand.CustomerData(
-          UUID.fromString(authCustomer.id()),
-          authCustomer.username(),
-          authCustomer.email(),
-          new PaymentTransactionCreateCommand.CustomerAddress(
-            authCustomer.address().street(),
-            authCustomer.address().number(),
-            authCustomer.address().complement(),
-            authCustomer.address().district(),
-            authCustomer.address().zipcode(),
-            authCustomer.address().city(),
-            authCustomer.address().state(),
-            authCustomer.address().country()
-          )
-        ))
-        .build();
+      // If any product already has a discount, there's no need to trigger the
+      // discount service to apply the coupon
+      boolean isAllProductsWithNoDiscount = products.stream()
+        .allMatch(product -> product.discountType() == null);
 
-      this.kafkaTemplate.send("order.order_transaction.payment.commands", paymentCommand)
-        .whenComplete((result, exception) -> {
-          if (exception == null) {
-            logger.info("Create payment posted on topic \"{}\" successfully", result.getRecordMetadata().topic());
-          }
-        });
+      if (updatedOrder.isWithCoupon() && isAllProductsWithNoDiscount) {
+        // Setting the products in the helper context
+        this.inventoryTransitionDataHolder.setProducts(this.reply.getProducts());
+
+        DiscountTransactionCreateCommand discountCommand = DiscountTransactionCreateCommand
+          .startTransaction(this.reply.getSagaId(), transactionId)
+          .withCouponCode(updatedOrder.getCouponCode())
+          .withOrderAmount(orderAmount)
+          .withCustomerId(authCustomerId)
+          .withOrderId(this.reply.getOrderId())
+          .build();
+
+        this.kafkaTemplate.send("order.order_transaction.discount.commands", discountCommand)
+          .whenComplete((result, exception) -> {
+            if (exception == null) {
+              logger.info("Apply coupon command posted on topic \"{}\" successfully", result.getRecordMetadata().topic());
+            }
+          });
+      } else {
+        PaymentTransactionCreateCommand paymentCommand = PaymentTransactionCreateCommand
+          .startTransaction(this.reply.getSagaId(), transactionId)
+          .withOrderId(this.reply.getOrderId())
+          .withOrderAmount(orderAmount)
+          .withProducts(products)
+          .withCustomer(new PaymentTransactionCreateCommand.CustomerData(
+            authCustomerId,
+            authCustomer.username(),
+            authCustomer.email(),
+            new PaymentTransactionCreateCommand.CustomerAddress(
+              authCustomer.address().street(),
+              authCustomer.address().number(),
+              authCustomer.address().complement(),
+              authCustomer.address().district(),
+              authCustomer.address().zipcode(),
+              authCustomer.address().city(),
+              authCustomer.address().state(),
+              authCustomer.address().country()
+            )
+          ))
+          .build();
+
+        this.kafkaTemplate.send("order.order_transaction.payment.commands", paymentCommand)
+          .whenComplete((result, exception) -> {
+            if (exception == null) {
+              logger.info("Create payment posted on topic \"{}\" successfully", result.getRecordMetadata().topic());
+            }
+          });
+      }
     };
   }
 

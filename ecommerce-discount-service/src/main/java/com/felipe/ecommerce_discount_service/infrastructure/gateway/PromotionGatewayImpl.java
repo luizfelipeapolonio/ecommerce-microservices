@@ -6,7 +6,7 @@ import com.felipe.ecommerce_discount_service.core.domain.enums.DiscountType;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.PromotionAppliesToDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.external.InventoryService;
 import com.felipe.ecommerce_discount_service.infrastructure.mappers.PromotionEntityMapper;
-import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionEntity;
+import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionEntity;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.repositories.PromotionRepository;
 import com.felipe.ecommerce_discount_service.infrastructure.services.PromotionSchedulerService;
 import com.felipe.kafka.ExpiredPromotionKafkaDTO;
@@ -27,7 +27,7 @@ public class PromotionGatewayImpl implements PromotionGateway {
   private final PromotionEntityMapper promotionEntityMapper;
   private final InventoryService inventoryService;
   private final PromotionSchedulerService promotionSchedulerService;
-  private final KafkaTemplate<String, ExpiredPromotionKafkaDTO> kafkaTemplate;
+  private final KafkaTemplate<String, Object> kafkaTemplate;
 
   private final Logger logger = LoggerFactory.getLogger(PromotionGatewayImpl.class);
 
@@ -35,7 +35,7 @@ public class PromotionGatewayImpl implements PromotionGateway {
                               PromotionEntityMapper promotionEntityMapper,
                               InventoryService inventoryService,
                               PromotionSchedulerService promotionSchedulerService,
-                              KafkaTemplate<String, ExpiredPromotionKafkaDTO> kafkaTemplate) {
+                              KafkaTemplate<String, Object> kafkaTemplate) {
     this.promotionRepository = promotionRepository;
     this.promotionEntityMapper = promotionEntityMapper;
     this.inventoryService = inventoryService;

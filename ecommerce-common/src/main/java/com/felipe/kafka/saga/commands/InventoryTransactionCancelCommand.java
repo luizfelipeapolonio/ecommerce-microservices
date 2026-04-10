@@ -28,7 +28,7 @@ public final class InventoryTransactionCancelCommand extends BaseSagaTransaction
     return this.failureCode;
   }
 
-  public static Builder builder(UUID sagaId, UUID transactionId) {
+  public static Builder startTransaction(UUID sagaId, UUID transactionId) {
     return new Builder(sagaId, transactionId);
   }
 

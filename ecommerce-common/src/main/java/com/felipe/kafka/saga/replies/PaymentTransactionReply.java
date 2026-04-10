@@ -9,6 +9,7 @@ import java.util.UUID;
 public final class PaymentTransactionReply extends ReplyTransaction {
   private final String checkoutUrl;
   private final String invoiceUrl;
+  private final String orderAmount;
 
   private PaymentTransactionReply(Builder builder) {
     super(
@@ -23,6 +24,7 @@ public final class PaymentTransactionReply extends ReplyTransaction {
     );
     this.checkoutUrl = builder.checkoutUrl;
     this.invoiceUrl = builder.invoiceUrl;
+    this.orderAmount = builder.orderAmount;
   }
 
   public String getCheckoutUrl() {
@@ -33,6 +35,10 @@ public final class PaymentTransactionReply extends ReplyTransaction {
     return this.invoiceUrl;
   }
 
+  public String getOrderAmount() {
+    return this.orderAmount;
+  }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -41,6 +47,7 @@ public final class PaymentTransactionReply extends ReplyTransaction {
   public static class Builder {
     private String checkoutUrl;
     private String invoiceUrl;
+    private String orderAmount;
     private UUID sagaId;
     private UUID transactionId;
     private UUID orderId;
@@ -60,6 +67,11 @@ public final class PaymentTransactionReply extends ReplyTransaction {
 
     public Builder withInvoiceUrl(String invoiceUrl) {
       this.invoiceUrl = invoiceUrl;
+      return this;
+    }
+
+    public Builder withOrderAmount(String orderAmount) {
+      this.orderAmount = orderAmount;
       return this;
     }
 

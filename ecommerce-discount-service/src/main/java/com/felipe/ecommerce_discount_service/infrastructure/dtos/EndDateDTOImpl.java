@@ -1,6 +1,6 @@
-package com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion;
+package com.felipe.ecommerce_discount_service.infrastructure.dtos;
 
-import com.felipe.ecommerce_discount_service.core.application.dtos.promotion.EndDateDTO;
+import com.felipe.ecommerce_discount_service.core.application.dtos.EndDateDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Range;

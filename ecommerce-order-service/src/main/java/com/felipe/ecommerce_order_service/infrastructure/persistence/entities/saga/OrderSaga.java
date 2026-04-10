@@ -1,6 +1,7 @@
 package com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga;
 
 import com.felipe.kafka.saga.replies.ReplyTransaction;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -161,21 +162,30 @@ public class OrderSaga {
   }
 
   public void markParticipantSuccess(ReplyTransaction.SagaParticipant participantName) {
-    mutateParticipant(participantName, SagaParticipantStatus.SUCCESS);
+    mutateParticipant(participantName, SagaParticipantStatus.SUCCESS, null);
   }
 
   public void markParticipantFailed(ReplyTransaction.SagaParticipant participantName) {
-    mutateParticipant(participantName, SagaParticipantStatus.FAILURE);
+    mutateParticipant(participantName, SagaParticipantStatus.FAILURE, null);
   }
 
   public void markParticipantProcessing(ReplyTransaction.SagaParticipant participantName) {
-    mutateParticipant(participantName, SagaParticipantStatus.PROCESSING);
+    mutateParticipant(participantName, SagaParticipantStatus.PROCESSING, null);
   }
 
-  private void mutateParticipant(ReplyTransaction.SagaParticipant participantName, SagaParticipantStatus status) {
+  public void setParticipantDetails(ReplyTransaction.SagaParticipant participantName, String details) {
+    mutateParticipant(participantName, null, details);
+  }
+
+  private void mutateParticipant(ReplyTransaction.SagaParticipant participantName, @Nullable SagaParticipantStatus status, @Nullable String details) {
     for (OrderSagaParticipant participant : this.participants) {
       if (participant.getName() == participantName) {
-        participant.setStatus(status);
+        if (status != null) {
+          participant.setStatus(status);
+        }
+        if (details != null) {
+          participant.setDetails(details);
+        }
         break;
       }
     }

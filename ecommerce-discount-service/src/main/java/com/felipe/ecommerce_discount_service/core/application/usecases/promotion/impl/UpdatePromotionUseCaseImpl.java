@@ -1,6 +1,6 @@
 package com.felipe.ecommerce_discount_service.core.application.usecases.promotion.impl;
 
-import com.felipe.ecommerce_discount_service.core.application.dtos.promotion.EndDateDTO;
+import com.felipe.ecommerce_discount_service.core.application.dtos.EndDateDTO;
 import com.felipe.ecommerce_discount_service.core.application.dtos.promotion.UpdatePromotionDTO;
 import com.felipe.ecommerce_discount_service.core.application.exceptions.DataNotFoundException;
 import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidEndDateException;

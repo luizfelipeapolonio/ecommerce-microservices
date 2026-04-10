@@ -1,7 +1,7 @@
 package com.felipe.ecommerce_discount_service.core.application.usecases.promotion.impl;
 
 import com.felipe.ecommerce_discount_service.core.application.dtos.promotion.CreatePromotionDTO;
-import com.felipe.ecommerce_discount_service.core.application.dtos.promotion.EndDateDTO;
+import com.felipe.ecommerce_discount_service.core.application.dtos.EndDateDTO;
 import com.felipe.ecommerce_discount_service.core.application.dtos.promotion.PromotionAppliesToDTO;
 import com.felipe.ecommerce_discount_service.core.application.exceptions.InvalidEndDateException;
 import com.felipe.ecommerce_discount_service.core.application.gateway.PromotionGateway;

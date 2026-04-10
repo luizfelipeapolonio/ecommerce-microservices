@@ -15,7 +15,7 @@ public class Order {
   private UUID id;
   private BigDecimal orderPrice;
   private boolean withCoupon;
-  private UUID couponId;
+  private String couponCode;
   private String checkoutUrl;
   private String invoiceUrl;
   private UUID customerId;
@@ -66,16 +66,16 @@ public class Order {
     return this;
   }
 
-  public UUID getCouponId() {
-    return this.couponId;
+  public String getCouponCode() {
+    return this.couponCode;
   }
 
-  public void setCouponId(UUID couponId) {
-    this.couponId = couponId;
+  public void setCouponCode(String couponCode) {
+    this.couponCode = couponCode;
   }
 
-  public Order couponId(UUID couponId) {
-    this.couponId = couponId;
+  public Order couponCode(String couponCode) {
+    this.couponCode = couponCode;
     return this;
   }
 

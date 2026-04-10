@@ -48,6 +48,7 @@ public class KafkaConsumerConfiguration {
     String[] types = {
       "inventoryTransactionReply:com.felipe.kafka.saga.replies.InventoryTransactionReply",
       "paymentTransactionReply:com.felipe.kafka.saga.replies.PaymentTransactionReply",
+      "discountTransactionReply:com.felipe.kafka.saga.replies.DiscountTransactionReply"
     };
     return String.join(", ", types);
   }

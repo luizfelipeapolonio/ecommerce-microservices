@@ -6,6 +6,7 @@ import com.felipe.ecommerce_order_service.infrastructure.exceptions.CustomerServ
 import com.felipe.response.ResponsePayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,12 @@ import static org.springframework.security.oauth2.client.web.client.RequestAttri
 
 @Service
 public class CustomerService implements CustomerGateway {
+
+  @Value("${services.customer-service.url}")
+  private String customerServiceUrl;
   private final RestClient restClient;
   private CustomerProfileDTO currentAuthCustomer;
   private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
-  private static final String CUSTOMER_SERVICE_URI = "http://localhost:8081/api/v1/customers";
   private static final String CLIENT_REGISTRATION_ID = "ecommerce-order-service";
 
   public CustomerService(RestClient restClient) {
@@ -33,7 +36,7 @@ public class CustomerService implements CustomerGateway {
     try {
       final ResponsePayload<CustomerProfileDTO> response = this.restClient
         .get()
-        .uri(URI.create(CUSTOMER_SERVICE_URI + "/profile"))
+        .uri(URI.create(this.customerServiceUrl + "/profile"))
         .attributes(clientRegistrationId(CLIENT_REGISTRATION_ID))
         .header("authCustomerEmail", customerEmail)
         .accept(MediaType.APPLICATION_JSON)

@@ -68,3 +68,7 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /order-service/swagger-ui.html
+
+services:
+  customer-service.url: http://localhost:8081/api/v1/customers
+  discount-service.url: http://localhost:8083/api/v1/coupons

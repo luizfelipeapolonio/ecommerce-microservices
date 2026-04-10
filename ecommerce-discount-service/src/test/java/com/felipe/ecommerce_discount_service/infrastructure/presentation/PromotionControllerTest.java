@@ -12,7 +12,7 @@ import com.felipe.ecommerce_discount_service.core.application.usecases.promotion
 import com.felipe.ecommerce_discount_service.core.domain.Promotion;
 import com.felipe.ecommerce_discount_service.core.domain.PromotionAppliesTo;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.CreatePromotionDTOImpl;
-import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.EndDateDTOImpl;
+import com.felipe.ecommerce_discount_service.infrastructure.dtos.EndDateDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.PromotionAppliesToDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.PromotionResponseDTO;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.promotion.UpdatePromotionDTOImpl;

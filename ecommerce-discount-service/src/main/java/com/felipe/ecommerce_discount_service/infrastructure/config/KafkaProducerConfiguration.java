@@ -1,6 +1,5 @@
 package com.felipe.ecommerce_discount_service.infrastructure.config;
 
-import com.felipe.kafka.ExpiredPromotionKafkaDTO;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -21,24 +20,33 @@ public class KafkaProducerConfiguration {
 
   @Value("${spring.kafka.bootstrap-servers}")
   private String kafkaServer;
+  private static final String SERIALIZER_TYPE_MAPPINGS = typeMappings();
 
   @Bean
-  public ProducerFactory<String, ExpiredPromotionKafkaDTO> producerFactory() {
+  public ProducerFactory<String, Object> producerFactory() {
     final Map<String, Object> configs = new HashMap<>();
     configs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.kafkaServer);
     configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-    configs.put(JsonSerializer.TYPE_MAPPINGS, "expiredPromotionKafkaDTO:com.felipe.kafka.ExpiredPromotionKafkaDTO");
+    configs.put(JsonSerializer.TYPE_MAPPINGS, SERIALIZER_TYPE_MAPPINGS);
     return new DefaultKafkaProducerFactory<>(configs);
   }
 
   @Bean
-  public KafkaTemplate<String, ExpiredPromotionKafkaDTO> kafkaTemplate() {
+  public KafkaTemplate<String, Object> kafkaTemplate() {
     return new KafkaTemplate<>(producerFactory());
   }
 
   @Bean
   public NewTopic promotionTopic() {
     return TopicBuilder.name("expired-promotion").build();
+  }
+
+  private static String typeMappings() {
+    String[] types = {
+      "expiredPromotionKafkaDTO:com.felipe.kafka.ExpiredPromotionKafkaDTO",
+      "discountTransactionReply:com.felipe.kafka.saga.replies.DiscountTransactionReply"
+    };
+    return String.join(", ", types);
   }
 }

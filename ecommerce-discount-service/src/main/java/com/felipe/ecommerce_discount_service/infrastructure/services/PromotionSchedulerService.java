@@ -1,6 +1,6 @@
 package com.felipe.ecommerce_discount_service.infrastructure.services;
 
-import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.PromotionEntity;
+import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionEntity;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.repositories.PromotionRepository;
 import com.felipe.kafka.ExpiredPromotionKafkaDTO;
 import org.slf4j.Logger;
@@ -22,13 +22,13 @@ import java.util.concurrent.ScheduledFuture;
 public class PromotionSchedulerService {
   private final TaskScheduler taskScheduler;
   private final PromotionRepository promotionRepository;
-  private final KafkaTemplate<String, ExpiredPromotionKafkaDTO> kafkaTemplate;
+  private final KafkaTemplate<String, Object> kafkaTemplate;
 
   private final Logger logger = LoggerFactory.getLogger(PromotionSchedulerService.class);
   private final Map<UUID, ScheduledFuture<?>> scheduledPromotionsToExpire = new ConcurrentHashMap<>();
 
   public PromotionSchedulerService(TaskScheduler taskScheduler, PromotionRepository promotionRepository,
-                                   KafkaTemplate<String, ExpiredPromotionKafkaDTO> kafkaTemplate) {
+                                   KafkaTemplate<String, Object> kafkaTemplate) {
     this.taskScheduler = taskScheduler;
     this.promotionRepository = promotionRepository;
     this.kafkaTemplate = kafkaTemplate;
@@ -82,7 +82,7 @@ public class PromotionSchedulerService {
           }
           this.logger.info(
             "Promotion: {} was posted on topic \"{}\" successfully",
-            result.getProducerRecord().value().promotionId(),
+            expiredPromotion.getId(),
             result.getRecordMetadata().topic()
           );
         });

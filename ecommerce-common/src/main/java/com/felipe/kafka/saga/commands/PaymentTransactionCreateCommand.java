@@ -15,6 +15,7 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
   private final String orderAmount;
   private final List<ProductData> products;
   private final CustomerData customer;
+  private final CouponData coupon;
 
   private PaymentTransactionCreateCommand(Builder builder) {
     super(builder.sagaId, builder.transactionId, Command.CREATE);
@@ -22,6 +23,7 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
     this.orderAmount = builder.orderAmount;
     this.products = builder.products;
     this.customer = builder.customer;
+    this.coupon = builder.coupon;
   }
 
   public UUID getOrderId() {
@@ -40,7 +42,11 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
     return this.customer;
   }
 
-  public static Builder builder(UUID sagaId, UUID transactionId) {
+  public CouponData getCoupon() {
+    return this.coupon;
+  }
+
+  public static Builder startTransaction(UUID sagaId, UUID transactionId) {
     return new Builder(sagaId, transactionId);
   }
 
@@ -57,6 +63,8 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
                                 String state,
                                 String country) {}
 
+  public record CouponData(String code, String discountType, String discountValue, String discountAmount) {}
+
   @JsonPOJOBuilder
   public static class Builder {
     private final UUID sagaId;
@@ -65,6 +73,7 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
     private String orderAmount;
     private List<ProductData> products;
     private CustomerData customer;
+    private CouponData coupon;
 
     @JsonCreator
     private Builder(@JsonProperty("sagaId") UUID sagaId, @JsonProperty("transactionId") UUID transactionId) {
@@ -89,6 +98,11 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
 
     public Builder withCustomer(CustomerData customer) {
       this.customer = customer;
+      return this;
+    }
+
+    public Builder withCoupon(CouponData coupon) {
+      this.coupon = coupon;
       return this;
     }
 

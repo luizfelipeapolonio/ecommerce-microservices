@@ -37,7 +37,8 @@ public final class InventoryFailedTransition extends SagaTransition {
     return () -> {
       UUID transactionId = UUID.randomUUID();
 
-      InventoryTransactionCancelCommand inventoryCommand = InventoryTransactionCancelCommand.builder(reply.getSagaId(), transactionId)
+      InventoryTransactionCancelCommand inventoryCommand = InventoryTransactionCancelCommand
+        .startTransaction(reply.getSagaId(), transactionId)
         .withOrderId(reply.getOrderId())
         .withFailureCode(reply.getFailureCode())
         .build();

@@ -2,7 +2,7 @@ CREATE TABLE orders (
     id               UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
     order_price      NUMERIC      NOT NULL,
     with_coupon      BOOLEAN      NOT NULL DEFAULT FALSE,
-    coupon_id        UUID,
+    coupon_code      VARCHAR(150),
     checkout_url     TEXT,
     invoice_url      TEXT,
     customer_id      UUID         NOT NULL,

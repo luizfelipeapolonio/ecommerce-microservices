@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_discount_service.infrastructure.persistence.entities;
+package com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion;
 
 import com.felipe.ecommerce_discount_service.core.domain.enums.PromotionAppliesTarget;
 import jakarta.persistence.Column;

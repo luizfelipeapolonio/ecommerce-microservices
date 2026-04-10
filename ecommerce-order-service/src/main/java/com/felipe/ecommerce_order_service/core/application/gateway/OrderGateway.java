@@ -10,6 +10,7 @@ import java.util.UUID;
 public interface OrderGateway {
   Map<String, UUID> createOrder(UUID customerId, CreateOrderDTO orderDTO);
   Optional<Order> findOrderById(UUID orderId);
+  Optional<Order> findOrderByIdWithItems(UUID orderId);
   void deleteOrder(UUID orderId);
   Order updateOrder(Order order);
 }
