@@ -98,6 +98,6 @@ public class OrderBeans {
 
   @Bean
   public SagaState cancellingStateHandler(DeleteOrderUseCase deleteOrderUseCase) {
-    return new CancellingStateHandler(deleteOrderUseCase);
+    return new CancellingStateHandler(deleteOrderUseCase, this.customerGateway, this.kafkaTemplate);
   }
 }

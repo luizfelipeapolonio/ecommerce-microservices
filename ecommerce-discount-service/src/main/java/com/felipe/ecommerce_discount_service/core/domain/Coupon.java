@@ -209,6 +209,11 @@ public class Coupon {
     this.appliedBy.add(appliedBy);
   }
 
+  public void removeAppliedBy(CouponAppliedBy appliedBy) {
+    appliedBy.setCoupon(null);
+    this.appliedBy.remove(appliedBy);
+  }
+
   public void increaseUsageCount() {
     this.usageCount += 1;
   }
