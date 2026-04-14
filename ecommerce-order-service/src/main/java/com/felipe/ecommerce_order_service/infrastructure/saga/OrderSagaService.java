@@ -5,6 +5,7 @@ import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.sa
 import com.felipe.ecommerce_order_service.infrastructure.persistence.repositories.OrderSagaRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -20,9 +21,11 @@ public class OrderSagaService {
       .orElseThrow(() -> new SagaNotFoundException(orderSagaId));
   }
 
-  public OrderSaga findOrderSagaByOrderId(UUID orderId) {
-    return this.orderSagaRepository.findByOrderId(orderId)
-      .orElseThrow(() -> new SagaNotFoundException("Saga with orderId '" + orderId + "' not found"));
+  public OrderSaga findOrderSagaByOrderId(UUID orderId, boolean withDetails) {
+    Optional<OrderSaga> orderSaga = withDetails
+      ? this.orderSagaRepository.findByOrderIdWithParticipants(orderId)
+      : this.orderSagaRepository.findByOrderId(orderId);
+    return orderSaga.orElseThrow(() -> new SagaNotFoundException("Saga with orderId '" + orderId + "' not found"));
   }
 
   public OrderSaga updateOrderSaga(OrderSaga orderSaga) {
