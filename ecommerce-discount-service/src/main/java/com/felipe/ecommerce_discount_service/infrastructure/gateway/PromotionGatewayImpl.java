@@ -8,7 +8,7 @@ import com.felipe.ecommerce_discount_service.infrastructure.external.InventorySe
 import com.felipe.ecommerce_discount_service.infrastructure.mappers.PromotionEntityMapper;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionEntity;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.repositories.PromotionRepository;
-import com.felipe.ecommerce_discount_service.infrastructure.services.PromotionSchedulerService;
+import com.felipe.ecommerce_discount_service.infrastructure.services.DiscountSchedulerService;
 import com.felipe.kafka.ExpiredPromotionKafkaDTO;
 import com.felipe.response.ResponsePayload;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ public class PromotionGatewayImpl implements PromotionGateway {
   private final PromotionRepository promotionRepository;
   private final PromotionEntityMapper promotionEntityMapper;
   private final InventoryService inventoryService;
-  private final PromotionSchedulerService promotionSchedulerService;
+  private final DiscountSchedulerService discountSchedulerService;
   private final KafkaTemplate<String, Object> kafkaTemplate;
 
   private final Logger logger = LoggerFactory.getLogger(PromotionGatewayImpl.class);
@@ -34,12 +34,12 @@ public class PromotionGatewayImpl implements PromotionGateway {
   public PromotionGatewayImpl(PromotionRepository promotionRepository,
                               PromotionEntityMapper promotionEntityMapper,
                               InventoryService inventoryService,
-                              PromotionSchedulerService promotionSchedulerService,
+                              DiscountSchedulerService discountSchedulerService,
                               KafkaTemplate<String, Object> kafkaTemplate) {
     this.promotionRepository = promotionRepository;
     this.promotionEntityMapper = promotionEntityMapper;
     this.inventoryService = inventoryService;
-    this.promotionSchedulerService = promotionSchedulerService;
+    this.discountSchedulerService = discountSchedulerService;
     this.kafkaTemplate = kafkaTemplate;
   }
 
@@ -61,7 +61,7 @@ public class PromotionGatewayImpl implements PromotionGateway {
     }
 
     final PromotionEntity savedPromotion = this.promotionRepository.save(promotionEntity);
-    this.promotionSchedulerService.schedulePromotionToExpire(savedPromotion);
+    this.discountSchedulerService.schedulePromotionToExpire(savedPromotion);
 
     return Optional.of(this.promotionEntityMapper.toDomain(savedPromotion));
   }
@@ -76,7 +76,7 @@ public class PromotionGatewayImpl implements PromotionGateway {
   public Promotion deletePromotion(Promotion promotion) {
     final PromotionEntity promotionEntity = this.promotionEntityMapper.toEntity(promotion);
     this.promotionRepository.delete(promotionEntity);
-    this.promotionSchedulerService.cancelScheduledPromotion(promotionEntity);
+    this.discountSchedulerService.cancelScheduledPromotion(promotionEntity);
 
     if (promotion.isActive()) {
       this.kafkaTemplate.send("expired-promotion", new ExpiredPromotionKafkaDTO(promotion.getId().toString()));
@@ -94,10 +94,10 @@ public class PromotionGatewayImpl implements PromotionGateway {
   @Override
   public Promotion updatePromotion(Promotion promotion) {
     final PromotionEntity entity = this.promotionEntityMapper.toEntity(promotion);
-    this.promotionSchedulerService.cancelScheduledPromotion(entity);
+    this.discountSchedulerService.cancelScheduledPromotion(entity);
 
     final PromotionEntity updatedPromotion = this.promotionRepository.save(entity);
-    this.promotionSchedulerService.schedulePromotionToExpire(updatedPromotion);
+    this.discountSchedulerService.schedulePromotionToExpire(updatedPromotion);
     return this.promotionEntityMapper.toDomain(updatedPromotion);
   }
 

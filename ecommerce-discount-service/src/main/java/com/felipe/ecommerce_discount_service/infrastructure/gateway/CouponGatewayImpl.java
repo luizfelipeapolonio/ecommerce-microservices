@@ -5,6 +5,7 @@ import com.felipe.ecommerce_discount_service.core.domain.Coupon;
 import com.felipe.ecommerce_discount_service.infrastructure.mappers.CouponEntityMapper;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.coupon.CouponEntity;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.repositories.CouponRepository;
+import com.felipe.ecommerce_discount_service.infrastructure.services.DiscountSchedulerService;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -13,10 +14,21 @@ import java.util.Optional;
 public class CouponGatewayImpl implements CouponGateway {
   private final CouponRepository couponRepository;
   private final CouponEntityMapper couponEntityMapper;
+  private final DiscountSchedulerService discountSchedulerService;
 
-  public CouponGatewayImpl(CouponRepository couponRepository, CouponEntityMapper couponEntityMapper) {
+  public CouponGatewayImpl(CouponRepository couponRepository, CouponEntityMapper couponEntityMapper,
+                           DiscountSchedulerService discountSchedulerService) {
     this.couponRepository = couponRepository;
     this.couponEntityMapper = couponEntityMapper;
+    this.discountSchedulerService = discountSchedulerService;
+  }
+
+  @Override
+  public Coupon createCoupon(Coupon coupon) {
+    CouponEntity couponEntity = this.couponEntityMapper.toEntity(coupon);
+    CouponEntity savedCoupon = this.couponRepository.save(couponEntity);
+    this.discountSchedulerService.scheduleCouponToExpire(savedCoupon);
+    return this.couponEntityMapper.toDomain(savedCoupon);
   }
 
   @Override

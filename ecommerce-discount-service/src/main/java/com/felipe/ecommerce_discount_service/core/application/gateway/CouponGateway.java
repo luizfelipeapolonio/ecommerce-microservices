@@ -5,6 +5,7 @@ import com.felipe.ecommerce_discount_service.core.domain.Coupon;
 import java.util.Optional;
 
 public interface CouponGateway {
+  Coupon createCoupon(Coupon coupon);
   Optional<Coupon> findCouponByCode(String couponCode);
   Coupon saveCoupon(Coupon coupon);
 }

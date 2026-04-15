@@ -36,7 +36,7 @@ public class CreateCouponUseCaseImpl implements CreateCouponUseCase {
       .discountValue(couponDTO.discountValue())
       .minimumPrice(new BigDecimal(couponDTO.minimumPrice()))
       .usageLimit(couponDTO.usageLimit());
-    return this.couponGateway.saveCoupon(coupon);
+    return this.couponGateway.createCoupon(coupon);
   }
 
   private LocalDateTime convertEndDate(EndDateDTO endDate) {

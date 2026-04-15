@@ -8,7 +8,7 @@ import com.felipe.ecommerce_discount_service.infrastructure.mappers.PromotionEnt
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionAppliesToEntity;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionEntity;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.repositories.PromotionRepository;
-import com.felipe.ecommerce_discount_service.infrastructure.services.PromotionSchedulerService;
+import com.felipe.ecommerce_discount_service.infrastructure.services.DiscountSchedulerService;
 import com.felipe.ecommerce_discount_service.testutils.DataMock;
 import com.felipe.kafka.ExpiredPromotionKafkaDTO;
 import com.felipe.response.ResponsePayload;
@@ -51,7 +51,7 @@ public class PromotionGatewayImplTest {
   private InventoryService inventoryService;
 
   @Mock
-  private PromotionSchedulerService promotionSchedulerService;
+  private DiscountSchedulerService discountSchedulerService;
 
   @Mock
   private KafkaTemplate<String, ExpiredPromotionKafkaDTO> kafkaTemplate;
@@ -88,7 +88,7 @@ public class PromotionGatewayImplTest {
     when(this.promotionEntityMapper.toEntity(any(Promotion.class))).thenReturn(promotionEntity);
     when(this.inventoryService.applyPromotion(any(InventoryService.PromotionRequest.class))).thenReturn(inventoryServiceResponse);
     when(this.promotionRepository.save(promotionEntity)).thenReturn(promotionEntity);
-    doNothing().when(this.promotionSchedulerService).schedulePromotionToExpire(promotionEntity);
+    doNothing().when(this.discountSchedulerService).schedulePromotionToExpire(promotionEntity);
     when(this.promotionEntityMapper.toDomain(promotionEntity)).thenReturn(promotionDomain);
 
     final Optional<Promotion> createdPromotion = this.promotionGateway.createPromotion(promotionDomain);
@@ -110,7 +110,7 @@ public class PromotionGatewayImplTest {
     verify(this.promotionEntityMapper, times(1)).toEntity(any(Promotion.class));
     verify(this.inventoryService, times(1)).applyPromotion(any(InventoryService.PromotionRequest.class));
     verify(this.promotionRepository, times(1)).save(promotionEntity);
-    verify(this.promotionSchedulerService, times(1)).schedulePromotionToExpire(promotionEntity);
+    verify(this.discountSchedulerService, times(1)).schedulePromotionToExpire(promotionEntity);
     verify(this.promotionEntityMapper, times(1)).toDomain(promotionEntity);
   }
 
@@ -143,7 +143,7 @@ public class PromotionGatewayImplTest {
     verify(this.promotionEntityMapper, times(1)).toEntity(any(Promotion.class));
     verify(this.inventoryService, times(1)).applyPromotion(any(InventoryService.PromotionRequest.class));
     verify(this.promotionRepository, never()).save(any(PromotionEntity.class));
-    verify(this.promotionSchedulerService, never()).schedulePromotionToExpire(any(PromotionEntity.class));
+    verify(this.discountSchedulerService, never()).schedulePromotionToExpire(any(PromotionEntity.class));
     verify(this.promotionEntityMapper, never()).toDomain(any(PromotionEntity.class));
   }
 
@@ -198,7 +198,7 @@ public class PromotionGatewayImplTest {
 
     when(this.promotionEntityMapper.toEntity(promotionDomain)).thenReturn(promotionEntity);
     doNothing().when(this.promotionRepository).delete(promotionEntity);
-    doNothing().when(this.promotionSchedulerService).cancelScheduledPromotion(promotionEntity);
+    doNothing().when(this.discountSchedulerService).cancelScheduledPromotion(promotionEntity);
     when(this.kafkaTemplate.send(eq("expired-promotion"), any(ExpiredPromotionKafkaDTO.class))).thenReturn(any());
 
     Promotion deletedPromotion = this.promotionGateway.deletePromotion(promotionDomain);
@@ -218,7 +218,7 @@ public class PromotionGatewayImplTest {
 
     verify(this.promotionEntityMapper, times(1)).toEntity(promotionDomain);
     verify(this.promotionRepository, times(1)).delete(promotionEntity);
-    verify(this.promotionSchedulerService, times(1)).cancelScheduledPromotion(promotionEntity);
+    verify(this.discountSchedulerService, times(1)).cancelScheduledPromotion(promotionEntity);
     verify(this.kafkaTemplate, times(1)).send(eq("expired-promotion"), any(ExpiredPromotionKafkaDTO.class));
   }
 
@@ -232,7 +232,7 @@ public class PromotionGatewayImplTest {
 
     when(this.promotionEntityMapper.toEntity(promotionDomain)).thenReturn(promotionEntity);
     doNothing().when(this.promotionRepository).delete(promotionEntity);
-    doNothing().when(this.promotionSchedulerService).cancelScheduledPromotion(promotionEntity);
+    doNothing().when(this.discountSchedulerService).cancelScheduledPromotion(promotionEntity);
 
     Promotion deletedPromotion = this.promotionGateway.deletePromotion(promotionDomain);
 
@@ -251,7 +251,7 @@ public class PromotionGatewayImplTest {
 
     verify(this.promotionEntityMapper, times(1)).toEntity(promotionDomain);
     verify(this.promotionRepository, times(1)).delete(promotionEntity);
-    verify(this.promotionSchedulerService, times(1)).cancelScheduledPromotion(promotionEntity);
+    verify(this.discountSchedulerService, times(1)).cancelScheduledPromotion(promotionEntity);
     verify(this.kafkaTemplate, never()).send(anyString(), any());
   }
 
@@ -305,9 +305,9 @@ public class PromotionGatewayImplTest {
     final PromotionEntity promotionEntity = this.dataMock.getPromotionsEntity().getFirst();
 
     when(this.promotionEntityMapper.toEntity(promotionDomain)).thenReturn(promotionEntity);
-    doNothing().when(this.promotionSchedulerService).cancelScheduledPromotion(promotionEntity);
+    doNothing().when(this.discountSchedulerService).cancelScheduledPromotion(promotionEntity);
     when(this.promotionRepository.save(promotionEntity)).thenReturn(promotionEntity);
-    doNothing().when(this.promotionSchedulerService).schedulePromotionToExpire(promotionEntity);
+    doNothing().when(this.discountSchedulerService).schedulePromotionToExpire(promotionEntity);
     when(this.promotionEntityMapper.toDomain(promotionEntity)).thenReturn(promotionDomain);
 
     Promotion updatedPromotion = this.promotionGateway.updatePromotion(promotionDomain);
@@ -326,9 +326,9 @@ public class PromotionGatewayImplTest {
     assertThat(updatedPromotion.getPromotionApplies().size()).isEqualTo(promotionDomain.getPromotionApplies().size());
 
     verify(this.promotionEntityMapper, times(1)).toEntity(promotionDomain);
-    verify(this.promotionSchedulerService, times(1)).cancelScheduledPromotion(promotionEntity);
+    verify(this.discountSchedulerService, times(1)).cancelScheduledPromotion(promotionEntity);
     verify(this.promotionRepository, times(1)).save(promotionEntity);
-    verify(this.promotionSchedulerService, times(1)).schedulePromotionToExpire(promotionEntity);
+    verify(this.discountSchedulerService, times(1)).schedulePromotionToExpire(promotionEntity);
     verify(this.promotionEntityMapper, times(1)).toDomain(promotionEntity);
   }
 
