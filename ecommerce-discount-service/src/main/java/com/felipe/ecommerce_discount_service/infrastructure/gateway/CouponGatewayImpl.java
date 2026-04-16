@@ -8,7 +8,9 @@ import com.felipe.ecommerce_discount_service.infrastructure.persistence.reposito
 import com.felipe.ecommerce_discount_service.infrastructure.services.DiscountSchedulerService;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class CouponGatewayImpl implements CouponGateway {
@@ -37,8 +39,36 @@ public class CouponGatewayImpl implements CouponGateway {
   }
 
   @Override
+  public Optional<Coupon> findCouponById(UUID couponId) {
+    return this.couponRepository.findById(couponId).map(this.couponEntityMapper::toDomain);
+  }
+
+  @Override
+  public List<Coupon> findAllActiveCoupons() {
+    return this.couponRepository.findAllByIsActiveTrue()
+      .stream()
+      .map(this.couponEntityMapper::toDomain)
+      .toList();
+  }
+
+  @Override
+  public List<Coupon> findAllCoupons() {
+    return this.couponRepository.findAll()
+      .stream()
+      .map(this.couponEntityMapper::toDomain)
+      .toList();
+  }
+
+  @Override
   public Coupon saveCoupon(Coupon coupon) {
     CouponEntity entity = this.couponEntityMapper.toEntity(coupon);
     return this.couponEntityMapper.toDomain(this.couponRepository.save(entity));
+  }
+
+  @Override
+  public Coupon deleteCoupon(Coupon coupon) {
+    CouponEntity entity = this.couponEntityMapper.toEntity(coupon);
+    this.couponRepository.delete(entity);
+    return coupon;
   }
 }

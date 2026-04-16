@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public interface CouponRepository extends JpaRepository<CouponEntity, UUID> {
   Optional<CouponEntity> findByCouponCodeAndIsActiveTrue(String couponCode);
+  List<CouponEntity> findAllByIsActiveTrue();
 
   @Query("SELECT c FROM CouponEntity c WHERE c.endDate > CURRENT_TIMESTAMP AND c.isActive = true")
   List<CouponEntity> findAllByEndDateAfterNowAndIsActiveTrue();
