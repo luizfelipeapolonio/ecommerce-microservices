@@ -21,6 +21,7 @@
         <module>ecommerce-cart-service</module>
         <module>ecommerce-order-service</module>
         <module>ecommerce-payment-service</module>
+        <module>ecommerce-delivery-service</module>
     </modules>
 
 </project>
