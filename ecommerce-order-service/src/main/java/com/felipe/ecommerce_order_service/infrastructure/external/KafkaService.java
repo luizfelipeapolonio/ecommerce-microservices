@@ -6,6 +6,7 @@ import com.felipe.ecommerce_order_service.infrastructure.saga.SagaOrchestrator;
 import com.felipe.kafka.saga.replies.DiscountTransactionReply;
 import com.felipe.kafka.saga.replies.InventoryTransactionReply;
 import com.felipe.kafka.saga.replies.PaymentTransactionReply;
+import com.felipe.kafka.saga.replies.ShippingTransactionReply;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,24 @@ public class KafkaService {
     logger.info(
       "\nReceived reply:\ncouponCode: {}\nstatus: {}\nparticipant: {}\ncommand: {}\nfailureCode: {}\nfailureMessage: {}\ntransactionId: {}\norderId: {}",
       transactionReply.getCouponCode(),
+      transactionReply.getStatus(),
+      transactionReply.getParticipant(),
+      transactionReply.getCommand(),
+      transactionReply.getFailureCode(),
+      transactionReply.getFailureMessage(),
+      transactionReply.getTransactionId(),
+      transactionReply.getOrderId()
+    );
+    OrderSaga saga = this.orderSagaService.findOrderSagaById(transactionReply.getSagaId());
+    this.sagaOrchestrator.handle(saga, transactionReply);
+  }
+
+  @Transactional
+  @KafkaHandler
+  void ShippingTransactionReplies(ShippingTransactionReply transactionReply) {
+    logger.info(
+      "\nReceived reply:\nshippingFee: {}\nstatus: {}\nparticipant: {}\ncommand: {}\nfailureCode: {}\nfailureMessage: {}\ntransactionId: {}\norderId: {}",
+      transactionReply.getShippingFee(),
       transactionReply.getStatus(),
       transactionReply.getParticipant(),
       transactionReply.getCommand(),

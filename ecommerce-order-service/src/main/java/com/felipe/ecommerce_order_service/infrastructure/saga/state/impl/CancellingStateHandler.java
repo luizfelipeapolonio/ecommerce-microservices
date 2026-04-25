@@ -32,7 +32,7 @@ public class CancellingStateHandler implements SagaState {
   public SagaTransition handle(OrderSaga saga, ReplyTransaction reply) {
     return switch (reply.getParticipant()){
       case INVENTORY -> handleInventoryCancelling(reply);
-      case PAYMENT, DISCOUNT -> throw new UnhandledSagaParticipantException(reply.getParticipant().name(), SagaStatus.CANCELLING);
+      case PAYMENT, DISCOUNT, SHIPPING -> throw new UnhandledSagaParticipantException(reply.getParticipant().name(), SagaStatus.CANCELLING);
     };
   }
 

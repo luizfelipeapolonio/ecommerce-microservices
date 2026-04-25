@@ -79,6 +79,7 @@ public class PaymentService {
         .setEnabled(true)
         .build());
     addLineItemsToSession(paymentCommand.getOrderId(), params, paymentCommand.getProducts());
+    addShippingFee(paymentCommand.getOrderId(), params, paymentCommand);
     addDiscountIfApplicable(params, paymentCommand);
 
     try {
@@ -223,6 +224,22 @@ public class PaymentService {
             .build())
           .build());
     });
+  }
+
+  private void addShippingFee(UUID orderId, SessionCreateParams.Builder sessionBuilder, PaymentTransactionCreateCommand paymentCommand) {
+    sessionBuilder.addLineItem(
+      SessionCreateParams.LineItem.builder()
+        .setQuantity(1L)
+        .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
+          .setCurrency("brl")
+          .setUnitAmount(formatBigDecimalStringToValidLongValue(paymentCommand.getShippingFee()))
+          .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
+            .setName("Frete")
+            .setDescription("Valor da taxa de envio: R$ %s".formatted(paymentCommand.getShippingFee()))
+            .putMetadata("order_id", orderId.toString())
+            .build())
+          .build())
+        .build());
   }
 
   private String generateProductDescription(PaymentTransactionCreateCommand.ProductData product) {

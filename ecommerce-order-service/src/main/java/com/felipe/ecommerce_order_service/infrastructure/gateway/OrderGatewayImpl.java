@@ -67,7 +67,8 @@ public class OrderGatewayImpl implements OrderGateway {
       .status(SagaStatus.STARTED)
       .addParticipant(new OrderSagaParticipant(ReplyTransaction.SagaParticipant.INVENTORY))
       .addParticipant(new OrderSagaParticipant(ReplyTransaction.SagaParticipant.PAYMENT))
-      .addParticipant(new OrderSagaParticipant(ReplyTransaction.SagaParticipant.DISCOUNT));
+      .addParticipant(new OrderSagaParticipant(ReplyTransaction.SagaParticipant.DISCOUNT))
+      .addParticipant(new OrderSagaParticipant(ReplyTransaction.SagaParticipant.SHIPPING));
 
     OrderSaga createdSaga = this.orderSagaRepository.save(newSaga);
     UUID transactionId = UUID.randomUUID();

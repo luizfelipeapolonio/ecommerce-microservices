@@ -1,18 +1,18 @@
 package com.felipe.ecommerce_order_service.infrastructure.saga.transition.impl;
 
 import com.felipe.ecommerce_order_service.core.application.dtos.CustomerProfileDTO;
+import com.felipe.ecommerce_order_service.core.application.dtos.UpdateOrderDTO;
 import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
+import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.SagaTransition;
-import com.felipe.ecommerce_order_service.infrastructure.saga.utils.InventoryTransitionDataHolder;
+import com.felipe.ecommerce_order_service.infrastructure.saga.utils.OrderTransitionDataHolder;
 import com.felipe.kafka.saga.commands.PaymentTransactionCreateCommand;
 import com.felipe.kafka.saga.replies.DiscountTransactionReply;
-import com.felipe.utils.product.PricingCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -20,17 +20,20 @@ import java.util.function.Consumer;
 public final class DiscountFailedTransition extends SagaTransition {
   private final DiscountTransactionReply reply;
   private final CustomerGateway customerGateway;
-  private final InventoryTransitionDataHolder inventoryTransitionDataHolder;
+  private final UpdateOrderUseCase updateOrderUseCase;
+  private final OrderTransitionDataHolder orderTransitionDataHolder;
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private static final Logger logger = LoggerFactory.getLogger(DiscountFailedTransition.class);
 
   public DiscountFailedTransition(DiscountTransactionReply reply,
                                   CustomerGateway customerGateway,
-                                  InventoryTransitionDataHolder inventoryTransitionDataHolder,
+                                  UpdateOrderUseCase updateOrderUseCase,
+                                  OrderTransitionDataHolder orderTransitionDataHolder,
                                   KafkaTemplate<String, Object> kafkaTemplate) {
     this.reply = reply;
     this.customerGateway = customerGateway;
-    this.inventoryTransitionDataHolder = inventoryTransitionDataHolder;
+    this.updateOrderUseCase = updateOrderUseCase;
+    this.orderTransitionDataHolder = orderTransitionDataHolder;
     this.kafkaTemplate = kafkaTemplate;
   }
 
@@ -55,7 +58,7 @@ public final class DiscountFailedTransition extends SagaTransition {
       logger.info("Authenticated customer -> id: {} - email: {}", authCustomer.id(), authCustomer.email());
       UUID transactionId = UUID.randomUUID();
       UUID authCustomerId = UUID.fromString(authCustomer.id());
-      List<PaymentTransactionCreateCommand.ProductData> products = this.inventoryTransitionDataHolder.getProducts()
+      List<PaymentTransactionCreateCommand.ProductData> products = this.orderTransitionDataHolder.getProducts()
         .stream()
         .map(productData -> new PaymentTransactionCreateCommand.ProductData(
           productData.name(),
@@ -65,12 +68,15 @@ public final class DiscountFailedTransition extends SagaTransition {
           productData.discountValue()
         ))
         .toList();
-      String orderAmount = calculateOrderAmount(products);
+      String orderAmount = this.orderTransitionDataHolder.getOrderAmount();
+      UpdateOrderDTO updateOrderDTO = new UpdateOrderDTO().updateWithCoupon(false);
+      this.updateOrderUseCase.execute(this.reply.getOrderId(), updateOrderDTO);
 
       PaymentTransactionCreateCommand paymentCommand = PaymentTransactionCreateCommand
         .startTransaction(this.reply.getSagaId(), transactionId)
         .withOrderId(this.reply.getOrderId())
         .withOrderAmount(orderAmount)
+        .withShippingFee(this.orderTransitionDataHolder.getShippingFee())
         .withProducts(products)
         .withCustomer(new PaymentTransactionCreateCommand.CustomerData(
           authCustomerId,
@@ -96,19 +102,5 @@ public final class DiscountFailedTransition extends SagaTransition {
           }
         });
     };
-  }
-
-  private String calculateOrderAmount(List<PaymentTransactionCreateCommand.ProductData> products) {
-    BigDecimal orderAmount = new BigDecimal("0.00");
-    for (var product : products) {
-      BigDecimal price = PricingCalculator.calculateFinalPrice(
-        product.discountType(),
-        product.unitPrice(),
-        product.discountValue(),
-        product.quantity()
-      );
-      orderAmount = orderAmount.add(price);
-    }
-    return orderAmount.toString();
   }
 }

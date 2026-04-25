@@ -29,7 +29,7 @@ public class WaitingForPaymentStateHandler implements SagaState {
   @Override
   public SagaTransition handle(OrderSaga saga, ReplyTransaction reply) {
     return switch (reply.getParticipant()){
-      case INVENTORY, DISCOUNT -> throw new UnhandledSagaParticipantException(reply.getParticipant().name(), SagaStatus.WAITING_FOR_PAYMENT);
+      case INVENTORY, DISCOUNT, SHIPPING -> throw new UnhandledSagaParticipantException(reply.getParticipant().name(), SagaStatus.WAITING_FOR_PAYMENT);
       case PAYMENT -> handlePaymentFinished(reply);
     };
   }

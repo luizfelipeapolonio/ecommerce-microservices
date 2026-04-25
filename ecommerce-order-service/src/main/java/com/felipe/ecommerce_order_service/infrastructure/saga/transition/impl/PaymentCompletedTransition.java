@@ -40,7 +40,7 @@ public final class PaymentCompletedTransition extends SagaTransition {
   @Override
   protected TriggerAction action() {
     return () -> {
-      UpdateOrderDTO updateDTO = new UpdateOrderDTO(null, null, this.reply.getInvoiceUrl(), null, List.of());
+      UpdateOrderDTO updateDTO = new UpdateOrderDTO().updateInvoiceUrl(this.reply.getInvoiceUrl());
       Order updatedOrder = this.updateOrderUseCase.execute(this.reply.getOrderId(), updateDTO);
       logger.info("Updated order -> invoiceUrl: {}", updatedOrder.getInvoiceUrl());
       UUID transactionId = UUID.randomUUID();

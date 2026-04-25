@@ -21,7 +21,7 @@ import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.Process
 import com.felipe.ecommerce_order_service.infrastructure.saga.state.SagaState;
 import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.StartedStateHandler;
 import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.WaitingForPaymentStateHandler;
-import com.felipe.ecommerce_order_service.infrastructure.saga.utils.InventoryTransitionDataHolder;
+import com.felipe.ecommerce_order_service.infrastructure.saga.utils.OrderTransitionDataHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -31,18 +31,18 @@ public class OrderBeans {
   private final OrderGateway orderGateway;
   private final CustomerGateway customerGateway;
   private final CouponGateway couponGateway;
-  private final InventoryTransitionDataHolder inventoryTransitionDataHolder;
+  private final OrderTransitionDataHolder orderTransitionDataHolder;
   private final KafkaTemplate<String, Object> kafkaTemplate;
 
   public OrderBeans(OrderGateway orderGateway,
                     CustomerGateway customerGateway,
                     CouponGateway couponGateway,
-                    InventoryTransitionDataHolder inventoryTransitionDataHolder,
+                    OrderTransitionDataHolder orderTransitionDataHolder,
                     KafkaTemplate<String, Object> kafkaTemplate) {
     this.orderGateway = orderGateway;
     this.customerGateway = customerGateway;
     this.couponGateway = couponGateway;
-    this.inventoryTransitionDataHolder = inventoryTransitionDataHolder;
+    this.orderTransitionDataHolder = orderTransitionDataHolder;
     this.kafkaTemplate = kafkaTemplate;
   }
 
@@ -78,12 +78,12 @@ public class OrderBeans {
 
   @Bean
   public SagaState startedStateHandler(UpdateOrderUseCase updateOrderUseCase) {
-    return new StartedStateHandler(this.kafkaTemplate, this.customerGateway, updateOrderUseCase, this.inventoryTransitionDataHolder);
+    return new StartedStateHandler(this.kafkaTemplate, updateOrderUseCase, this.orderTransitionDataHolder);
   }
 
   @Bean
   public SagaState processingStateHandler(UpdateOrderUseCase updateOrderUseCase) {
-    return new ProcessingStateHandler(updateOrderUseCase, this.customerGateway, this.inventoryTransitionDataHolder, this.kafkaTemplate);
+    return new ProcessingStateHandler(updateOrderUseCase, this.customerGateway, this.orderTransitionDataHolder, this.kafkaTemplate);
   }
 
   @Bean

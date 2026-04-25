@@ -1,6 +1,5 @@
 package com.felipe.ecommerce_order_service.infrastructure.saga.state.impl;
 
-import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
 import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
 import com.felipe.ecommerce_order_service.infrastructure.exceptions.UnhandledSagaParticipantException;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
@@ -9,25 +8,21 @@ import com.felipe.ecommerce_order_service.infrastructure.saga.state.SagaState;
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.SagaTransition;
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.impl.InventoryFailedTransition;
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.impl.InventorySucceededTransition;
-import com.felipe.ecommerce_order_service.infrastructure.saga.utils.InventoryTransitionDataHolder;
+import com.felipe.ecommerce_order_service.infrastructure.saga.utils.OrderTransitionDataHolder;
 import com.felipe.kafka.saga.replies.InventoryTransactionReply;
 import com.felipe.kafka.saga.replies.ReplyTransaction;
 import org.springframework.kafka.core.KafkaTemplate;
 
 public class StartedStateHandler implements SagaState {
   private final KafkaTemplate<String, Object> kafkaTemplate;
-  private final CustomerGateway customerGateway;
   private final UpdateOrderUseCase updateOrderUseCase;
-  private final InventoryTransitionDataHolder inventoryTransitionDataHolder;
+  private final OrderTransitionDataHolder orderTransitionDataHolder;
 
-  public StartedStateHandler(KafkaTemplate<String, Object> kafkaTemplate,
-                             CustomerGateway customerGateway,
-                             UpdateOrderUseCase updateOrderUseCase,
-                             InventoryTransitionDataHolder inventoryTransitionDataHolder) {
+  public StartedStateHandler(KafkaTemplate<String, Object> kafkaTemplate, UpdateOrderUseCase updateOrderUseCase,
+                             OrderTransitionDataHolder orderTransitionDataHolder) {
     this.kafkaTemplate = kafkaTemplate;
-    this.customerGateway = customerGateway;
     this.updateOrderUseCase = updateOrderUseCase;
-    this.inventoryTransitionDataHolder = inventoryTransitionDataHolder;
+    this.orderTransitionDataHolder = orderTransitionDataHolder;
   }
 
   @Override
@@ -39,7 +34,7 @@ public class StartedStateHandler implements SagaState {
   public SagaTransition handle(OrderSaga saga, ReplyTransaction reply) {
     return switch (reply.getParticipant()) {
       case INVENTORY -> handleInventoryStarted(reply);
-      case PAYMENT, DISCOUNT -> throw new UnhandledSagaParticipantException(reply.getParticipant().name(), SagaStatus.STARTED);
+      case PAYMENT, DISCOUNT, SHIPPING -> throw new UnhandledSagaParticipantException(reply.getParticipant().name(), SagaStatus.STARTED);
     };
   }
 
@@ -48,9 +43,8 @@ public class StartedStateHandler implements SagaState {
     return switch (reply.getStatus()) {
       case SUCCESS -> new InventorySucceededTransition(
         inventoryReply,
-        this.customerGateway,
         this.updateOrderUseCase,
-        this.inventoryTransitionDataHolder,
+        this.orderTransitionDataHolder,
         this.kafkaTemplate
       );
       case FAILURE -> new InventoryFailedTransition(inventoryReply, this.kafkaTemplate);

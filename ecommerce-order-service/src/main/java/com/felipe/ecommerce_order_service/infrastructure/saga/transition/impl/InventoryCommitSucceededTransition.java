@@ -35,7 +35,7 @@ public final class InventoryCommitSucceededTransition extends SagaTransition {
   @Override
   protected TriggerAction action() {
     return () -> {
-      UpdateOrderDTO orderDTO = new UpdateOrderDTO(OrderStatus.FINISHED, null, null, null, List.of());
+      UpdateOrderDTO orderDTO = new UpdateOrderDTO().updateStatus(OrderStatus.FINISHED);
       Order updatedOrder = this.updateOrderUseCase.execute(this.reply.getOrderId(), orderDTO);
       logger.info("Order \"{}\" finished successfully", updatedOrder.getId());
       logger.info("Saga \"{}\" completed successfully", this.reply.getSagaId());

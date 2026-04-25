@@ -29,7 +29,7 @@ public class CommitingStateHandler implements SagaState {
   public SagaTransition handle(OrderSaga saga, ReplyTransaction reply) {
     return switch (reply.getParticipant()) {
       case INVENTORY -> handleInventoryCommiting(reply);
-      case PAYMENT, DISCOUNT -> throw new UnhandledSagaParticipantException(reply.getParticipant().name(), SagaStatus.COMMITING);
+      case PAYMENT, DISCOUNT, SHIPPING -> throw new UnhandledSagaParticipantException(reply.getParticipant().name(), SagaStatus.COMMITING);
     };
   }
 

@@ -13,6 +13,7 @@ import java.util.UUID;
 public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
   private final UUID orderId;
   private final String orderAmount;
+  private final String shippingFee;
   private final List<ProductData> products;
   private final CustomerData customer;
   private final CouponData coupon;
@@ -21,6 +22,7 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
     super(builder.sagaId, builder.transactionId, Command.CREATE);
     this.orderId = builder.orderId;
     this.orderAmount = builder.orderAmount;
+    this.shippingFee = builder.shippingFee;
     this.products = builder.products;
     this.customer = builder.customer;
     this.coupon = builder.coupon;
@@ -32,6 +34,10 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
 
   public String getOrderAmount() {
     return this.orderAmount;
+  }
+
+  public String getShippingFee() {
+    return this.shippingFee;
   }
 
   public List<ProductData> getProducts() {
@@ -71,6 +77,7 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
     private final UUID transactionId;
     private UUID orderId;
     private String orderAmount;
+    private String shippingFee;
     private List<ProductData> products;
     private CustomerData customer;
     private CouponData coupon;
@@ -88,6 +95,11 @@ public final class PaymentTransactionCreateCommand extends BaseSagaTransaction {
 
     public Builder withOrderAmount(String orderAmount) {
       this.orderAmount = orderAmount;
+      return this;
+    }
+
+    public Builder withShippingFee(String shippingFee) {
+      this.shippingFee = shippingFee;
       return this;
     }
 

@@ -1,17 +1,14 @@
 package com.felipe.ecommerce_order_service.infrastructure.saga.transition.impl;
 
-import com.felipe.ecommerce_order_service.core.application.dtos.CustomerProfileDTO;
 import com.felipe.ecommerce_order_service.core.application.dtos.UpdateOrderDTO;
 import com.felipe.ecommerce_order_service.core.application.dtos.UpdateProductDTO;
-import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
 import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
 import com.felipe.ecommerce_order_service.core.domain.Order;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.SagaStatus;
 import com.felipe.ecommerce_order_service.infrastructure.saga.transition.SagaTransition;
-import com.felipe.ecommerce_order_service.infrastructure.saga.utils.InventoryTransitionDataHolder;
-import com.felipe.kafka.saga.commands.DiscountTransactionCreateCommand;
-import com.felipe.kafka.saga.commands.PaymentTransactionCreateCommand;
+import com.felipe.ecommerce_order_service.infrastructure.saga.utils.OrderTransitionDataHolder;
+import com.felipe.kafka.saga.commands.ShippingTransactionCreateCommand;
 import com.felipe.kafka.saga.replies.InventoryTransactionReply;
 import com.felipe.utils.product.PricingCalculator;
 import org.slf4j.Logger;
@@ -25,21 +22,18 @@ import java.util.function.Consumer;
 
 public final class InventorySucceededTransition extends SagaTransition {
   private final InventoryTransactionReply reply;
-  private final CustomerGateway customerGateway;
   private final UpdateOrderUseCase updateOrderUseCase;
-  private final InventoryTransitionDataHolder inventoryTransitionDataHolder;
+  private final OrderTransitionDataHolder orderTransitionDataHolder;
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private static final Logger logger = LoggerFactory.getLogger(InventorySucceededTransition.class);
 
   public InventorySucceededTransition(InventoryTransactionReply reply,
-                                      CustomerGateway customerGateway,
                                       UpdateOrderUseCase updateOrderUseCase,
-                                      InventoryTransitionDataHolder inventoryTransitionDataHolder,
+                                      OrderTransitionDataHolder orderTransitionDataHolder,
                                       KafkaTemplate<String, Object> kafkaTemplate) {
     this.reply = reply;
-    this.customerGateway = customerGateway;
     this.updateOrderUseCase = updateOrderUseCase;
-    this.inventoryTransitionDataHolder = inventoryTransitionDataHolder;
+    this.orderTransitionDataHolder = orderTransitionDataHolder;
     this.kafkaTemplate = kafkaTemplate;
   }
 
@@ -54,89 +48,39 @@ public final class InventorySucceededTransition extends SagaTransition {
   @Override
   protected TriggerAction action() {
     return () -> {
-      CustomerProfileDTO authCustomer = this.customerGateway.getCurrentAuthCustomer();
-      logger.info("Authenticated customer -> id: {} - email: {}", authCustomer.id(), authCustomer.email());
       UUID transactionId = UUID.randomUUID();
-      UUID authCustomerId = UUID.fromString(authCustomer.id());
-      List<PaymentTransactionCreateCommand.ProductData> products = this.reply.getProducts()
-        .stream()
-        .map(productData -> new PaymentTransactionCreateCommand.ProductData(
-          productData.getName(),
-          productData.getQuantity(),
-          productData.getUnitPrice(),
-          productData.getDiscountType(),
-          productData.getDiscountValue()
-        ))
-        .toList();
-      String orderAmount = calculateOrderAmount(products);
       // Updating order data
+      String orderAmount = calculateOrderAmount(this.reply.getProducts());
       UpdateOrderDTO updateOrderDTO = convertToUpdateOrderDTO(this.reply, orderAmount);
       Order updatedOrder = this.updateOrderUseCase.execute(this.reply.getOrderId(), updateOrderDTO);
 
-      // If any product already has a discount, there's no need to trigger the
-      // discount service to apply the coupon
-      boolean isAllProductsWithNoDiscount = products.stream()
-        .allMatch(product -> product.discountType() == null);
+      // Setting products data in the helper context
+      this.orderTransitionDataHolder.setProducts(this.reply.getProducts());
+      this.orderTransitionDataHolder.setCouponCode(updatedOrder.getCouponCode());
+      this.orderTransitionDataHolder.setOrderAmount(orderAmount);
 
-      if (updatedOrder.isWithCoupon() && isAllProductsWithNoDiscount) {
-        // Setting the products in the helper context
-        this.inventoryTransitionDataHolder.setProducts(this.reply.getProducts());
+      ShippingTransactionCreateCommand shippingCommand = ShippingTransactionCreateCommand
+        .startTransaction(this.reply.getSagaId(), transactionId)
+        .withOrderId(this.reply.getOrderId())
+        .build();
 
-        DiscountTransactionCreateCommand discountCommand = DiscountTransactionCreateCommand
-          .startTransaction(this.reply.getSagaId(), transactionId)
-          .withCouponCode(updatedOrder.getCouponCode())
-          .withOrderAmount(orderAmount)
-          .withCustomerId(authCustomerId)
-          .withOrderId(this.reply.getOrderId())
-          .build();
-
-        this.kafkaTemplate.send("order.order_transaction.discount.commands", discountCommand)
-          .whenComplete((result, exception) -> {
-            if (exception == null) {
-              logger.info("Apply coupon command posted on topic \"{}\" successfully", result.getRecordMetadata().topic());
-            }
-          });
-      } else {
-        PaymentTransactionCreateCommand paymentCommand = PaymentTransactionCreateCommand
-          .startTransaction(this.reply.getSagaId(), transactionId)
-          .withOrderId(this.reply.getOrderId())
-          .withOrderAmount(orderAmount)
-          .withProducts(products)
-          .withCustomer(new PaymentTransactionCreateCommand.CustomerData(
-            authCustomerId,
-            authCustomer.username(),
-            authCustomer.email(),
-            new PaymentTransactionCreateCommand.CustomerAddress(
-              authCustomer.address().street(),
-              authCustomer.address().number(),
-              authCustomer.address().complement(),
-              authCustomer.address().district(),
-              authCustomer.address().zipcode(),
-              authCustomer.address().city(),
-              authCustomer.address().state(),
-              authCustomer.address().country()
-            )
-          ))
-          .build();
-
-        this.kafkaTemplate.send("order.order_transaction.payment.commands", paymentCommand)
-          .whenComplete((result, exception) -> {
-            if (exception == null) {
-              logger.info("Create payment posted on topic \"{}\" successfully", result.getRecordMetadata().topic());
-            }
-          });
-      }
+      this.kafkaTemplate.send("order.order_transaction.shipping.commands", shippingCommand)
+        .whenComplete((result, exception) -> {
+          if (exception == null) {
+            logger.info("Calculate shipping fee command posted on topic \"{}\" successfully", result.getRecordMetadata().topic());
+          }
+        });
     };
   }
 
-  private String calculateOrderAmount(List<PaymentTransactionCreateCommand.ProductData> products) {
+  private String calculateOrderAmount(List<InventoryTransactionReply.ProductData> products) {
     BigDecimal orderAmount = new BigDecimal("0.00");
     for (var product : products) {
       BigDecimal price = PricingCalculator.calculateFinalPrice(
-        product.discountType(),
-        product.unitPrice(),
-        product.discountValue(),
-        product.quantity()
+        product.getDiscountType(),
+        product.getUnitPrice(),
+        product.getDiscountValue(),
+        product.getQuantity()
       );
       orderAmount = orderAmount.add(price);
     }
@@ -156,6 +100,6 @@ public final class InventorySucceededTransition extends SagaTransition {
         return new UpdateProductDTO(product.getId(), product.getName(), finalPrice);
       })
       .toList();
-    return new UpdateOrderDTO(null, null, null, orderAmount, productsDTO);
+    return new UpdateOrderDTO().updateOrderPrice(orderAmount).updateProducts(productsDTO);
   }
 }

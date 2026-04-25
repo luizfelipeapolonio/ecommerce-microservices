@@ -1,4 +1,4 @@
-package com.felipe.ecommerce_order_service.infrastructure.config;
+package com.felipe.ecommerce_shipping_service.infrastructure.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -26,31 +26,30 @@ public class KafkaConsumerConfiguration {
 
   @Bean
   public ConsumerFactory<String, Object> consumerFactory() {
-    final Map<String, Object> configs = new HashMap<>();
+    Map<String, Object> configs = new HashMap<>();
     configs.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.kafkaServer);
-    configs.put(ConsumerConfig.GROUP_ID_CONFIG, "order-service");
+    configs.put(ConsumerConfig.GROUP_ID_CONFIG, "shipping-service");
     configs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     configs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
     configs.put(JsonDeserializer.TYPE_MAPPINGS, DESERIALIZER_TYPE_MAPPINGS);
     configs.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+    configs.put(JsonDeserializer.REMOVE_TYPE_INFO_HEADERS, false);
     configs.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     return new DefaultKafkaConsumerFactory<>(configs);
   }
 
   @Bean
   public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, Object>> kafkaListenerContainerFactory() {
-    final ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(consumerFactory());
     return factory;
   }
 
   private static String typeMappings() {
     String[] types = {
-      "inventoryTransactionReply:com.felipe.kafka.saga.replies.InventoryTransactionReply",
-      "paymentTransactionReply:com.felipe.kafka.saga.replies.PaymentTransactionReply",
-      "discountTransactionReply:com.felipe.kafka.saga.replies.DiscountTransactionReply",
-      "shippingTransactionReply:com.felipe.kafka.saga.replies.ShippingTransactionReply"
+      "shippingTransactionCreateCommand:com.felipe.kafka.saga.commands.ShippingTransactionCreateCommand",
     };
-    return String.join(", ", types);
+    //return String.join(", ", types);
+    return types[0];
   }
 }
