@@ -35,6 +35,12 @@ public class OrderEntity {
   @Column(name = "coupon_code", length = 150)
   private String couponCode;
 
+  @Column(name = "coupon_value")
+  private BigDecimal couponValue;
+
+  @Column(name = "shipping_fee")
+  private BigDecimal shippingFee;
+
   @Column(name = "checkout_url")
   private String checkoutUrl;
 
@@ -110,6 +116,32 @@ public class OrderEntity {
 
   public OrderEntity couponCode(String couponCode) {
     this.couponCode = couponCode;
+    return this;
+  }
+
+  public BigDecimal getCouponValue() {
+    return this.couponValue;
+  }
+
+  public void setCouponValue(BigDecimal couponValue) {
+    this.couponValue = couponValue;
+  }
+
+  public OrderEntity couponValue(BigDecimal couponValue) {
+    this.couponValue = couponValue;
+    return this;
+  }
+
+  public BigDecimal getShippingFee() {
+    return this.shippingFee;
+  }
+
+  public void setShippingFee(BigDecimal shippingFee) {
+    this.shippingFee = shippingFee;
+  }
+
+  public OrderEntity shippingFee(BigDecimal shippingFee) {
+    this.shippingFee = shippingFee;
     return this;
   }
 

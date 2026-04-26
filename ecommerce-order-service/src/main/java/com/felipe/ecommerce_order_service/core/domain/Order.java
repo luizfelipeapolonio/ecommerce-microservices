@@ -16,6 +16,8 @@ public class Order {
   private BigDecimal orderPrice;
   private boolean withCoupon;
   private String couponCode;
+  private BigDecimal couponValue;
+  private BigDecimal shippingFee;
   private String checkoutUrl;
   private String invoiceUrl;
   private UUID customerId;
@@ -76,6 +78,32 @@ public class Order {
 
   public Order couponCode(String couponCode) {
     this.couponCode = couponCode;
+    return this;
+  }
+
+  public BigDecimal getCouponValue() {
+    return this.couponValue;
+  }
+
+  public void setCouponValue(BigDecimal couponValue) {
+    this.couponValue = couponValue;
+  }
+
+  public Order couponValue(BigDecimal couponValue) {
+    this.couponValue = couponValue;
+    return this;
+  }
+
+  public BigDecimal getShippingFee() {
+    return this.shippingFee;
+  }
+
+  public void setShippingFee(BigDecimal shippingFee) {
+    this.shippingFee = shippingFee;
+  }
+
+  public Order shippingFee(BigDecimal shippingFee) {
+    this.shippingFee = shippingFee;
     return this;
   }
 

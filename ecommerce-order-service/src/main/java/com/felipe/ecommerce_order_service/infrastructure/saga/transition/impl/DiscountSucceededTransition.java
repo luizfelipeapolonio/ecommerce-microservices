@@ -63,8 +63,10 @@ public final class DiscountSucceededTransition extends SagaTransition {
       String orderAmount = calculateOrderAmount(currentOrderAmount, this.reply.getDiscountType(), this.reply.getDiscountValue());
       String couponDiscountAmount = calculateDiscount(currentOrderAmount, this.reply.getDiscountType(), this.reply.getDiscountValue());
 
-      // Updating order amount
-      UpdateOrderDTO updateOrderDTO = new UpdateOrderDTO().updateOrderPrice(orderAmount);
+      // Updating order
+      UpdateOrderDTO updateOrderDTO = new UpdateOrderDTO()
+        .updateOrderPrice(orderAmount)
+        .updateCouponValue(couponDiscountAmount);
       this.updateOrderUseCase.execute(this.reply.getOrderId(), updateOrderDTO);
 
       PaymentTransactionCreateCommand paymentCommand = PaymentTransactionCreateCommand

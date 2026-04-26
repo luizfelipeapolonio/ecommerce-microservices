@@ -46,6 +46,12 @@ public class UpdateOrderUseCaseImpl implements UpdateOrderUseCase {
         if (orderDTO.orderPrice() != null) {
           order.setOrderPrice(new BigDecimal(orderDTO.orderPrice()));
         }
+        if (orderDTO.couponValue() != null) {
+          order.setCouponValue(new BigDecimal(orderDTO.couponValue()));
+        }
+        if (orderDTO.shippingFee() != null) {
+          order.setShippingFee(new BigDecimal(orderDTO.shippingFee()));
+        }
         if (orderDTO.withCoupon() != null) {
           if (!orderDTO.withCoupon()) {
             order.setWithCoupon(false);

@@ -3,6 +3,8 @@ CREATE TABLE orders (
     order_price      NUMERIC      NOT NULL,
     with_coupon      BOOLEAN      NOT NULL DEFAULT FALSE,
     coupon_code      VARCHAR(150),
+    coupon_value     NUMERIC,
+    shipping_fee     NUMERIC,
     checkout_url     TEXT,
     invoice_url      TEXT,
     customer_id      UUID         NOT NULL,

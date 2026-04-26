@@ -66,8 +66,10 @@ public final class ShippingSucceededTransition extends SagaTransition {
       String currentOrderAmount = this.orderTransitionDataHolder.getOrderAmount();
       String orderAmount = calculateOrderAmount(currentOrderAmount, this.reply.getShippingFee());
 
-      // Updating order amount and setting the helper context
-      UpdateOrderDTO updateOrderDTO = new UpdateOrderDTO().updateOrderPrice(orderAmount);
+      // Updating order and setting the helper context
+      UpdateOrderDTO updateOrderDTO = new UpdateOrderDTO()
+        .updateOrderPrice(orderAmount)
+        .updateShippingFee(this.reply.getShippingFee());
       this.updateOrderUseCase.execute(this.reply.getOrderId(), updateOrderDTO);
       this.orderTransitionDataHolder.setOrderAmount(orderAmount);
 

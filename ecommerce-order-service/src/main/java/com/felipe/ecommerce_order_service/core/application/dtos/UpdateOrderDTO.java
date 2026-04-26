@@ -10,6 +10,8 @@ public class UpdateOrderDTO {
   private String checkoutUrl;
   private String invoiceUrl;
   private String orderPrice;
+  private String couponValue;
+  private String shippingFee;
   private Boolean withCoupon;
   private final List<UpdateProductDTO> products = new ArrayList<>();
 
@@ -50,6 +52,24 @@ public class UpdateOrderDTO {
 
   public String orderPrice() {
     return this.orderPrice;
+  }
+
+  public UpdateOrderDTO updateCouponValue(String couponValue) {
+    this.couponValue = couponValue;
+    return this;
+  }
+
+  public String couponValue() {
+    return this.couponValue;
+  }
+
+  public UpdateOrderDTO updateShippingFee(String shippingFee) {
+    this.shippingFee = shippingFee;
+    return this;
+  }
+
+  public String shippingFee() {
+    return this.shippingFee;
   }
 
   public UpdateOrderDTO updateWithCoupon(boolean withCoupon) {
