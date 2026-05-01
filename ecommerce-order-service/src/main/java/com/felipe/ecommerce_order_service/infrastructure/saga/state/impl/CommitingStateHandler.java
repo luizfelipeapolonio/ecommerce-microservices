@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_order_service.infrastructure.saga.state.impl;
 
+import com.felipe.ecommerce_order_service.core.application.gateway.CustomerGateway;
 import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
 import com.felipe.ecommerce_order_service.infrastructure.exceptions.UnhandledSagaParticipantException;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
@@ -13,10 +14,13 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 public class CommitingStateHandler implements SagaState {
   private final UpdateOrderUseCase updateOrderUseCase;
+  private final CustomerGateway customerGateway;
   private final KafkaTemplate<String, Object> kafkaTemplate;
 
-  public CommitingStateHandler(UpdateOrderUseCase updateOrderUseCase, KafkaTemplate<String, Object> kafkaTemplate) {
+  public CommitingStateHandler(UpdateOrderUseCase updateOrderUseCase, CustomerGateway customerGateway,
+                               KafkaTemplate<String, Object> kafkaTemplate) {
     this.updateOrderUseCase = updateOrderUseCase;
+    this.customerGateway = customerGateway;
     this.kafkaTemplate = kafkaTemplate;
   }
 
@@ -35,7 +39,7 @@ public class CommitingStateHandler implements SagaState {
 
   private SagaTransition handleInventoryCommiting(ReplyTransaction reply) {
     return switch (reply.getStatus()) {
-      case SUCCESS -> new InventoryCommitSucceededTransition(reply, this.updateOrderUseCase);
+      case SUCCESS -> new InventoryCommitSucceededTransition(reply, this.updateOrderUseCase, this.customerGateway, this.kafkaTemplate);
       case FAILURE -> new InventoryCommitFailedTransition(reply, this.kafkaTemplate);
     };
   }

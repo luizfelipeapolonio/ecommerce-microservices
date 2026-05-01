@@ -1,5 +1,10 @@
 server:
   port: 8088
+logging:
+  group:
+    infra-services: com.felipe.ecommerce_shipping_service.infrastructure.services.ShipmentSchedulerService
+  level:
+    infra-services: debug
 spring:
   application.name: ecommerce-shipping-service
   output.ansi.enabled: ALWAYS

@@ -48,8 +48,8 @@ public class KafkaConsumerConfiguration {
   private static String typeMappings() {
     String[] types = {
       "shippingTransactionCreateCommand:com.felipe.kafka.saga.commands.ShippingTransactionCreateCommand",
+      "shippingTransactionCommitCommand:com.felipe.kafka.saga.commands.ShippingTransactionCommitCommand",
     };
-    //return String.join(", ", types);
-    return types[0];
+    return String.join(", ", types);
   }
 }

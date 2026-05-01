@@ -78,7 +78,8 @@ public class KafkaProducerConfiguration {
       "inventoryTransactionCancelCommand:com.felipe.kafka.saga.commands.InventoryTransactionCancelCommand",
       "inventoryTransactionCommitCommand:com.felipe.kafka.saga.commands.InventoryTransactionCommitCommand",
       "paymentTransactionCreateCommand:com.felipe.kafka.saga.commands.PaymentTransactionCreateCommand",
-      "shippingTransactionCreateCommand:com.felipe.kafka.saga.commands.ShippingTransactionCreateCommand"
+      "shippingTransactionCreateCommand:com.felipe.kafka.saga.commands.ShippingTransactionCreateCommand",
+      "shippingTransactionCommitCommand:com.felipe.kafka.saga.commands.ShippingTransactionCommitCommand"
     };
     return String.join(", ", types);
   }

@@ -1,6 +1,10 @@
 package com.felipe.ecommerce_shipping_service.infrastructure.external;
 
+import com.felipe.ecommerce_shipping_service.core.application.dtos.CreateShipmentDTO;
+import com.felipe.ecommerce_shipping_service.core.application.usecases.CreateShipmentUseCase;
+import com.felipe.ecommerce_shipping_service.core.domain.Shipment;
 import com.felipe.ecommerce_shipping_service.infrastructure.utils.ShippingCalculator;
+import com.felipe.kafka.saga.commands.ShippingTransactionCommitCommand;
 import com.felipe.kafka.saga.commands.ShippingTransactionCreateCommand;
 import com.felipe.kafka.saga.replies.ShippingTransactionReply;
 import org.slf4j.Logger;
@@ -17,12 +21,15 @@ import java.util.concurrent.CompletableFuture;
 @KafkaListener(id = "shipping-transactions", topics = "order.order_transaction.shipping.commands", groupId = "shipping-service")
 public class KafkaService {
   private final ShippingCalculator shippingCalculator;
+  private final CreateShipmentUseCase createShipmentUseCase;
   private final KafkaTemplate<String, ShippingTransactionReply> kafkaTemplate;
   private static final Logger logger = LoggerFactory.getLogger(KafkaService.class);
   private static final String ORDER_TRANSACTION_REPLY_TOPIC = "order.order_transaction.replies";
 
-  public KafkaService(ShippingCalculator shippingCalculator, KafkaTemplate<String, ShippingTransactionReply> kafkaTemplate) {
+  public KafkaService(ShippingCalculator shippingCalculator, CreateShipmentUseCase createShipmentUseCase,
+                      KafkaTemplate<String, ShippingTransactionReply> kafkaTemplate) {
     this.shippingCalculator = shippingCalculator;
+    this.createShipmentUseCase = createShipmentUseCase;
     this.kafkaTemplate = kafkaTemplate;
   }
 
@@ -59,5 +66,33 @@ public class KafkaService {
         "Calculating shipping fee reply posted on topic \"{}\" successfully -> status: {}",
         result.getRecordMetadata().topic(), result.getProducerRecord().value().getStatus().name()
       ));
+  }
+
+  @KafkaHandler
+  void commitShipment(ShippingTransactionCommitCommand transactionCommand) {
+    logger.info("\nCommand received in Commit Shipment -> orderId: {}", transactionCommand.getOrderId());
+    try {
+      CreateShipmentDTO shipmentDTO = new CreateShipmentDTO(
+        transactionCommand.getOrderId(),
+        mapToShipmentAddressDTO(transactionCommand.getShipmentAddress())
+      );
+      Shipment shipment = this.createShipmentUseCase.execute(shipmentDTO);
+      logger.info("Shipment created successfully -> orderId: {} - address: {}", shipment.getOrderId(), shipment.getShipmentAddress());
+    } catch (Exception ex) {
+      logger.error("Error in commiting shipment -> {}", ex.getMessage(), ex);
+    }
+  }
+
+  private CreateShipmentDTO.ShipmentAddress mapToShipmentAddressDTO(ShippingTransactionCommitCommand.ShipmentAddress shipmentAddress) {
+    return new CreateShipmentDTO.ShipmentAddress(
+      shipmentAddress.street(),
+      shipmentAddress.number(),
+      shipmentAddress.complement(),
+      shipmentAddress.district(),
+      shipmentAddress.zipcode(),
+      shipmentAddress.city(),
+      shipmentAddress.state(),
+      shipmentAddress.country()
+    );
   }
 }

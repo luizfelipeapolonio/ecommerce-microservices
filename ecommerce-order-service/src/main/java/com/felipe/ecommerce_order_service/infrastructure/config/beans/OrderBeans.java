@@ -93,7 +93,7 @@ public class OrderBeans {
 
   @Bean
   public SagaState commitingStateHandler(UpdateOrderUseCase updateOrderUseCase) {
-    return new CommitingStateHandler(updateOrderUseCase, this.kafkaTemplate);
+    return new CommitingStateHandler(updateOrderUseCase, this.customerGateway, this.kafkaTemplate);
   }
 
   @Bean
