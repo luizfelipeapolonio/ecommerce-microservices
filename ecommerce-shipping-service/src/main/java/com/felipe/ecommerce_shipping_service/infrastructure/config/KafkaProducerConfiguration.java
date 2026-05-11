@@ -1,6 +1,5 @@
 package com.felipe.ecommerce_shipping_service.infrastructure.config;
 
-import com.felipe.kafka.saga.replies.ShippingTransactionReply;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +20,7 @@ public class KafkaProducerConfiguration {
   private String kafkaServer;
 
   @Bean
-  public ProducerFactory<String, ShippingTransactionReply> producerFactory() {
+  public ProducerFactory<String, Object> producerFactory() {
     Map<String, Object> config = new HashMap<>();
     config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.kafkaServer);
     config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -31,7 +30,7 @@ public class KafkaProducerConfiguration {
   }
 
   @Bean
-  public KafkaTemplate<String, ShippingTransactionReply> kafkaTemplate() {
+  public KafkaTemplate<String, Object> kafkaTemplate() {
     return new KafkaTemplate<>(producerFactory());
   }
 }

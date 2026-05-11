@@ -40,6 +40,9 @@ public class ClientRegistrationConfiguration {
   @Value("${auth.clients.order-client.secret}")
   private String orderClientSecret;
 
+  @Value("${auth.clients.mail-client.secret}")
+  private String mailClientSecret;
+
   public ClientRegistrationConfiguration(JpaRegisteredClientRepository jpaRegisteredClientRepository, PasswordEncoder passwordEncoder) {
     this.jpaRegisteredClientRepository = jpaRegisteredClientRepository;
     this.passwordEncoder = passwordEncoder;
@@ -118,12 +121,23 @@ public class ClientRegistrationConfiguration {
         .scope("admin")
         .build();
 
+      RegisteredClient mailClient = RegisteredClient.withId(UUID.randomUUID().toString())
+        .clientId("ecommerce-mail-service")
+        .clientSecret(passwordEncoder.encode(mailClientSecret))
+        .clientName("ecommerce-mail-service")
+        .clientIdIssuedAt(Instant.now())
+        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+        .scope("admin")
+        .build();
+
       jpaRegisteredClientRepository.save(gatewayClient);
       jpaRegisteredClientRepository.save(customerClient);
       jpaRegisteredClientRepository.save(inventoryClient);
       jpaRegisteredClientRepository.save(discountClient);
       jpaRegisteredClientRepository.save(cartClient);
       jpaRegisteredClientRepository.save(orderClient);
+      jpaRegisteredClientRepository.save(mailClient);
     };
   }
 }

@@ -2,8 +2,10 @@ package com.felipe.ecommerce_order_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_order_service.core.application.usecases.CreateOrderUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.FindOrderByIdUseCase;
+import com.felipe.ecommerce_order_service.core.application.usecases.GetOrderByIdWithItemsUseCase;
 import com.felipe.ecommerce_order_service.core.domain.Order;
 import com.felipe.ecommerce_order_service.infrastructure.dtos.CreateOrderDTOImpl;
+import com.felipe.ecommerce_order_service.infrastructure.dtos.OrderResponseDTO;
 import com.felipe.ecommerce_order_service.infrastructure.dtos.OrderStatusDTO;
 import com.felipe.ecommerce_order_service.infrastructure.dtos.StartSagaDTO;
 import com.felipe.ecommerce_order_service.infrastructure.persistence.entities.saga.OrderSaga;
@@ -31,12 +33,16 @@ import java.util.UUID;
 public class OrderController {
   private final CreateOrderUseCase createOrderUseCase;
   private final FindOrderByIdUseCase findOrderByIdUseCase;
+  private final GetOrderByIdWithItemsUseCase getOrderByIdWithItemsUseCase;
   private final OrderSagaService orderSagaService;
 
-  public OrderController(CreateOrderUseCase createOrderUseCase, FindOrderByIdUseCase findOrderByIdUseCase,
+  public OrderController(CreateOrderUseCase createOrderUseCase,
+                         FindOrderByIdUseCase findOrderByIdUseCase,
+                         GetOrderByIdWithItemsUseCase getOrderByIdWithItemsUseCase,
                          OrderSagaService orderSagaService) {
     this.createOrderUseCase = createOrderUseCase;
     this.findOrderByIdUseCase = findOrderByIdUseCase;
+    this.getOrderByIdWithItemsUseCase = getOrderByIdWithItemsUseCase;
     this.orderSagaService = orderSagaService;
   }
 
@@ -75,6 +81,18 @@ public class OrderController {
       .code(HttpStatus.OK)
       .message("Status do pedido de id '" + orderId + "'")
       .payload(statusDTO)
+      .build();
+  }
+
+  @GetMapping("/{orderId}")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<OrderResponseDTO> getOrderById(@PathVariable UUID orderId) {
+    Order order = this.getOrderByIdWithItemsUseCase.execute(orderId);
+    return new ResponsePayload.Builder<OrderResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Pedido de id '" + orderId + "'")
+      .payload(new OrderResponseDTO(order))
       .build();
   }
 }

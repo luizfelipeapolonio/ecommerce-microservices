@@ -23,12 +23,12 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaService {
   private final PaymentService paymentService;
   private final UpdatePaymentUseCase updatePaymentUseCase;
-  private final KafkaTemplate<String, PaymentTransactionReply> kafkaTemplate;
+  private final KafkaTemplate<String, Object> kafkaTemplate;
   private static final Logger logger = LoggerFactory.getLogger(KafkaService.class);
   private static final String ORDER_TRANSACTION_REPLY_TOPIC = "order.order_transaction.replies";
 
   public KafkaService(PaymentService paymentService, UpdatePaymentUseCase updatePaymentUseCase,
-                      KafkaTemplate<String, PaymentTransactionReply> kafkaTemplate) {
+                      KafkaTemplate<String, Object> kafkaTemplate) {
     this.paymentService = paymentService;
     this.updatePaymentUseCase = updatePaymentUseCase;
     this.kafkaTemplate = kafkaTemplate;
@@ -50,7 +50,7 @@ public class KafkaService {
       .withCommand(paymentCommand.getCommand())
       .withParticipant(PaymentTransactionReply.SagaParticipant.PAYMENT);
 
-    CompletableFuture<SendResult<String, PaymentTransactionReply>> sentMessage;
+    CompletableFuture<SendResult<String, Object>> sentMessage;
     try {
       String checkoutUrl = this.paymentService.processPayment(paymentCommand);
       replyBuilder.withCheckoutUrl(checkoutUrl)
@@ -65,11 +65,13 @@ public class KafkaService {
       logger.error("Error in process payment reply -> {}", ex.getMessage(), ex);
       sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLY_TOPIC, replyBuilder.build());
     }
-    sentMessage.whenComplete((result, exception) ->
+    sentMessage.whenComplete((result, exception) -> {
+      PaymentTransactionReply reply = (PaymentTransactionReply) result.getProducerRecord().value();
       logger.info(
         "Process payment reply posted on topic \"{}\" successfully -> status: {}",
-        result.getRecordMetadata().topic(), result.getProducerRecord().value().getStatus().name()
-      ));
+        result.getRecordMetadata().topic(), reply.getStatus().name()
+      );
+    });
   }
 
   @KafkaHandler

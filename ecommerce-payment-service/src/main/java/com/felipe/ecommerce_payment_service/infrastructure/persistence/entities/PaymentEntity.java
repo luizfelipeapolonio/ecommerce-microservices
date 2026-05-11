@@ -33,6 +33,9 @@ public class PaymentEntity {
   @Column(name = "customer_id", nullable = false)
   private UUID customerId;
 
+  @Column(name = "customer_email", nullable = false)
+  private String customerEmail;
+
   @Column(name = "stripe_customer_id", nullable = false)
   private String stripeCustomerId;
 
@@ -109,6 +112,19 @@ public class PaymentEntity {
 
   public PaymentEntity customerId(UUID customerId) {
     this.customerId = customerId;
+    return this;
+  }
+
+  public String getCustomerEmail() {
+    return this.customerEmail;
+  }
+
+  public void setCustomerEmail(String customerEmail) {
+    this.customerEmail = customerEmail;
+  }
+
+  public PaymentEntity customerEmail(String customerEmail) {
+    this.customerEmail = customerEmail;
     return this;
   }
 

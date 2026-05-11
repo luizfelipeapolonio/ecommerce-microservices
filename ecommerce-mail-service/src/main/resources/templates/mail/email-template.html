@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>E-commerce email</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f4f6f8;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #1f2937;
+            padding: 24px 12px;
+        }
+
+        .email-wrapper {
+            width: 100%;
+            max-width: 680px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .banner {
+            width: 100%;
+            display: block;
+        }
+
+        .content {
+            padding: 40px 32px;
+        }
+
+        .greeting {
+            font-size: 24px;
+            font-weight: bold;
+            color: #111827;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #111827;
+        }
+
+        .message {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 18px;
+            color: #4b5563;
+        }
+
+        .card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 14px 22px;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: 18px;
+        }
+
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .order-table thead {
+            background-color: #111827;
+            color: #ffffff;
+        }
+
+        .order-table th,
+        .order-table td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        .order-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .total {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        .tracking-code {
+            background-color: #111827;
+            color: #ffffff;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-top: 16px;
+            font-weight: bold;
+        }
+
+        .success-box {
+            background-color: #ecfdf5;
+            border: 1px solid #10b981;
+            color: #065f46;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-size: 15px;
+        }
+
+        .footer {
+            background-color: #111827;
+            color: #d1d5db;
+            text-align: center;
+            padding: 24px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        @media screen and (max-width: 600px) {
+            .content {
+                padding: 28px 20px;
+            }
+
+            .greeting {
+                font-size: 20px;
+            }
+
+            .section-title {
+                font-size: 18px;
+            }
+
+            .order-table th,
+            .order-table td {
+                font-size: 13px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="email-wrapper">
+    <!-- Banner image -->
+    <img
+            class="banner"
+            alt="E-commerce Banner"
+            src="data:image/svg+xml;utf8,
+                <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='320'>
+                    <defs>
+                        <linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'>
+                            <stop offset='0%' stop-color='%23111827'/>
+                            <stop offset='100%' stop-color='%232563eb'/>
+                        </linearGradient>
+                    </defs>
+
+                    <rect width='100%' height='100%' fill='url(%23g)'/>
+
+                    <circle cx='1050' cy='60' r='120' fill='rgba(255,255,255,0.08)'/>
+                    <circle cx='180' cy='260' r='140' fill='rgba(255,255,255,0.05)'/>
+
+                    <text
+                        x='80'
+                        y='150'
+                        font-family='Arial'
+                        font-size='56'
+                        fill='white'
+                        font-weight='bold'>
+                        E-commerce
+                    </text>
+
+                    <text
+                        x='80'
+                        y='210'
+                        font-family='Arial'
+                        font-size='24'
+                        fill='%23dbeafe'>
+                        Tudo o que você precisa em um só lugar
+                    </text>
+
+                    <rect x='80' y='235' rx='12' ry='12' width='320' height='48' fill='white' opacity='0.15'/>
+                    <text
+                        x='115'
+                        y='266'
+                        font-family='Arial'
+                        font-size='20'
+                        fill='white'>
+                        Rápido • Seguro • Confiável
+                    </text>
+                </svg>"
+    />
+
+    <div class="content">
+        <h1 class="greeting" th:text="|Olá, ${mailTo.username}!|"></h1>
+
+        <div th:switch="${subject}">
+            <!-- APPROVED PAYMENT -->
+            <div th:case="${T(com.felipe.kafka.EmailDTO$Subject).APPROVED_PAYMENT}">
+                <div class="success-box">
+                    Seu pagamento foi aprovado com sucesso.
+                </div>
+
+                <h2 class="section-title">Pagamento confirmado</h2>
+
+                <p class="message">
+                    Recebemos o pagamento do seu pedido e já estamos preparando os próximos passos.
+                </p>
+
+                <p class="message">
+                    Em breve você receberá a nota fiscal e as atualizações de envio.
+                </p>
+            </div>
+
+            <!-- CREATED INVOICE -->
+            <div th:case="${T(com.felipe.kafka.EmailDTO$Subject).CREATED_INVOICE}">
+                <div class="success-box">
+                    A nota fiscal do seu pedido foi gerada.
+                </div>
+
+                <h2 class="section-title">Nota fiscal disponível</h2>
+
+                <p class="message">
+                    Sua nota fiscal já está pronta para visualização.
+                </p>
+
+                <a
+                        class="button"
+                        th:href="@{${mailTo.invoiceUrl}}">
+                    Visualizar nota fiscal
+                </a>
+            </div>
+
+            <!-- PREPARING SHIPMENT -->
+            <div th:case="${T(com.felipe.kafka.EmailDTO$Subject).PREPARING_SHIPMENT}">
+                <h2
+                        class="section-title"
+                        th:text="|Seu pedido '${mailTo.orderId}' está sendo preparado|">
+                </h2>
+
+                <p class="message">
+                    Nossa equipe já está separando os produtos do seu pedido.
+                </p>
+
+                <div class="card">
+                    <p class="message"><strong>Resumo do pedido:</strong></p>
+
+                    <table class="order-table">
+                        <thead>
+                        <tr>
+                            <th>Quantidade</th>
+                            <th>Item</th>
+                            <th>Valor</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr th:each="item : ${mailTo.orderItems}">
+                                <td th:text="${item.quantity}"></td>
+                                <td th:text="${item.name}"></td>
+                                <td th:text="|R$ ${item.price}|"></td>
+                            </tr>
+                            <tr>
+                                <td>-</td>
+                                <td>Frete</td>
+                                <td th:text="|R$ ${mailTo.shippingFee}|"></td>
+                            </tr>
+                            <tr th:if="${mailTo.couponValue}">
+                                <td>1</td>
+                                <td>Cupom de desconto</td>
+                                <td th:text="|-R$ ${mailTo.couponValue}|"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="total">
+                        Total: R$
+                        <span th:text="${mailTo.orderPrice}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SHIPMENT OUT FOR DELIVERY -->
+            <div th:case="${T(com.felipe.kafka.EmailDTO$Subject).SHIPMENT_OUT_FOR_DELIVERY}">
+                <div class="success-box">
+                    Seu pedido saiu para entrega.
+                </div>
+
+                <h2
+                        class="section-title"
+                        th:text="|Seu pedido '${mailTo.orderId}' já está a caminho|">
+                </h2>
+
+                <p class="message">
+                    Você pode acompanhar a entrega utilizando o código abaixo:
+                </p>
+
+                <div
+                        class="tracking-code"
+                        th:text="${mailTo.trackingCode}">
+                </div>
+            </div>
+
+            <!-- DELIVERED SHIPMENT -->
+            <div th:case="${T(com.felipe.kafka.EmailDTO$Subject).DELIVERED_SHIPMENT}">
+                <div class="success-box">
+                    Pedido entregue com sucesso.
+                </div>
+
+                <h2
+                        class="section-title"
+                        th:text="|Seu pedido '${mailTo.orderId}' foi entregue!|">
+                </h2>
+
+                <p class="message">
+                    Obrigado por comprar no E-commerce. Esperamos ver você novamente em breve.
+                </p>
+
+                <div class="card">
+                    <p class="message"><strong>Resumo do pedido:</strong></p>
+
+                    <table class="order-table">
+                        <thead>
+                        <tr>
+                            <th>Quantidade</th>
+                            <th>Item</th>
+                            <th>Valor</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr th:each="item : ${mailTo.orderItems}">
+                                <td th:text="${item.quantity}"></td>
+                                <td th:text="${item.name}"></td>
+                                <td th:text="|R$ ${item.price}|"></td>
+                            </tr>
+                            <tr>
+                                <td>-</td>
+                                <td>Frete</td>
+                                <td th:text="|R$ ${mailTo.shippingFee}|"></td>
+                            </tr>
+                            <tr th:if="${mailTo.couponValue}">
+                                <td>1</td>
+                                <td>Cupom de desconto</td>
+                                <td th:text="|-R$ ${mailTo.couponValue}|"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="total">
+                        Total: R$
+                        <span th:text="${mailTo.orderPrice}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2026 E-commerce • Todos os direitos reservados
+        <br />
+        Este e-mail foi enviado automaticamente. Não responda esta mensagem.
+    </div>
+</div>
+</body>
+</html>

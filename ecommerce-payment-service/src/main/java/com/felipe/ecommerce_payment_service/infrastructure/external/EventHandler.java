@@ -4,6 +4,7 @@ import com.felipe.ecommerce_payment_service.core.application.usecases.UpdatePaym
 import com.felipe.ecommerce_payment_service.core.domain.Payment;
 import com.felipe.ecommerce_payment_service.core.domain.PaymentStatus;
 import com.felipe.ecommerce_payment_service.infrastructure.exceptions.PaymentEventsException;
+import com.felipe.kafka.EmailDTO;
 import com.felipe.kafka.saga.replies.PaymentTransactionReply;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
@@ -15,8 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Component
@@ -24,17 +27,21 @@ public class EventHandler {
 
   @Value("${stripe.webhook.key}")
   private String webhookKey;
-  private final KafkaTemplate<String, PaymentTransactionReply> kafkaTemplate;
+  private final KafkaTemplate<String, Object> kafkaTemplate;
   private final UpdatePaymentUseCase updatePaymentUseCase;
   private final PaymentService paymentService;
+  private final TaskScheduler taskScheduler;
   private static final Logger logger = LoggerFactory.getLogger(EventHandler.class);
   private static final String ORDER_TRANSACTION_REPLY_TOPIC = "order.order_transaction.replies";
 
-  public EventHandler(KafkaTemplate<String, PaymentTransactionReply> kafkaTemplate, UpdatePaymentUseCase updatePaymentUseCase,
-                      PaymentService paymentService) {
+  public EventHandler(KafkaTemplate<String, Object> kafkaTemplate,
+                      UpdatePaymentUseCase updatePaymentUseCase,
+                      PaymentService paymentService,
+                      TaskScheduler taskScheduler) {
     this.kafkaTemplate = kafkaTemplate;
     this.updatePaymentUseCase = updatePaymentUseCase;
     this.paymentService = paymentService;
+    this.taskScheduler = taskScheduler;
   }
 
   public void handle(String payload, String stripeHeader) {
@@ -73,10 +80,35 @@ public class EventHandler {
             if (exception == null) {
               logger.info(
                 "Payment confirmation of order '{}' posted on topic \"{}\" successfully",
-                result.getProducerRecord().value().getOrderId(), result.getRecordMetadata().topic()
+                orderId, result.getRecordMetadata().topic()
               );
             }
           });
+
+        EmailDTO emailDTO = new EmailDTO()
+          .setOrderId(orderId)
+          .setEmailTo(updatedPayment.getCustomerEmail())
+          .setSubject(EmailDTO.Subject.APPROVED_PAYMENT);
+
+        this.kafkaTemplate.send("order.emails", emailDTO)
+          .whenComplete((result, exception) -> {
+            if (exception == null) {
+              logger.info("Approved payment email posted on topic \"{}\" successfully", result.getRecordMetadata().topic());
+            }
+          });
+
+        // Delaying invoice creation to simulate a separate event
+        this.taskScheduler.schedule(() -> {
+          emailDTO.setInvoiceUrl(invoiceUrl);
+          emailDTO.setSubject(EmailDTO.Subject.CREATED_INVOICE);
+
+          this.kafkaTemplate.send("order.emails", emailDTO)
+            .whenComplete((result, exception) -> {
+              if (exception == null) {
+                logger.info("Created invoice email posted successfully");
+              }
+            });
+        }, Instant.now().plusSeconds(10));
       }
       case "invoice.payment_failed" -> {
         Invoice invoice = (Invoice) stripeObject;

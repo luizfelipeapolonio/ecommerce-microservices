@@ -1,5 +1,6 @@
 package com.felipe.ecommerce_payment_service.infrastructure.external;
 
+import com.felipe.ecommerce_payment_service.core.application.dtos.CreatePaymentDTO;
 import com.felipe.ecommerce_payment_service.core.application.usecases.CreatePaymentUseCase;
 import com.felipe.ecommerce_payment_service.core.domain.Payment;
 import com.felipe.ecommerce_payment_service.infrastructure.exceptions.InsufficientCustomerBalanceException;
@@ -84,14 +85,15 @@ public class PaymentService {
 
     try {
       Session session = this.stripeClient.v1().checkout().sessions().create(params.build());
-      Payment createdPayment = this.createPaymentUseCase.execute(
+      Payment createdPayment = this.createPaymentUseCase.execute(new CreatePaymentDTO(
         paymentCommand.getOrderId(),
         paymentCommand.getSagaId(),
         paymentCommand.getTransactionId(),
         paymentCommand.getOrderAmount(),
         paymentCommand.getCustomer().id(),
+        paymentCommand.getCustomer().email(),
         customer.getId(),
-        session.getId()
+        session.getId())
       );
       logger.info("Payment domain created successfully -> orderId: {}", createdPayment.getOrderId());
       return session.getUrl();

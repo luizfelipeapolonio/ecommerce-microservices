@@ -22,12 +22,12 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaService {
   private final ShippingCalculator shippingCalculator;
   private final CreateShipmentUseCase createShipmentUseCase;
-  private final KafkaTemplate<String, ShippingTransactionReply> kafkaTemplate;
+  private final KafkaTemplate<String, Object> kafkaTemplate;
   private static final Logger logger = LoggerFactory.getLogger(KafkaService.class);
   private static final String ORDER_TRANSACTION_REPLY_TOPIC = "order.order_transaction.replies";
 
   public KafkaService(ShippingCalculator shippingCalculator, CreateShipmentUseCase createShipmentUseCase,
-                      KafkaTemplate<String, ShippingTransactionReply> kafkaTemplate) {
+                      KafkaTemplate<String, Object> kafkaTemplate) {
     this.shippingCalculator = shippingCalculator;
     this.createShipmentUseCase = createShipmentUseCase;
     this.kafkaTemplate = kafkaTemplate;
@@ -43,7 +43,7 @@ public class KafkaService {
       .withCommand(transactionCommand.getCommand())
       .withParticipant(ShippingTransactionReply.SagaParticipant.SHIPPING);
 
-    CompletableFuture<SendResult<String, ShippingTransactionReply>> sentMessage;
+    CompletableFuture<SendResult<String, Object>> sentMessage;
     try {
       String shippingFee = this.shippingCalculator.calculateShippingFee();
 
@@ -61,11 +61,13 @@ public class KafkaService {
 
       sentMessage = this.kafkaTemplate.send(ORDER_TRANSACTION_REPLY_TOPIC, replyBuilder.build());
     }
-    sentMessage.whenComplete((result, exception) ->
-      logger.info(
-        "Calculating shipping fee reply posted on topic \"{}\" successfully -> status: {}",
-        result.getRecordMetadata().topic(), result.getProducerRecord().value().getStatus().name()
-      ));
+    sentMessage.whenComplete((result, exception) -> {
+      ShippingTransactionReply reply = (ShippingTransactionReply) result.getProducerRecord().value();
+        logger.info(
+          "Calculating shipping fee reply posted on topic \"{}\" successfully -> status: {}",
+          result.getRecordMetadata().topic(), reply.getStatus().name()
+        );
+    });
   }
 
   @KafkaHandler

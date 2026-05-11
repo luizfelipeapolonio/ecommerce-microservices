@@ -3,10 +3,12 @@ package com.felipe.ecommerce_shipping_service.infrastructure.services;
 import com.felipe.ecommerce_shipping_service.core.domain.ShipmentStatus;
 import com.felipe.ecommerce_shipping_service.infrastructure.persistence.entities.shipment.ShipmentEntity;
 import com.felipe.ecommerce_shipping_service.infrastructure.persistence.repositories.ShipmentRepository;
+import com.felipe.kafka.EmailDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
@@ -24,15 +26,18 @@ import java.util.concurrent.ScheduledFuture;
 public class ShipmentSchedulerService {
   private final TaskScheduler taskScheduler;
   private final ShipmentRepository shipmentRepository;
+  private final KafkaTemplate<String, Object> kafkaTemplate;
   private final Map<UUID, ScheduledFuture<?>> scheduledShipments = new ConcurrentHashMap<>();
   private static final Logger logger = LoggerFactory.getLogger(ShipmentSchedulerService.class);
 
-  public ShipmentSchedulerService(TaskScheduler taskScheduler, ShipmentRepository shipmentRepository) {
+  public ShipmentSchedulerService(TaskScheduler taskScheduler, ShipmentRepository shipmentRepository,
+                                  KafkaTemplate<String, Object> kafkaTemplate) {
     this.taskScheduler = taskScheduler;
     this.shipmentRepository = shipmentRepository;
+    this.kafkaTemplate = kafkaTemplate;
   }
 
-  public void scheduleShipmentToStatusMutation(ShipmentEntity shipment) {
+  public void scheduleShipmentForStatusMutation(ShipmentEntity shipment) {
     schedule(shipment, () -> mutateToOutForDelivery(shipment), shipment.getUpdatedAt());
   }
 
@@ -88,7 +93,16 @@ public class ShipmentSchedulerService {
 
       schedule(updatedShipment, () -> mutateToDelivered(updatedShipment), updatedShipment.getUpdatedAt());
 
-      // TODO: send to email kafka topic
+      EmailDTO emailDTO = new EmailDTO()
+        .setOrderId(foundShipment.getOrderId())
+        .setSubject(EmailDTO.Subject.SHIPMENT_OUT_FOR_DELIVERY);
+
+      this.kafkaTemplate.send("order.emails", emailDTO)
+        .whenComplete((result, exception) -> {
+          if (exception == null) {
+            logger.info("Shipment out for delivery email posted on topic \"{}\" successfully", result.getRecordMetadata().topic());
+          }
+        });
     });
   }
 
@@ -102,7 +116,16 @@ public class ShipmentSchedulerService {
       logger.info("Mutating Shipment \"{}\" status to DELIVERED", updatedShipment.getId());
       logger.debug("mutateToDelivered - Scheduled shipments quantity: {}", this.scheduledShipments.size());
 
-      // TODO: send to email kafka topic
+      EmailDTO emailDTO = new EmailDTO()
+        .setOrderId(foundShipment.getOrderId())
+        .setSubject(EmailDTO.Subject.DELIVERED_SHIPMENT);
+
+      this.kafkaTemplate.send("order.emails", emailDTO)
+        .whenComplete((result, exception) -> {
+          if (exception == null) {
+            logger.info("Delivered shipment email posted on topic \"{}\" successfully", result.getRecordMetadata().topic());
+          }
+        });
     });
   }
 }

@@ -1,6 +1,5 @@
 package com.felipe.ecommerce_payment_service.infrastructure.config;
 
-import com.felipe.kafka.saga.replies.PaymentTransactionReply;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,19 +18,28 @@ public class KafkaProducerConfiguration {
 
   @Value("${spring.kafka.bootstrap-servers}")
   private String kafkaServer;
+  private static final String SERIALIZER_TYPE_MAPPINGS = typeMappings();
 
   @Bean
-  public ProducerFactory<String, PaymentTransactionReply> producerFactory() {
+  public ProducerFactory<String, Object> producerFactory() {
     Map<String, Object> configs = new HashMap<>();
     configs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.kafkaServer);
     configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-    configs.put(JsonSerializer.TYPE_MAPPINGS, "paymentTransactionReply:com.felipe.kafka.saga.replies.PaymentTransactionReply");
+    configs.put(JsonSerializer.TYPE_MAPPINGS, SERIALIZER_TYPE_MAPPINGS);
     return new DefaultKafkaProducerFactory<>(configs);
   }
 
   @Bean
-  public KafkaTemplate<String, PaymentTransactionReply> kafkaTemplate() {
+  public KafkaTemplate<String, Object> kafkaTemplate() {
     return new KafkaTemplate<>(producerFactory());
+  }
+
+  private static String typeMappings() {
+    String[] types = {
+      "paymentTransactionReply:com.felipe.kafka.saga.replies.PaymentTransactionReply",
+      "emailDTO:com.felipe.kafka.EmailDTO"
+    };
+    return String.join(", ", types);
   }
 }

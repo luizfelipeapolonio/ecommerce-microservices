@@ -9,6 +9,7 @@ public class Payment {
   private UUID orderId;
   private BigDecimal orderAmount;
   private UUID customerId;
+  private String customerEmail;
   private String stripeCustomerId;
   private UUID sagaId;
   private UUID transactionId;
@@ -69,6 +70,19 @@ public class Payment {
 
   public Payment customerId(UUID customerId) {
     this.customerId = customerId;
+    return this;
+  }
+
+  public String getCustomerEmail() {
+    return this.customerEmail;
+  }
+
+  public void setCustomerEmail(String customerEmail) {
+    this.customerEmail = customerEmail;
+  }
+
+  public Payment customerEmail(String customerEmail) {
+    this.customerEmail = customerEmail;
     return this;
   }
 

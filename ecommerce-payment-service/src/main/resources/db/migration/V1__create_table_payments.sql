@@ -3,6 +3,7 @@ CREATE TABLE payments (
     order_id           UUID         NOT NULL,
     order_amount       NUMERIC      NOT NULL,
     customer_id        UUID         NOT NULL,
+    customer_email     VARCHAR(255) NOT NULL,
     stripe_customer_id VARCHAR(255) NOT NULL,
     saga_id            UUID         NOT NULL,
     transaction_id     UUID         NOT NULL,
