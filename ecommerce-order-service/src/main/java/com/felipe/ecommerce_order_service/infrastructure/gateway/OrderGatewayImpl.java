@@ -91,6 +91,11 @@ public class OrderGatewayImpl implements OrderGateway {
   }
 
   @Override
+  public Optional<Order> findOrderByIdAndCustomerIdWithItems(UUID orderId, UUID customerId) {
+    return this.orderRepository.findByIdAndCustomerIdWithItems(orderId, customerId).map(this.orderEntityMapper::toDomain);
+  }
+
+  @Override
   public void deleteOrder(UUID orderId) {
     this.orderRepository.deleteById(orderId);
   }

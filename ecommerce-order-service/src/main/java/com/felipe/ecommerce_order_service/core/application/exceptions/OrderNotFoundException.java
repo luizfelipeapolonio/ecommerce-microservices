@@ -6,4 +6,8 @@ public class OrderNotFoundException extends RuntimeException {
   public OrderNotFoundException(UUID orderId) {
     super("Pedido de id '" + orderId + "' não encontrado");
   }
+
+  public OrderNotFoundException(String message) {
+    super(message);
+  }
 }

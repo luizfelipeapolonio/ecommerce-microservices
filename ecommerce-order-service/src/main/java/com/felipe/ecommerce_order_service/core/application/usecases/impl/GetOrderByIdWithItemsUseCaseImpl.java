@@ -15,7 +15,7 @@ public class GetOrderByIdWithItemsUseCaseImpl implements GetOrderByIdWithItemsUs
   }
 
   @Override
-  public Order execute(UUID orderId) {
+  public Order execute(UUID orderId, String customerEmail) {
     return this.orderGateway.findOrderByIdWithItems(orderId)
       .orElseThrow(() -> new OrderNotFoundException(orderId));
   }

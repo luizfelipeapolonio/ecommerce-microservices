@@ -11,6 +11,7 @@ public interface OrderGateway {
   Map<String, UUID> createOrder(UUID customerId, CreateOrderDTO orderDTO);
   Optional<Order> findOrderById(UUID orderId);
   Optional<Order> findOrderByIdWithItems(UUID orderId);
+  Optional<Order> findOrderByIdAndCustomerIdWithItems(UUID orderId, UUID customerId);
   void deleteOrder(UUID orderId);
   Order updateOrder(Order order);
 }

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,16 +34,16 @@ import java.util.UUID;
 public class OrderController {
   private final CreateOrderUseCase createOrderUseCase;
   private final FindOrderByIdUseCase findOrderByIdUseCase;
-  private final GetOrderByIdWithItemsUseCase getOrderByIdWithItemsUseCase;
+  private final Map<String, GetOrderByIdWithItemsUseCase> getOrderUseCases;
   private final OrderSagaService orderSagaService;
 
   public OrderController(CreateOrderUseCase createOrderUseCase,
                          FindOrderByIdUseCase findOrderByIdUseCase,
-                         GetOrderByIdWithItemsUseCase getOrderByIdWithItemsUseCase,
+                         Map<String, GetOrderByIdWithItemsUseCase> getOrderUseCases,
                          OrderSagaService orderSagaService) {
     this.createOrderUseCase = createOrderUseCase;
     this.findOrderByIdUseCase = findOrderByIdUseCase;
-    this.getOrderByIdWithItemsUseCase = getOrderByIdWithItemsUseCase;
+    this.getOrderUseCases = getOrderUseCases;
     this.orderSagaService = orderSagaService;
   }
 
@@ -86,13 +87,22 @@ public class OrderController {
 
   @GetMapping("/{orderId}")
   @ResponseStatus(HttpStatus.OK)
-  public ResponsePayload<OrderResponseDTO> getOrderById(@PathVariable UUID orderId) {
-    Order order = this.getOrderByIdWithItemsUseCase.execute(orderId);
+  public ResponsePayload<OrderResponseDTO> getOrderById(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID orderId) {
+    GetOrderByIdWithItemsUseCase getOrderByIdWithItemsUseCase = selectGetOrderUseCase(jwt);
+    Order order = getOrderByIdWithItemsUseCase.execute(orderId, jwt.getSubject());
     return new ResponsePayload.Builder<OrderResponseDTO>()
       .type(ResponseType.SUCCESS)
       .code(HttpStatus.OK)
       .message("Pedido de id '" + orderId + "'")
       .payload(new OrderResponseDTO(order))
       .build();
+  }
+
+  private GetOrderByIdWithItemsUseCase selectGetOrderUseCase(Jwt jwt) {
+    List<String> scopes = jwt.getClaimAsStringList("scope");
+    List<String> authorities = jwt.getClaimAsStringList("authorities");
+    return scopes.contains("admin") || authorities.contains("ROLE_ADMIN")
+      ? this.getOrderUseCases.get("getOrderByIdWithItems")
+      : this.getOrderUseCases.get("getOrderByIdWithItemsAuthenticated");
   }
 }

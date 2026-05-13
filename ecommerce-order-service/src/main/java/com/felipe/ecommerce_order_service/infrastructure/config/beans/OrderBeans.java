@@ -13,6 +13,7 @@ import com.felipe.ecommerce_order_service.core.application.usecases.impl.CreateO
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.DeleteOrderUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.FindOrderByIdUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.GetOrderByIdUseCaseImpl;
+import com.felipe.ecommerce_order_service.core.application.usecases.impl.GetOrderByIdWithItemsAuthenticatedUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.GetOrderByIdWithItemsUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.UpdateOrderUseCaseImpl;
 import com.felipe.ecommerce_order_service.infrastructure.saga.state.impl.CancellingStateHandler;
@@ -61,9 +62,14 @@ public class OrderBeans {
     return new GetOrderByIdUseCaseImpl(this.orderGateway);
   }
 
-  @Bean
+  @Bean(name = "getOrderByIdWithItems")
   public GetOrderByIdWithItemsUseCase getOrderByIdWithItemsUseCase() {
     return new GetOrderByIdWithItemsUseCaseImpl(this.orderGateway);
+  }
+
+  @Bean(name = "getOrderByIdWithItemsAuthenticated")
+  public GetOrderByIdWithItemsUseCase getOrderByIdWithItemsAuthenticatedUseCase() {
+    return new GetOrderByIdWithItemsAuthenticatedUseCaseImpl(this.orderGateway, this.customerGateway);
   }
 
   @Bean
