@@ -23,7 +23,7 @@ public class RemoveCouponApplicationUseCaseImpl implements RemoveCouponApplicati
 
     Optional<CouponAppliedBy> couponAppliedBy = coupon.getAppliedBy()
       .stream()
-      .filter(appliedBy -> appliedBy.getCustomerId().equals(customerId) || appliedBy.getOrderId().equals(orderId))
+      .filter(appliedBy -> appliedBy.getCustomerId().equals(customerId) && appliedBy.getOrderId().equals(orderId))
       .findFirst();
     if (couponAppliedBy.isEmpty()) return;
 
