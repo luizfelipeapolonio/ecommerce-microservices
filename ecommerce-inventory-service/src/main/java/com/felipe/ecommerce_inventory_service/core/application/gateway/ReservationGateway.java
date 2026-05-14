@@ -12,7 +12,7 @@ public interface ReservationGateway {
   List<Reservation> reserveProduct(UUID orderId, List<ProductReservationDTO> reservationDTOs);
   Optional<Reservation> findReservationByOrderId(UUID orderId);
   List<Reservation> findAllReservationsByOrderIdAndStatus(UUID orderId, ReservationStatus status);
-  List<Reservation> findReservationsByProductIds(List<UUID> productIds);
+  List<Reservation> findReservationsByProductIdsAndStatus(List<UUID> productIds, ReservationStatus status);
   void updateReservations(List<Reservation> reservations);
   void deleteReservations(List<Reservation> reservations);
 }

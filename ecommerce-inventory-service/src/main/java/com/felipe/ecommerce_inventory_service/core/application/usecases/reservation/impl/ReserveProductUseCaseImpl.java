@@ -9,6 +9,7 @@ import com.felipe.ecommerce_inventory_service.core.application.gateway.Reservati
 import com.felipe.ecommerce_inventory_service.core.application.usecases.reservation.ReserveProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
 import com.felipe.ecommerce_inventory_service.core.domain.reservation.Reservation;
+import com.felipe.ecommerce_inventory_service.core.domain.reservation.ReservationStatus;
 import com.felipe.utils.Pair;
 
 import java.util.List;
@@ -29,9 +30,16 @@ public class ReserveProductUseCaseImpl implements ReserveProductUseCase {
   @Override
   public Pair<List<Product>, List<Reservation>> execute(UUID orderId, List<ProductReservationDTO> reservationDTOs) {
     List<Product> products = reservationDTOs.stream()
-      .map(reservation ->
-        this.productGateway.findProductByIdWithTransactionLock(reservation.productId())
-          .orElseThrow(() -> new DataNotFoundException("Produto de id: '" + reservation.productId() + "' não encontrado")))
+      .map(reservation -> {
+          Product product = this.productGateway.findProductByIdWithTransactionLock(reservation.productId())
+            .orElseThrow(() -> new DataNotFoundException("Produto de id: '" + reservation.productId() + "' não encontrado"));
+
+          if (product.getQuantity() == 0) {
+            throw new UnavailableProductException("O produto de id '" + product.getId() + "' não está disponível no estoque");
+          }
+          return product;
+        }
+      )
       .toList();
 
     Optional<Reservation> existingReservation = this.reservationGateway.findReservationByOrderId(orderId);
@@ -41,11 +49,11 @@ public class ReserveProductUseCaseImpl implements ReserveProductUseCase {
       );
     }
     List<UUID> productIds = products.stream().map(Product::getId).toList();
-    List<Reservation> reservations = this.reservationGateway.findReservationsByProductIds(productIds);
+    List<Reservation> reservations = this.reservationGateway.findReservationsByProductIdsAndStatus(productIds, ReservationStatus.RESERVED);
 
     // throws exception if:
     // quantity to reserve > product stock quantity
-    // reservation quantity + quantity to reserve > product stock quantity
+    // reserved quantity + quantity to reserve > product stock quantity
     checkIfProductsAreAvailable(products, reservations, reservationDTOs);
     List<Reservation> reservationsDone = this.reservationGateway.reserveProduct(orderId, reservationDTOs);
     return new Pair<>(products, reservationsDone);
@@ -69,11 +77,11 @@ public class ReserveProductUseCaseImpl implements ReserveProductUseCase {
   }
 
   private boolean isProductAvailable(long stockQuantity, List<Reservation> reservations, long quantityToReserve) {
-    long reservationQuantity = 0;
+    long reservedQuantity = 0;
     for (Reservation reservation : reservations) {
-      reservationQuantity += reservation.getQuantity();
+      reservedQuantity += reservation.getQuantity();
     }
-    long totalReservations = reservationQuantity + quantityToReserve;
-    return quantityToReserve < stockQuantity || totalReservations <  stockQuantity;
+    long totalReservations = reservedQuantity + quantityToReserve;
+    return quantityToReserve <= stockQuantity && totalReservations <= stockQuantity;
   }
 }

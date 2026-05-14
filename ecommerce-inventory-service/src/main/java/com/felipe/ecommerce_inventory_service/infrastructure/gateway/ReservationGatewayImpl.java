@@ -53,8 +53,8 @@ public class ReservationGatewayImpl implements ReservationGateway {
   }
 
   @Override
-  public List<Reservation> findReservationsByProductIds(List<UUID> productIds) {
-    return this.reservationRepository.findByProductIdIn(productIds)
+  public List<Reservation> findReservationsByProductIdsAndStatus(List<UUID> productIds, ReservationStatus status) {
+    return this.reservationRepository.findByProductIdInAndStatus(productIds, status.getText())
       .stream()
       .map(this.reservationEntityMapper::toDomain)
       .toList();
