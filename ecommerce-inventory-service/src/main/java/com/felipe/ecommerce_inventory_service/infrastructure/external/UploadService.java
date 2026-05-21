@@ -66,7 +66,6 @@ public class UploadService {
   }
 
   @CircuitBreaker(name = "inventory__uploadService", fallbackMethod = "fallback")
-  @RateLimiter(name = "inventory__uploadService", fallbackMethod = "fallback")
   public ResponsePayload<List<ImageResponse>> getProductImages(Set<String> productIdsList)  {
     final String productIds = StringUtils.collectionToCommaDelimitedString(productIdsList);
     logger.info("Get product images for productIds: {}", productIds);
