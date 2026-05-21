@@ -23,6 +23,7 @@
         <module>ecommerce-payment-service</module>
         <module>ecommerce-shipping-service</module>
         <module>ecommerce-mail-service</module>
+        <module>ecommerce-catalog-service</module>
     </modules>
 
 </project>
