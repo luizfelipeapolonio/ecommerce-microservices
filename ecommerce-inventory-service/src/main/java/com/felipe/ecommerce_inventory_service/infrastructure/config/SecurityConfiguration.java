@@ -31,6 +31,7 @@ public class SecurityConfiguration {
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers(HttpMethod.GET, DOCS_WHITELIST).permitAll()
         .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/v1/products/search").permitAll()
         .anyRequest().hasAnyAuthority("ROLE_ADMIN", "SCOPE_admin"))
       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .oauth2ResourceServer(oauth2 -> oauth2

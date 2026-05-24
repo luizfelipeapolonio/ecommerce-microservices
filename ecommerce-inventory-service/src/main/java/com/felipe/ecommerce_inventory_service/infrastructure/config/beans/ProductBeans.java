@@ -19,6 +19,7 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.product.
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.RemoveProductFromStockUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.SearchProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.AddProductInStockUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.ApplyPromotionToProductsUseCaseImpl;
@@ -32,6 +33,7 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.product.
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetProductsByModelUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.GetProductsUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.RemoveProductFromStockUseCaseImpl;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.SearchProductsUseCaseImpl;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.impl.UpdateProductUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -105,6 +107,11 @@ public class ProductBeans {
   @Bean
   public DeleteProductUseCase deleteProductUseCase() {
     return new DeleteProductUseCaseImpl(productGateway);
+  }
+
+  @Bean
+  public SearchProductsUseCase searchProductsUseCase() {
+    return new SearchProductsUseCaseImpl(productGateway);
   }
 
   @Bean

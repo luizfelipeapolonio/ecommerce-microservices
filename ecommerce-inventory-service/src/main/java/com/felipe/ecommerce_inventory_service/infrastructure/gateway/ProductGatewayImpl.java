@@ -5,18 +5,21 @@ import com.felipe.ecommerce_inventory_service.core.application.dtos.product.Prod
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionAppliesToDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.SearchProductsResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.UpdateProductDomainDTO;
 import com.felipe.ecommerce_inventory_service.core.application.gateway.ProductGateway;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductPageResponseDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductSearchProjectionDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.external.UploadService;
 import com.felipe.ecommerce_inventory_service.infrastructure.mappers.ProductEntityMapper;
 import com.felipe.ecommerce_inventory_service.infrastructure.mappers.UploadFileMapper;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ProductEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.repositories.ProductRepository;
 import com.felipe.response.ResponsePayload;
+import com.felipe.utils.product.PricingCalculator;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,6 +198,21 @@ public class ProductGatewayImpl implements ProductGateway {
   }
 
   @Override
+  public SearchProductsResponseDTO searchProducts(String query, int page, int elementsQuantity) {
+    Pageable pagination = PageRequest.of(page, elementsQuantity);
+    Page<ProductSearchProjectionDTO> productsPage = this.productRepository.searchProducts(query, pagination);
+    List<SearchProductsResponseDTO.SearchedProducts> searchedProducts = mapToSearchedProductsList(productsPage);
+
+    return new SearchProductsResponseDTO(
+      productsPage.getNumber(),
+      productsPage.getNumberOfElements(),
+      productsPage.getTotalPages(),
+      productsPage.getTotalElements(),
+      searchedProducts
+    );
+  }
+
+  @Override
   public long updateProductQuantityInStock(Product product) {
     final ProductEntity updatedProduct = this.productRepository.save(this.productEntityMapper.toEntity(product));
     return updatedProduct.getQuantity();
@@ -284,5 +302,47 @@ public class ProductGatewayImpl implements ProductGateway {
       .collect(Collectors.toSet());
 
     return this.uploadService.getProductImages(productIds);
+  }
+
+  private List<SearchProductsResponseDTO.SearchedProducts> mapToSearchedProductsList(Page<ProductSearchProjectionDTO> products) {
+    Set<String> productIds = products
+      .stream()
+      .map(product -> product.getId().toString())
+      .collect(Collectors.toSet());
+
+    ResponsePayload<List<UploadService.ImageResponse>> response = this.uploadService.getProductThumbnails(productIds);
+
+    List<SearchProductsResponseDTO.SearchedProducts> searchedProducts = new ArrayList<>();
+    products.getContent().forEach(searchedProduct -> {
+      Optional<ImageFileDTO> thumbnail = response.getPayload()
+        .stream()
+        .filter(imageResponse -> imageResponse.getProductId().equals(searchedProduct.getId().toString()))
+        .flatMap(imageResponse -> imageResponse.getImages().stream())
+        .findFirst();
+
+      searchedProducts.add(new SearchProductsResponseDTO.SearchedProducts(
+        searchedProduct.getId(),
+        searchedProduct.getName(),
+        searchedProduct.getUnitPrice().toPlainString(),
+        searchedProduct.getDiscountType(),
+        searchedProduct.getDiscountValue(),
+        calculateFinalPrice(searchedProduct),
+        searchedProduct.getQuantity(),
+        searchedProduct.getBrandName(),
+        searchedProduct.getCategoryName(),
+        searchedProduct.getModelName(),
+        thumbnail.map(ImageFileDTO::path).orElse(null)
+      ));
+    });
+    return searchedProducts;
+  }
+
+  private String calculateFinalPrice(ProductSearchProjectionDTO searchedProduct) {
+    return PricingCalculator.calculateFinalPrice(
+      searchedProduct.getDiscountType(),
+      searchedProduct.getUnitPrice().toPlainString(),
+      searchedProduct.getDiscountValue(),
+      1L)
+      .toPlainString();
   }
 }

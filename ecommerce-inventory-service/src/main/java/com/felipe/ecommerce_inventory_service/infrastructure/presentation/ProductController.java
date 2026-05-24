@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductInStockDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.SearchProductsResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.AddProductInStockUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CheckIfProductIsInStockUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.CreateProductUseCase;
@@ -16,6 +17,7 @@ import com.felipe.ecommerce_inventory_service.core.application.usecases.product.
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsByModelUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.GetProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.RemoveProductFromStockUseCase;
+import com.felipe.ecommerce_inventory_service.core.application.usecases.product.SearchProductsUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UpdateProductUseCase;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
@@ -66,6 +68,7 @@ public class ProductController implements ProductApi {
   private final AddProductInStockUseCase addProductInStockUseCase;
   private final RemoveProductFromStockUseCase removeProductFromStockUseCase;
   private final GetProductsUseCase getProductsUseCase;
+  private final SearchProductsUseCase searchProductsUseCase;
   private final GetAllProductsUseCase getAllProductsUseCase;
   private final GetProductsByCategoryUseCase getProductsByCategoryUseCase;
   private final GetProductsByBrandUseCase getProductsByBrandUseCase;
@@ -83,6 +86,7 @@ public class ProductController implements ProductApi {
                            AddProductInStockUseCase addProductInStockUseCase,
                            RemoveProductFromStockUseCase removeProductFromStockUseCase,
                            GetProductsUseCase getProductsUseCase,
+                           SearchProductsUseCase searchProductsUseCase,
                            GetAllProductsUseCase getAllProductsUseCase,
                            GetProductsByCategoryUseCase getProductsByCategoryUseCase,
                            GetProductsByBrandUseCase getProductsByBrandUseCase,
@@ -98,6 +102,7 @@ public class ProductController implements ProductApi {
     this.addProductInStockUseCase = addProductInStockUseCase;
     this.removeProductFromStockUseCase = removeProductFromStockUseCase;
     this.getProductsUseCase = getProductsUseCase;
+    this.searchProductsUseCase = searchProductsUseCase;
     this.getAllProductsUseCase = getAllProductsUseCase;
     this.getProductsByCategoryUseCase = getProductsByCategoryUseCase;
     this.getProductsByBrandUseCase = getProductsByBrandUseCase;
@@ -147,6 +152,20 @@ public class ProductController implements ProductApi {
       .code(HttpStatus.OK)
       .message(message)
       .payload(products)
+      .build();
+  }
+
+  @GetMapping("/search")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<SearchProductsResponseDTO> searchProducts(@RequestParam(name = "query") String query,
+                                                                   @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                   @RequestParam(name = "pageSize", defaultValue = "50") int size) {
+    SearchProductsResponseDTO search = this.searchProductsUseCase.execute(query, page, size);
+    return new ResponsePayload.Builder<SearchProductsResponseDTO>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Resultados para: '" + query + "'")
+      .payload(search)
       .build();
   }
 

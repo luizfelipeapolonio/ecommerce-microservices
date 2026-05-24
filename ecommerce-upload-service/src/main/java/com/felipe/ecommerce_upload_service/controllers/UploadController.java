@@ -30,7 +30,7 @@ import java.util.List;
 public class UploadController {
   private final UploadService uploadService;
   private final ObjectMapper objectMapper;
-  private final Logger logger = LoggerFactory.getLogger(UploadController.class);
+  private static final Logger logger = LoggerFactory.getLogger(UploadController.class);
 
   public UploadController(UploadService uploadService, ObjectMapper objectMapper) {
     this.uploadService = uploadService;
@@ -56,7 +56,7 @@ public class UploadController {
         .build();
 
     } catch (JsonProcessingException ex) {
-      this.logger.error("Error on convert JSON 'productData' to ProductUploadDTO: {}", ex.getMessage(), ex);
+      logger.error("Error on convert JSON 'productData' to ProductUploadDTO: {}", ex.getMessage(), ex);
       throw new UnprocessableJsonException("Não foi possível converter JSON para objeto", ex);
     }
   }
@@ -64,7 +64,7 @@ public class UploadController {
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<List<ImageResponseDTO>> getProductImages(@RequestHeader(name = "productIds") String productIds) {
-    this.logger.info("Header: productIds - value: {}", productIds);
+    logger.info("Header: productIds - value: {}", productIds);
     final List<ImageResponseDTO> images = this.uploadService.getProductImages(productIds);
 
     return new ResponsePayload.Builder<List<ImageResponseDTO>>()
@@ -72,6 +72,18 @@ public class UploadController {
       .code(HttpStatus.OK)
       .message("Imagens dos produtos")
       .payload(images)
+      .build();
+  }
+
+  @GetMapping("/thumbnails")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<List<ImageResponseDTO>> getProductsThumbnail(@RequestHeader(name = "productIds") String productIds) {
+    List<ImageResponseDTO> productsThumbnail = this.uploadService.getProductsThumbnail(productIds);
+    return new ResponsePayload.Builder<List<ImageResponseDTO>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Thumbnail dos produtos")
+      .payload(productsThumbnail)
       .build();
   }
 

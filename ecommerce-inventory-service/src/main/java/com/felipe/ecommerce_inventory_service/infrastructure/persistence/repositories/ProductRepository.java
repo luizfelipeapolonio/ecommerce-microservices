@@ -1,6 +1,7 @@
 package com.felipe.ecommerce_inventory_service.infrastructure.persistence.repositories;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionDTO;
+import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.ProductSearchProjectionDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ProductEntity;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
@@ -35,6 +36,46 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
   Page<ProductEntity> findByModelNameAndBrandName(@Param("modelName") String modelName, @Param("brandName") String brandName, Pageable pageable);
 
   List<ProductEntity> findAllByPromotionId(String promotionId);
+
+  @Query(value = """
+    SELECT 
+      p.id AS id,
+      p.name AS name,
+      p.unit_price AS unitPrice,
+      p.discount_type AS discountType,
+      p.discount_value AS discountValue,
+      p.quantity AS quantity,
+      b.name AS brandName,
+      c.name AS categoryName,
+      m.name AS modelName,
+      
+      GREATEST(
+        similarity(LOWER(p.name), LOWER(:term)),
+        similarity(LOWER(b.name), LOWER(:term)),
+        similarity(LOWER(c.name), LOWER(:term)),
+        similarity(LOWER(m.name), LOWER(:term))
+      ) AS score
+        
+    FROM products p
+    JOIN brands b ON b.id = p.brand_id
+    JOIN categories c ON c.id = p.category_id
+    JOIN models m ON m.id = p.model_id
+      
+    WHERE
+      
+      p.name ILIKE CONCAT('%', :term, '%')
+      OR b.name ILIKE CONCAT('%', :term, '%')
+      OR c.name ILIKE CONCAT('%', :term, '%')
+      OR m.name ILIKE CONCAT('%', :term, '%')
+      
+      OR LOWER(p.name) % LOWER(:term)
+      OR LOWER(b.name) % LOWER(:term)
+      OR LOWER(c.name) % LOWER(:term)
+      OR LOWER(m.name) % LOWER(:term)
+      
+    ORDER BY score DESC
+  """, nativeQuery = true)
+  Page<ProductSearchProjectionDTO> searchProducts(@Param("term") String term, Pageable pageable);
 
   @Query(
     "SELECT p FROM ProductEntity p JOIN p.category c JOIN p.brand b JOIN p.model m " +

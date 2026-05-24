@@ -3,6 +3,7 @@ package com.felipe.ecommerce_inventory_service.core.application.gateway;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.SearchProductsResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.UpdateProductDomainDTO;
 import com.felipe.ecommerce_inventory_service.core.application.usecases.product.UploadFile;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
@@ -23,6 +24,7 @@ public interface ProductGateway {
   PageResponseDTO getProductsByBrand(String brandName, int page, int elementsQuantity);
   PageResponseDTO getProductsByModel(String modelName, String brandName, int page, int elementsQuantity);
   Product deleteProduct(Product product);
+  SearchProductsResponseDTO searchProducts(String query, int page, int elementsQuantity);
   long updateProductQuantityInStock(Product product);
   int applyPromotionToProducts(PromotionDTO promotionDTO);
 }
