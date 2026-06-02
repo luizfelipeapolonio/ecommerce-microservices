@@ -4,10 +4,13 @@ import com.felipe.ecommerce_inventory_service.core.domain.Brand;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.core.domain.Model;
 import com.felipe.ecommerce_inventory_service.core.domain.Product;
+import com.felipe.ecommerce_inventory_service.core.domain.reservation.Reservation;
+import com.felipe.ecommerce_inventory_service.core.domain.reservation.ReservationStatus;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.BrandEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.CategoryEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ModelEntity;
 import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ProductEntity;
+import com.felipe.ecommerce_inventory_service.infrastructure.persistence.entities.ReservationEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,49 +27,32 @@ public class DataMock {
   private final List<ModelEntity> modelsEntity = new ArrayList<>();
   private final List<Product> productsDomain = new ArrayList<>();
   private final List<ProductEntity> productsEntity = new ArrayList<>();
+  private final List<Reservation> reservationsDomain = new ArrayList<>();
+  private final List<ReservationEntity> reservationsEntity = new ArrayList<>();
 
   public DataMock() {
-    this.createCategoriesDomainMock();
-    this.createCategoriesEntityMock();
-    this.createBrandsDomainMock();
-    this.createBrandsEntityMock();
-    this.createModelsDomainMock();
-    this.createModelsEntityMock();
-    this.createProductsDomainMock();
-    this.createProductsEntityMock();
+    createCategoriesDomainMock();
+    createCategoriesEntityMock();
+    createBrandsDomainMock();
+    createBrandsEntityMock();
+    createModelsDomainMock();
+    createModelsEntityMock();
+    createProductsDomainMock();
+    createProductsEntityMock();
+    createReservationsDomainMock();
+    createReservationsEntityMock();
   }
 
-  public List<Category> getCategoriesDomain() {
-    return this.categoriesDomain;
-  }
-
-  public List<CategoryEntity> getCategoriesEntity() {
-    return this.categoriesEntity;
-  }
-
-  public List<Brand> getBrandsDomain() {
-    return this.brandsDomain;
-  }
-
-  public List<BrandEntity> getBrandsEntity() {
-    return this.brandsEntity;
-  }
-
-  public List<Model> getModelsDomain() {
-    return this.modelsDomain;
-  }
-
-  public List<ModelEntity> getModelsEntity() {
-    return this.modelsEntity;
-  }
-
-  public List<Product> getProductsDomain() {
-    return this.productsDomain;
-  }
-
-  public List<ProductEntity> getProductsEntity() {
-    return this.productsEntity;
-  }
+  public List<Category> getCategoriesDomain() { return this.categoriesDomain; }
+  public List<CategoryEntity> getCategoriesEntity() { return this.categoriesEntity; }
+  public List<Brand> getBrandsDomain() { return this.brandsDomain; }
+  public List<BrandEntity> getBrandsEntity() { return this.brandsEntity; }
+  public List<Model> getModelsDomain() { return this.modelsDomain; }
+  public List<ModelEntity> getModelsEntity() { return this.modelsEntity; }
+  public List<Product> getProductsDomain() { return this.productsDomain; }
+  public List<ProductEntity> getProductsEntity() { return this.productsEntity; }
+  public List<Reservation> getReservationsDomain() { return this.reservationsDomain; }
+  public List<ReservationEntity> getReservationsEntity() { return this.reservationsEntity; }
 
   private void createCategoriesDomainMock() {
     Category category1 = Category.builder()
@@ -395,7 +381,7 @@ public class DataMock {
       .build();
 
     ProductEntity product2 = ProductEntity.builder()
-      .id(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .id(UUID.fromString("8570948d-ffc8-4239-a1af-75681b31749c"))
       .name("Mouse wireless Logitech G502 X")
       .description("A technical and descriptive text about the product")
       .unitPrice(new BigDecimal("80.00"))
@@ -408,7 +394,7 @@ public class DataMock {
       .build();
 
     ProductEntity product3 = ProductEntity.builder()
-      .id(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .id(UUID.fromString("205aafa7-f5e1-409c-8707-1d673d254374"))
       .name("Corsair RAM memory 16GB 3200MHz")
       .description("A technical and descriptive text about the product")
       .unitPrice(new BigDecimal("200.00"))
@@ -423,5 +409,71 @@ public class DataMock {
     this.productsEntity.add(product1);
     this.productsEntity.add(product2);
     this.productsEntity.add(product3);
+  }
+
+  private void createReservationsDomainMock() {
+    Reservation reservation1 = new Reservation()
+      .id(1L)
+      .orderId(UUID.fromString("a82da5c2-4b21-4aae-a7ec-93546eb12c75"))
+      .productId(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .quantity(1L)
+      .status(ReservationStatus.RESERVED)
+      .createdAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"));
+
+    Reservation reservation2 = new Reservation()
+      .id(2L)
+      .orderId(UUID.fromString("a82da5c2-4b21-4aae-a7ec-93546eb12c75"))
+      .productId(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .quantity(1L)
+      .status(ReservationStatus.RESERVED)
+      .createdAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"));
+
+    Reservation reservation3 = new Reservation()
+      .id(3L)
+      .orderId(UUID.fromString("a82da5c2-4b21-4aae-a7ec-93546eb12c75"))
+      .productId(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .quantity(1L)
+      .status(ReservationStatus.RESERVED)
+      .createdAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"));
+
+    this.reservationsDomain.add(reservation1);
+    this.reservationsDomain.add(reservation2);
+    this.reservationsDomain.add(reservation3);
+  }
+
+  private void createReservationsEntityMock() {
+    ReservationEntity reservation1 = new ReservationEntity()
+      .id(1L)
+      .orderId(UUID.fromString("a82da5c2-4b21-4aae-a7ec-93546eb12c75"))
+      .productId(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .quantity(1L)
+      .status(ReservationStatus.RESERVED)
+      .createdAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"));
+
+    ReservationEntity reservation2 = new ReservationEntity()
+      .id(2L)
+      .orderId(UUID.fromString("a82da5c2-4b21-4aae-a7ec-93546eb12c75"))
+      .productId(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .quantity(1L)
+      .status(ReservationStatus.RESERVED)
+      .createdAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"));
+
+    ReservationEntity reservation3 = new ReservationEntity()
+      .id(3L)
+      .orderId(UUID.fromString("a82da5c2-4b21-4aae-a7ec-93546eb12c75"))
+      .productId(UUID.fromString("54e210c9-8d3b-48fd-9c73-e8b7d5fe7503"))
+      .quantity(1L)
+      .status(ReservationStatus.RESERVED)
+      .createdAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"))
+      .updatedAt(LocalDateTime.parse("2026-05-26T12:00:28.978228256"));
+
+    this.reservationsEntity.add(reservation1);
+    this.reservationsEntity.add(reservation2);
+    this.reservationsEntity.add(reservation3);
   }
 }

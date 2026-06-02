@@ -1,10 +1,14 @@
 package com.felipe.ecommerce_discount_service.testutils;
 
+import com.felipe.ecommerce_discount_service.core.domain.Coupon;
+import com.felipe.ecommerce_discount_service.core.domain.CouponAppliedBy;
 import com.felipe.ecommerce_discount_service.core.domain.Promotion;
 import com.felipe.ecommerce_discount_service.core.domain.PromotionAppliesTo;
 import com.felipe.ecommerce_discount_service.core.domain.enums.DiscountType;
 import com.felipe.ecommerce_discount_service.core.domain.enums.PromotionAppliesTarget;
 import com.felipe.ecommerce_discount_service.core.domain.enums.PromotionScope;
+import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.coupon.CouponAppliedByEntity;
+import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.coupon.CouponEntity;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionAppliesToEntity;
 import com.felipe.ecommerce_discount_service.infrastructure.persistence.entities.promotion.PromotionEntity;
 
@@ -20,28 +24,31 @@ public class DataMock {
   private final List<PromotionEntity> promotionsEntity = new ArrayList<>();
   private final List<PromotionAppliesToEntity> promotionAppliesToEntity = new ArrayList<>();
 
+  private final List<Coupon> couponsDomain = new ArrayList<>();
+  private final List<CouponEntity> couponsEntity = new ArrayList<>();
+  private final List<CouponAppliedBy> couponAppliedByDomain = new ArrayList<>();
+  private final List<CouponAppliedByEntity> couponAppliedByEntity = new ArrayList<>();
+
   public DataMock() {
-    this.createPromotionsDomain();
-    this.createPromotionAppliesToDomain();
-    this.createPromotionsEntity();
-    this.createPromotionAppliesToEntity();
+    createPromotionsDomain();
+    createPromotionAppliesToDomain();
+    createPromotionsEntity();
+    createPromotionAppliesToEntity();
+
+    createCouponsDomain();
+    createCouponAppliedByDomain();
+    createCouponsEntity();
+    createCouponAppliedByEntity();
   }
 
-  public List<Promotion> getPromotionsDomain() {
-    return this.promotionsDomain;
-  }
-
-  public List<PromotionEntity> getPromotionsEntity() {
-    return this.promotionsEntity;
-  }
-
-  public List<PromotionAppliesTo> getPromotionAppliesToDomain() {
-    return this.promotionAppliesToDomain;
-  }
-
-  public List<PromotionAppliesToEntity> getPromotionAppliesToEntity() {
-    return this.promotionAppliesToEntity;
-  }
+  public List<Promotion> getPromotionsDomain() { return this.promotionsDomain; }
+  public List<PromotionEntity> getPromotionsEntity() { return this.promotionsEntity; }
+  public List<PromotionAppliesTo> getPromotionAppliesToDomain() { return this.promotionAppliesToDomain; }
+  public List<PromotionAppliesToEntity> getPromotionAppliesToEntity() { return this.promotionAppliesToEntity; }
+  public List<Coupon> getCouponsDomain() { return this.couponsDomain; }
+  public List<CouponAppliedBy> getCouponAppliedByDomain() { return this.couponAppliedByDomain; }
+  public List<CouponEntity> getCouponsEntity() { return this.couponsEntity; }
+  public List<CouponAppliedByEntity> getCouponAppliedByEntity() { return this.couponAppliedByEntity; }
 
   private void createPromotionsDomain() {
     Promotion promotion1 = Promotion.builder()
@@ -165,5 +172,87 @@ public class DataMock {
     this.promotionAppliesToEntity.add(target2);
     this.promotionAppliesToEntity.add(target3);
     this.promotionAppliesToEntity.add(target4);
+  }
+
+  private void createCouponsDomain() {
+    Coupon coupon1 = new Coupon()
+      .id(UUID.fromString("26849051-6958-4c03-b9cf-5e005b5733c9"))
+      .name("Coupon 1")
+      .couponCode("20%OFF")
+      .description("Description of Coupon 1")
+      .discountType(DiscountType.PERCENTAGE)
+      .discountValue("20.00")
+      .usageCount(0)
+      .usageLimit(10)
+      .minimumPrice(new BigDecimal("100.00"))
+      .createdAt(LocalDateTime.parse("2026-05-25T14:49:35.174364200"))
+      .updatedAt(LocalDateTime.parse("2026-05-25T14:49:35.174364200"))
+      .endDate(LocalDateTime.parse("2027-05-25T14:49:35.174364200"));
+
+    Coupon coupon2 = new Coupon()
+      .id(UUID.fromString("26849051-6958-4c03-b9cf-5e005b5733c9"))
+      .name("Coupon 2")
+      .couponCode("30%OFF")
+      .description("Description of Coupon 2")
+      .discountType(DiscountType.PERCENTAGE)
+      .discountValue("30.00")
+      .usageCount(0)
+      .usageLimit(10)
+      .minimumPrice(new BigDecimal("100.00"))
+      .createdAt(LocalDateTime.parse("2026-05-25T14:49:35.174364200"))
+      .updatedAt(LocalDateTime.parse("2026-05-25T14:49:35.174364200"))
+      .endDate(LocalDateTime.parse("2027-05-25T14:49:35.174364200"));
+
+    this.couponsDomain.add(coupon1);
+    this.couponsDomain.add(coupon2);
+  }
+
+  private void createCouponsEntity() {
+    CouponEntity coupon1 = new CouponEntity()
+      .id(UUID.fromString("26849051-6958-4c03-b9cf-5e005b5733c9"))
+      .name("Coupon 1")
+      .couponCode("20%OFF")
+      .description("Description of Coupon 1")
+      .discountType(DiscountType.PERCENTAGE)
+      .discountValue("20.00")
+      .usageCount(0)
+      .usageLimit(10)
+      .minimumPrice(new BigDecimal("100.00"))
+      .createdAt(LocalDateTime.parse("2026-05-25T14:49:35.174364200"))
+      .updatedAt(LocalDateTime.parse("2026-05-25T14:49:35.174364200"))
+      .endDate(LocalDateTime.parse("2027-05-25T14:49:35.174364200"));
+
+    CouponEntity coupon2 = new CouponEntity()
+      .id(UUID.fromString("26849051-6958-4c03-b9cf-5e005b5733c9"))
+      .name("Coupon 2")
+      .couponCode("30%OFF")
+      .description("Description of Coupon 2")
+      .discountType(DiscountType.PERCENTAGE)
+      .discountValue("30.00")
+      .usageCount(0)
+      .usageLimit(10)
+      .minimumPrice(new BigDecimal("100.00"))
+      .createdAt(LocalDateTime.parse("2026-05-25T14:49:35.174364200"))
+      .updatedAt(LocalDateTime.parse("2026-05-25T14:49:35.174364200"))
+      .endDate(LocalDateTime.parse("2027-05-25T14:49:35.174364200"));
+
+    this.couponsEntity.add(coupon1);
+    this.couponsEntity.add(coupon2);
+  }
+
+  private void createCouponAppliedByDomain() {
+    CouponAppliedBy appliedBy1 = new CouponAppliedBy()
+      .id(1L)
+      .appliedAt(LocalDateTime.parse("2026-05-25T14:49:35.174364200"));
+
+    this.couponAppliedByDomain.add(appliedBy1);
+  }
+
+  private void createCouponAppliedByEntity() {
+    CouponAppliedByEntity appliedBy1 = new CouponAppliedByEntity()
+      .id(1L)
+      .appliedAt(LocalDateTime.parse("2026-05-25T14:49:35.174364200"));
+
+    this.couponAppliedByEntity.add(appliedBy1);
   }
 }
