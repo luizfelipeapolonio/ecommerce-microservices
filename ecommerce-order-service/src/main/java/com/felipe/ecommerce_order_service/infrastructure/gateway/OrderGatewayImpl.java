@@ -76,7 +76,7 @@ public class OrderGatewayImpl implements OrderGateway {
 
     return Map.of(
       "orderId", savedOrder.getId(),
-      "sagaId", newSaga.getId()
+      "sagaId", createdSaga.getId()
     );
   }
 
