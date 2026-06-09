@@ -7,6 +7,7 @@ import com.felipe.ecommerce_discount_service.core.application.usecases.coupon.Ge
 import com.felipe.ecommerce_discount_service.core.application.usecases.coupon.GetAllCouponsUseCase;
 import com.felipe.ecommerce_discount_service.core.application.usecases.coupon.GetCouponByIdUseCase;
 import com.felipe.ecommerce_discount_service.core.domain.Coupon;
+import com.felipe.ecommerce_discount_service.infrastructure.config.openapi.CouponApi;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.coupon.CouponResponseDTO;
 import com.felipe.ecommerce_discount_service.infrastructure.dtos.coupon.CreateCouponDTOImpl;
 import com.felipe.ecommerce_discount_service.infrastructure.exceptions.InvalidRequestParamException;
@@ -29,7 +30,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/coupons")
-public class CouponController {
+public class CouponController implements CouponApi {
   private final CreateCouponUseCase createCouponUseCase;
   private final DeleteCouponUseCase deleteCouponUseCase;
   private final GetAllActiveCouponsUseCase getAllActiveCouponsUseCase;
@@ -49,6 +50,7 @@ public class CouponController {
     this.checkIfCouponIsValidUseCase = checkIfCouponIsValidUseCase;
   }
 
+  @Override
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public ResponsePayload<CouponResponseDTO> createCoupon(@Valid @RequestBody CreateCouponDTOImpl couponDTO) {
@@ -61,6 +63,7 @@ public class CouponController {
       .build();
   }
 
+  @Override
   @GetMapping("/check")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<CouponResponseDTO> checkIfCouponIsValid(@RequestParam(name = "couponCode", required = false) String couponCode) {
@@ -78,6 +81,7 @@ public class CouponController {
       .build();
   }
 
+  @Override
   @GetMapping("/active")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<List<CouponResponseDTO>> getAllActiveCoupons() {
@@ -93,6 +97,7 @@ public class CouponController {
       .build();
   }
 
+  @Override
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<List<CouponResponseDTO>> getAllCoupons() {
@@ -108,6 +113,7 @@ public class CouponController {
       .build();
   }
 
+  @Override
   @GetMapping("/{couponId}")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<CouponResponseDTO> getCouponById(@PathVariable UUID couponId) {
@@ -120,6 +126,7 @@ public class CouponController {
       .build();
   }
 
+  @Override
   @DeleteMapping("/{couponId}")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<CouponResponseDTO> deleteCoupon(@PathVariable UUID couponId) {

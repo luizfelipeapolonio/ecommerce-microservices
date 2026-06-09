@@ -155,6 +155,7 @@ public class ProductController implements ProductApi {
       .build();
   }
 
+  @Override
   @GetMapping("/search")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<SearchProductsResponseDTO> searchProducts(@RequestParam(name = "query") String query,

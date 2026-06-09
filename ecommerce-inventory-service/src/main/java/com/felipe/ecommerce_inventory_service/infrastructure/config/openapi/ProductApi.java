@@ -2,6 +2,7 @@ package com.felipe.ecommerce_inventory_service.infrastructure.config.openapi;
 
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PageResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ProductResponseDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.SearchProductsResponseDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.StockProductQuantityDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.StockProductQuantityResponseDTO;
 import com.felipe.ecommerce_inventory_service.infrastructure.dtos.product.UpdateProductDTO;
@@ -226,6 +227,28 @@ public interface ProductApi {
     @RequestParam(name = "page") int page,
     @Parameter(in = ParameterIn.QUERY, name = "pageSize", description = "The number of elements on the page", schema = @Schema(type = "integer", format = "int32", example = "10"))
     @RequestParam(name = "pageSize") int size
+  );
+
+  @Operation(
+    operationId = "searchProducts",
+    summary = "Search products",
+    description = "Search products",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with all found products", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<SearchProductsResponseDTO>"), examples = {
+          @ExampleObject(name = "Success response", ref = "SearchProductsExample")
+        })
+      }),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<SearchProductsResponseDTO> searchProducts(
+    @Parameter(in = ParameterIn.QUERY, name = "query", description = "The product name, category, brand or model", schema = @Schema(type = "string", example = "mouse"))
+    @RequestParam(name = "query") String query,
+    @Parameter(in = ParameterIn.QUERY, name = "page", description = "The page number", schema = @Schema(type = "integer", format = "int32", example = "1"))
+    @RequestParam(name = "page", defaultValue = "0") int page,
+    @Parameter(in = ParameterIn.QUERY, name = "pageSize", description = "The number of elements on the page", schema = @Schema(type = "integer", format = "int32", example = "10"))
+    @RequestParam(name = "pageSize", defaultValue = "50") int size
   );
 
   @Operation(

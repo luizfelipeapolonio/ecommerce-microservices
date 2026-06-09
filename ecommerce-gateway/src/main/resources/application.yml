@@ -23,32 +23,38 @@ spring:
                   - DELETE
                 allowedHeaders: "*"
           routes:
-          - id: ecommerce-customer-service
-            uri: lb://ECOMMERCE-CUSTOMER-SERVICE
-            predicates:
-            - Path=/api/v1/customers/**,/customer-service/v3/api-docs
-            filters:
-            - TokenRelay=
-          - id: ecommerce-cart-service
-            uri: lb://ECOMMERCE-CART-SERVICE
-            predicates:
-            - Path=/api/v1/carts/**,/cart-service/v3/api-docs
-            filters:
-            - TokenRelay=
-          - id: ecommerce-discount-service
-            uri: lb://ECOMMERCE-DISCOUNT-SERVICE
-            predicates:
-            - Path=/discount-service/v3/api-docs
-          - id: ecommerce-inventory-service
-            uri: lb://ECOMMERCE-INVENTORY-SERVICE
-            predicates:
-            - Path=/inventory-service/v3/api-docs
-          - id: ecommerce-order-service
-            uri: lb://ECOMMERCE-ORDER-SERVICE
-            predicates:
-            - Path=/api/v1/orders/**
-            filters:
-            - TokenRelay=
+            - id: ecommerce-customer-service
+              uri: lb://ECOMMERCE-CUSTOMER-SERVICE
+              predicates:
+                - Path=/api/v1/customers/**,/customer-service/v3/api-docs
+              filters:
+                - TokenRelay=
+            - id: ecommerce-cart-service
+              uri: lb://ECOMMERCE-CART-SERVICE
+              predicates:
+                - Path=/api/v1/carts/**,/cart-service/v3/api-docs
+              filters:
+                - TokenRelay=
+            - id: ecommerce-discount-service
+              uri: lb://ECOMMERCE-DISCOUNT-SERVICE
+              predicates:
+                - Path=/discount-service/v3/api-docs
+            - id: ecommerce-inventory-service
+              uri: lb://ECOMMERCE-INVENTORY-SERVICE
+              predicates:
+                - Path=/inventory-service/v3/api-docs
+            - id: ecommerce-order-service
+              uri: lb://ECOMMERCE-ORDER-SERVICE
+              predicates:
+                - Path=/api/v1/orders/**,/order-service/v3/api-docs
+              filters:
+                - TokenRelay=
+            - id: ecommerce-catalog-service
+              uri: lb://ECOMMERCE-CATALOG-SERVICE
+              predicates:
+                - Path=/api/v1/catalog/**,/catalog-service/v3/api-docs
+              filters:
+                - TokenRelay=
 
   security:
     oauth2:
@@ -94,3 +100,7 @@ springdoc:
         url: /discount-service/v3/api-docs
       - name: E-commerce Inventory Service
         url: /inventory-service/v3/api-docs
+      - name: E-commerce Order Service
+        url: /order-service/v3/api-docs
+      - name: E-commerce Catalog Service
+        url: /catalog-service/v3/api-docs

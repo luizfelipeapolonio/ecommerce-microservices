@@ -4,6 +4,7 @@ import com.felipe.ecommerce_order_service.core.application.usecases.CreateOrderU
 import com.felipe.ecommerce_order_service.core.application.usecases.FindOrderByIdUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.GetOrderByIdWithItemsUseCase;
 import com.felipe.ecommerce_order_service.core.domain.Order;
+import com.felipe.ecommerce_order_service.infrastructure.config.openapi.OrderApi;
 import com.felipe.ecommerce_order_service.infrastructure.dtos.CreateOrderDTOImpl;
 import com.felipe.ecommerce_order_service.infrastructure.dtos.OrderResponseDTO;
 import com.felipe.ecommerce_order_service.infrastructure.dtos.OrderStatusDTO;
@@ -31,7 +32,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/orders")
-public class OrderController {
+public class OrderController implements OrderApi {
   private final CreateOrderUseCase createOrderUseCase;
   private final FindOrderByIdUseCase findOrderByIdUseCase;
   private final Map<String, GetOrderByIdWithItemsUseCase> getOrderUseCases;
@@ -47,6 +48,7 @@ public class OrderController {
     this.orderSagaService = orderSagaService;
   }
 
+  @Override
   @PostMapping
   @ResponseStatus(HttpStatus.ACCEPTED)
   public ResponsePayload<StartSagaDTO> createOrder(@AuthenticationPrincipal Jwt jwt,
@@ -63,6 +65,7 @@ public class OrderController {
       .build();
   }
 
+  @Override
   @GetMapping("/{orderId}/status")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<OrderStatusDTO> getOrderStatus(@PathVariable UUID orderId,
@@ -85,6 +88,7 @@ public class OrderController {
       .build();
   }
 
+  @Override
   @GetMapping("/{orderId}")
   @ResponseStatus(HttpStatus.OK)
   public ResponsePayload<OrderResponseDTO> getOrderById(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID orderId) {

@@ -21,12 +21,15 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+  private static final String[] DOCS_WHITELIST = {"/catalog-service/swagger-ui.html", "/catalog-service/swagger-ui/**",
+                                                  "/catalog-service/v3/api-docs/**"};
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
       .csrf(AbstractHttpConfigurer::disable)
       .authorizeHttpRequests(authorize -> authorize
+        .requestMatchers(HttpMethod.GET, DOCS_WHITELIST).permitAll()
         .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/v1/catalog").permitAll()
         .anyRequest().authenticated())

@@ -4,6 +4,7 @@ import com.felipe.ecommerce_inventory_service.core.application.dtos.category.Cat
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.ImageFileDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionAppliesToDTO;
 import com.felipe.ecommerce_inventory_service.core.application.dtos.product.PromotionDTO;
+import com.felipe.ecommerce_inventory_service.core.application.dtos.product.SearchProductsResponseDTO;
 import com.felipe.ecommerce_inventory_service.core.domain.Brand;
 import com.felipe.ecommerce_inventory_service.core.domain.Category;
 import com.felipe.ecommerce_inventory_service.core.domain.Model;
@@ -144,6 +145,18 @@ public class OpenAPIConfiguration {
         SchemaCustomizer.withDefaults()
       );
       this.apiUtils.createSchemaFromClass(
+        "SearchProductsResponseDTO",
+        modelConverterInstance,
+        SearchProductsResponseDTO.class,
+        SchemaCustomizer.withDefaults()
+      );
+      this.apiUtils.createSchemaFromClass(
+        "SearchedProducts",
+        modelConverterInstance,
+        SearchProductsResponseDTO.SearchedProducts.class,
+        SchemaCustomizer.withDefaults()
+      );
+      this.apiUtils.createSchemaFromClass(
         "CreateProductDTO",
         modelConverterInstance,
         CreateProductDTO.class,
@@ -234,6 +247,11 @@ public class OpenAPIConfiguration {
         schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
         schema.addAllOfItem(new ObjectSchema()
           .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "ApplyPromotionResponse")));
+      });
+      this.apiUtils.createSchema("ResponsePayload<SearchProductsResponseDTO>", schema -> {
+        schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+        schema.addAllOfItem(new ObjectSchema()
+          .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "SearchProductsResponseDTO")));
       });
 
       // Examples
@@ -383,6 +401,25 @@ public class OpenAPIConfiguration {
         LocalDateTime.parse("2025-07-18T21:12:28.978228256"),
         new BigDecimal("130.00"),
         List.of(promotionCategoryTarget, promotionBrandTarget)
+      );
+      SearchProductsResponseDTO searchProductsResponseDTO = new SearchProductsResponseDTO(
+        0,
+        1,
+        10,
+        10,
+        List.of(new SearchProductsResponseDTO.SearchedProducts(
+          UUID.fromString("b8dc2e49-20cd-42d2-9241-1d0535241688"),
+          "Mouse wireless Logitech G PRO",
+          "120.00",
+          null,
+          null,
+          "120.00",
+          1L,
+          "Logitech",
+          "Mouse",
+          "G PRO",
+          "/path/to/product_image/mouse_wireless_logitech_g_pro.jpg"
+        ))
       );
 
       this.apiUtils.createExample(
@@ -654,6 +691,13 @@ public class OpenAPIConfiguration {
         HttpStatus.OK,
         "Promotion applied to 0 products successfully",
         Map.of("appliedPromotionQuantity", 0)
+      );
+      this.apiUtils.createExample(
+        "SearchProductsExample",
+        ResponseType.SUCCESS,
+        HttpStatus.OK,
+        "Results for 'mouse g pro'",
+        searchProductsResponseDTO
       );
     };
   }
