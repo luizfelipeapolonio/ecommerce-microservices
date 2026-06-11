@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
@@ -137,6 +138,11 @@ public class OpenAPIConfiguration {
       schema.addAllOfItem(new ObjectSchema()
         .addProperty("payload", new ObjectSchema().$ref(SCHEMAS_REF + "OrderResponseDTO")));
     });
+    this.openApiUtils.createSchema("ResponsePayload<List<OrderResponseDTO>>", schema -> {
+      schema.addAllOfItem(new ObjectSchema().$ref(SCHEMAS_REF + "ResponsePayload<Void>"));
+      schema.addAllOfItem(new ObjectSchema().addProperty("payload", new ArraySchema()
+        .items(new ObjectSchema().$ref(SCHEMAS_REF + "OrderResponseDTO"))));
+    });
   }
 
   private void insertExamples() {
@@ -204,6 +210,13 @@ public class OpenAPIConfiguration {
       HttpStatus.OK,
       "Order with id '95480447-11bd-4b55-a0af-821339812588'",
       orderResponseDTO
+    );
+    this.openApiUtils.createExample(
+      "GetAllCustomerOrdersExample",
+      ResponseType.SUCCESS,
+      HttpStatus.OK,
+      "All orders of customer with email 'customer@email.com'",
+      List.of(orderResponseDTO)
     );
   }
 }

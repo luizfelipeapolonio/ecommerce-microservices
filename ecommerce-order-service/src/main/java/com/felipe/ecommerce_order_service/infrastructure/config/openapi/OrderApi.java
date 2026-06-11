@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -48,6 +49,24 @@ public interface OrderApi {
     @AuthenticationPrincipal Jwt jwt,
     @Parameter(name = "CreateOrderDTOImpl", required = true)
     @org.springframework.web.bind.annotation.RequestBody CreateOrderDTOImpl orderDTO
+  );
+
+  @Operation(
+    operationId = "getAllCustomerOrders",
+    summary = "Get all customer orders",
+    description = "Get all customer orders",
+    responses = {
+      @ApiResponse(responseCode = "200", description = "Returns a ResponsePayload with a list of orders", content = {
+        @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(ref = "ResponsePayload<List<OrderResponseDTO>>"), examples = {
+          @ExampleObject(name = "Success response", ref = "GetAllCustomerOrdersExample")
+        })
+      }),
+      @ApiResponse(responseCode = "500", ref = "InternalServerError")
+    }
+  )
+  ResponsePayload<List<OrderResponseDTO>> getAllCustomerOrders(
+    @Parameter(in = ParameterIn.HEADER, name = "Authorization", description = "Authenticated user", schema = @Schema(name = "Jwt", type = "object"))
+    @AuthenticationPrincipal Jwt jwt
   );
 
   @Operation(
