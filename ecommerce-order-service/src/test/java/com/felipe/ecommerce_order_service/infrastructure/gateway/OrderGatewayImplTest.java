@@ -158,6 +158,23 @@ class OrderGatewayImplTest {
   }
 
   @Test
+  @DisplayName("getAllCustomerOrdersSuccess - Should successfully get all customer orders")
+  void getAllCustomerOrdersSuccess() {
+    List<OrderEntity> ordersEntity = this.dataMock.getOrdersEntity();
+    List<Order> ordersDomain = this.dataMock.getOrdersDomain();
+    UUID customerId = UUID.fromString(this.dataMock.getCustomerProfileDTO().id());
+
+    when(this.orderRepository.findAllByCustomerId(customerId)).thenReturn(ordersEntity);
+    when(this.orderEntityMapper.toDomain(ordersEntity.getFirst())).thenReturn(ordersDomain.getFirst());
+
+    List<Order> orders = this.orderGateway.getAllCustomerOrders(customerId);
+
+    assertThat(orders.getFirst()).usingRecursiveComparison().isEqualTo(ordersEntity.getFirst());
+    verify(this.orderRepository, times(1)).findAllByCustomerId(customerId);
+    verify(this.orderEntityMapper, times(1)).toDomain(ordersEntity.getFirst());
+  }
+
+  @Test
   @DisplayName("deleteOrderSuccess - Should successfully delete an Order")
   void deleteOrderSuccess() {
     OrderEntity orderEntity = this.dataMock.getOrdersEntity().getFirst();

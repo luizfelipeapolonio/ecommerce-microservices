@@ -3,6 +3,7 @@ package com.felipe.ecommerce_order_service.infrastructure.presentation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.ecommerce_order_service.core.application.usecases.CreateOrderUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.FindOrderByIdUseCase;
+import com.felipe.ecommerce_order_service.core.application.usecases.GetAllCustomerOrdersUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.GetOrderByIdWithItemsUseCase;
 import com.felipe.ecommerce_order_service.core.domain.Order;
 import com.felipe.ecommerce_order_service.infrastructure.dtos.CreateOrderDTOImpl;
@@ -76,6 +77,9 @@ class OrderControllerTest {
   private GetOrderByIdWithItemsUseCase getOrderByIdWithItemsUseCase;
 
   @MockitoBean
+  private GetAllCustomerOrdersUseCase getAllCustomerOrdersUseCase;
+
+  @MockitoBean
   private OrderSagaService orderSagaService;
 
   private DataMock dataMock;
@@ -115,6 +119,30 @@ class OrderControllerTest {
       .andExpectAll(status().isAccepted(), content().json(jsonResponseBody));
 
     verify(this.createOrderUseCase, times(1)).execute(orderDTO, CUSTOMER_EMAIL);
+  }
+
+  @Test
+  @DisplayName("getAllCustomerOrdersSuccess - Should return a success response with a list of orders")
+  void getAllCustomerOrdersSuccess() throws Exception {
+    List<Order> orders = this.dataMock.getOrdersDomain();
+    List<OrderResponseDTO> ordersDTO = orders.stream().map(OrderResponseDTO::new).toList();
+
+    var response = new ResponsePayload.Builder<List<OrderResponseDTO>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Todos os pedidos do cliente de email '" + CUSTOMER_EMAIL + "'")
+      .payload(ordersDTO)
+      .build();
+    String jsonResponseBody = this.objectMapper.writeValueAsString(response);
+
+    when(this.getAllCustomerOrdersUseCase.execute(CUSTOMER_EMAIL)).thenReturn(orders);
+
+    this.mockMvc.perform(get(BASE_URL)
+      .with(jwt().jwt(jwt -> jwt.subject(CUSTOMER_EMAIL)))
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().isOk(), content().json(jsonResponseBody));
+
+    verify(this.getAllCustomerOrdersUseCase, times(1)).execute(CUSTOMER_EMAIL);
   }
 
   @Test
