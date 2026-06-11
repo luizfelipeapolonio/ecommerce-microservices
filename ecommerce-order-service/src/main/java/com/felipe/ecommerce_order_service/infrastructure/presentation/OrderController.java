@@ -2,6 +2,7 @@ package com.felipe.ecommerce_order_service.infrastructure.presentation;
 
 import com.felipe.ecommerce_order_service.core.application.usecases.CreateOrderUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.FindOrderByIdUseCase;
+import com.felipe.ecommerce_order_service.core.application.usecases.GetAllCustomerOrdersUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.GetOrderByIdWithItemsUseCase;
 import com.felipe.ecommerce_order_service.core.domain.Order;
 import com.felipe.ecommerce_order_service.infrastructure.config.openapi.OrderApi;
@@ -36,15 +37,18 @@ public class OrderController implements OrderApi {
   private final CreateOrderUseCase createOrderUseCase;
   private final FindOrderByIdUseCase findOrderByIdUseCase;
   private final Map<String, GetOrderByIdWithItemsUseCase> getOrderUseCases;
+  private final GetAllCustomerOrdersUseCase getAllCustomerOrdersUseCase;
   private final OrderSagaService orderSagaService;
 
   public OrderController(CreateOrderUseCase createOrderUseCase,
                          FindOrderByIdUseCase findOrderByIdUseCase,
                          Map<String, GetOrderByIdWithItemsUseCase> getOrderUseCases,
+                         GetAllCustomerOrdersUseCase getAllCustomerOrdersUseCase,
                          OrderSagaService orderSagaService) {
     this.createOrderUseCase = createOrderUseCase;
     this.findOrderByIdUseCase = findOrderByIdUseCase;
     this.getOrderUseCases = getOrderUseCases;
+    this.getAllCustomerOrdersUseCase = getAllCustomerOrdersUseCase;
     this.orderSagaService = orderSagaService;
   }
 
@@ -62,6 +66,22 @@ public class OrderController implements OrderApi {
       .code(HttpStatus.ACCEPTED)
       .message("Requisição aceita. Iniciando processamento do pedido")
       .payload(new StartSagaDTO(sagaId, orderId, "PROCESSING", statusUrl))
+      .build();
+  }
+
+  @Override
+  @GetMapping
+  @ResponseStatus(HttpStatus.OK)
+  public ResponsePayload<List<OrderResponseDTO>> getAllCustomerOrders(@AuthenticationPrincipal Jwt jwt) {
+    List<OrderResponseDTO> customerOrders = this.getAllCustomerOrdersUseCase.execute(jwt.getSubject())
+      .stream()
+      .map(OrderResponseDTO::new)
+      .toList();
+    return new ResponsePayload.Builder<List<OrderResponseDTO>>()
+      .type(ResponseType.SUCCESS)
+      .code(HttpStatus.OK)
+      .message("Todos os pedidos do cliente de email '" + jwt.getSubject() + "'")
+      .payload(customerOrders)
       .build();
   }
 

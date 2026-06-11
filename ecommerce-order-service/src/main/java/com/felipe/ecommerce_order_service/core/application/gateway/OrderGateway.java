@@ -3,6 +3,7 @@ package com.felipe.ecommerce_order_service.core.application.gateway;
 import com.felipe.ecommerce_order_service.core.application.dtos.CreateOrderDTO;
 import com.felipe.ecommerce_order_service.core.domain.Order;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,6 +13,7 @@ public interface OrderGateway {
   Optional<Order> findOrderById(UUID orderId);
   Optional<Order> findOrderByIdWithItems(UUID orderId);
   Optional<Order> findOrderByIdAndCustomerIdWithItems(UUID orderId, UUID customerId);
+  List<Order> getAllCustomerOrders(UUID customerId);
   void deleteOrder(UUID orderId);
   Order updateOrder(Order order);
 }

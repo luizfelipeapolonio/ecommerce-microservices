@@ -6,12 +6,14 @@ import com.felipe.ecommerce_order_service.core.application.gateway.OrderGateway;
 import com.felipe.ecommerce_order_service.core.application.usecases.CreateOrderUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.DeleteOrderUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.FindOrderByIdUseCase;
+import com.felipe.ecommerce_order_service.core.application.usecases.GetAllCustomerOrdersUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.GetOrderByIdUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.GetOrderByIdWithItemsUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.UpdateOrderUseCase;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.CreateOrderUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.DeleteOrderUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.FindOrderByIdUseCaseImpl;
+import com.felipe.ecommerce_order_service.core.application.usecases.impl.GetAllCustomerOrdersUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.GetOrderByIdUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.GetOrderByIdWithItemsAuthenticatedUseCaseImpl;
 import com.felipe.ecommerce_order_service.core.application.usecases.impl.GetOrderByIdWithItemsUseCaseImpl;
@@ -70,6 +72,11 @@ public class OrderBeans {
   @Bean(name = "getOrderByIdWithItemsAuthenticated")
   public GetOrderByIdWithItemsUseCase getOrderByIdWithItemsAuthenticatedUseCase() {
     return new GetOrderByIdWithItemsAuthenticatedUseCaseImpl(this.orderGateway, this.customerGateway);
+  }
+
+  @Bean
+  public GetAllCustomerOrdersUseCase getAllCustomerOrdersUseCase() {
+    return new GetAllCustomerOrdersUseCaseImpl(this.orderGateway, this.customerGateway);
   }
 
   @Bean

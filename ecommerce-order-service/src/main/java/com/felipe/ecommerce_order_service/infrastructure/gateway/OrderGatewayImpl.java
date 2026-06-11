@@ -96,6 +96,11 @@ public class OrderGatewayImpl implements OrderGateway {
   }
 
   @Override
+  public List<Order> getAllCustomerOrders(UUID customerId) {
+    return this.orderRepository.findAllByCustomerId(customerId).stream().map(this.orderEntityMapper::toDomain).toList();
+  }
+
+  @Override
   public void deleteOrder(UUID orderId) {
     this.orderRepository.deleteById(orderId);
   }

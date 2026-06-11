@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,4 +16,6 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
 
   @Query("SELECT o FROM OrderEntity o JOIN FETCH o.items WHERE o.id = :orderId AND o.customerId = :customerId")
   Optional<OrderEntity> findByIdAndCustomerIdWithItems(@Param("orderId") UUID orderId, @Param("customerId") UUID customerId);
+
+  List<OrderEntity> findAllByCustomerId(UUID customerId);
 }
