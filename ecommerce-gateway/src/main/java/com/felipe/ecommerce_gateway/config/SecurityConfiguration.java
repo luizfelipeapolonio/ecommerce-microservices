@@ -30,6 +30,7 @@ public class SecurityConfiguration {
         .pathMatchers("/api/v1/customers/signup").permitAll()
         .pathMatchers(HttpMethod.GET, "/api/v1/catalog").permitAll()
         .pathMatchers(HttpMethod.GET, DOCS_WHITELIST).permitAll()
+        .pathMatchers(HttpMethod.GET, "/actuator/**").permitAll()
         .anyExchange().authenticated())
       .oauth2Login(Customizer.withDefaults())
       .securityMatcher(this::bearerAwareSecurityMatcher)

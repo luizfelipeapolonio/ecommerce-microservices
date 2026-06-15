@@ -28,6 +28,7 @@ public class SecurityConfiguration {
     return http
       .csrf(AbstractHttpConfigurer::disable)
       .authorizeHttpRequests(authorize -> authorize
+        .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
         .requestMatchers(HttpMethod.GET, DOCS_WHITELIST).permitAll()
         .anyRequest().hasAnyAuthority("ROLE_ADMIN", "SCOPE_admin"))
       .oauth2ResourceServer(oauth2 -> oauth2
