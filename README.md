@@ -656,6 +656,7 @@ adaptável e padronizado. Desta forma, qualquer mudança em qualquer microsservi
 e uniforme.
 
 - <h3 id="service_discovery">ecommerce-service-discovery</h3>
+
   O **ecommerce-service-discovery** atua como o registro central de serviços da plataforma.
   
   Seu papel é permitir que os microsserviços localizem dinamicamente uns aos outros sem depender de endereços fixos, 
@@ -669,6 +670,7 @@ e uniforme.
   - Suporte à escalabilidade horizontal da plataforma.
 
 - <h3 id="auth_server">ecommerce-auth-server</h3>
+
   O **ecommerce-auth-server** centraliza toda a autenticação e autorização da plataforma, atuando simultaneamente 
   como **Authorization Server** e **Identity Provider (IdP)**.
 
@@ -686,6 +688,7 @@ e uniforme.
   - Persistência de autorizações, consentimentos e tokens.
 
 - <h3 id="gateway">ecommerce-gateway</h3>
+
   O **ecommerce-gateway** representa o ponto único de entrada da plataforma.
 
   Além de centralizar o acesso aos microsserviços internos, também é responsável por iniciar o fluxo **Authorization 
@@ -699,6 +702,7 @@ e uniforme.
   - Exposição unificada da documentação OpenAPI dos microsserviços.
 
 - <h3 id="cart_service">ecommerce-cart-service</h3>
+
   O **ecommerce-cart-service** é responsável por gerenciar os carrinhos de compra dos usuários.
 
   Sua responsabilidade é manter salvo os produtos selecionados pelo cliente antes da criação definitiva do 
@@ -710,6 +714,7 @@ e uniforme.
   - Integração com **ecommerce-inventory-service** para consulta de produtos.
 
 - <h3 id="catalog_service">ecommerce-catalog-service</h3>
+
   O **ecommerce-catalog-service** atua como uma camada de agregação responsável por construir a página inicial do 
   E-commerce.
 
@@ -724,6 +729,7 @@ e uniforme.
   - Processamento assíncrono utilizando **CompletableFuture** e **Thread Pools**.
 
 - <h3 id="customer_service">ecommerce-customer-service</h3>
+
   O **ecommerce-customer-service** é responsável pelo gerenciamento das contas dos usuários do E-commerce, 
   armazenando informações cadastrais, endereços, dados de contato e demais informações necessárias durante o 
   processo de compra.
@@ -737,6 +743,7 @@ e uniforme.
   - Resource Server protegido por **OAuth2**.
 
 - <h3 id="discount_service">ecommerce-discount-service</h3>
+
   O **ecommerce-discount-service** concentra todas as regras relacionadas a promoções e cupons de desconto da 
   plataforma.
 
@@ -749,6 +756,7 @@ e uniforme.
   - Publicação de eventos de invalidação através do **Apache Kafka**.
 
 - <h3 id="inventory_service">ecommerce-inventory-service</h3>
+
   O **ecommerce-inventory-service** representa a fonte oficial das informações de produtos e estoque da plataforma.
   
   Além do gerenciamento administrativo do estoque, desempenha um papel fundamental durante o processamento 
@@ -762,6 +770,7 @@ e uniforme.
   - Pessimistic Locking utilizando **PESSIMISTIC_WRITE**.
 
 - <h3 id="mail_service">ecommerce-mail-service</h3>
+
   O **ecommerce-mail-service** centraliza toda a comunicação por e-mail da plataforma.
   
   Seu objetivo é desacoplar completamente o envio de notificações das regras de negócio dos demais microsserviços, 
@@ -773,6 +782,7 @@ e uniforme.
   - Processamento assíncrono através do **Apache Kafka**.
 
 - <h3 id="order_service">ecommerce-order-service</h3>
+
   O **ecommerce-order-service** representa o núcleo do processamento distribuído da plataforma.
 
   Além do gerenciamento dos pedidos, atua como **Saga Execution Coordinator**, sendo responsável por coordenar todas 
@@ -790,6 +800,7 @@ e uniforme.
   - Operações de compensação.
 
 - <h3 id="payment_service">ecommerce-payment-service</h3>
+
   O **ecommerce-payment-service** representa o domínio financeiro da plataforma, sendo responsável por executar, 
   confirmar, cancelar e compensar todas as operações relacionadas ao pagamento dos pedidos.
   
