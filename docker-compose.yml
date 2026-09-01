@@ -1,0 +1,72 @@
+services:
+  database:
+    build:
+      context: ./config/database
+      dockerfile: Dockerfile
+    image: ecommerce_database
+    ports:
+      - "5432:5432"
+    container_name: ecommerce_database
+    restart: unless-stopped
+    volumes:
+      - db_ecommerce:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: America/Sao_Paulo
+      PGTZ: America/Sao_Paulo
+    networks:
+      - ecommerce_infra_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 40s
+      retries: 8
+
+  kafka:
+    container_name: kafka
+    image: apache/kafka:latest
+    restart: unless-stopped
+    environment:
+      - KAFKA_NODE_ID=0
+      - KAFKA_DELETE_TOPIC_ENABLE=true
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=false
+      - KAFKA_PROCESS_ROLES=controller,broker
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://trip-planner-kafka:9094
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    networks:
+      - ecommerce_infra_net
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - ecommerce_infra_net
+
+  cache:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - ecommerce_infra_net
+
+networks:
+  ecommerce_infra_net:
+    driver: bridge
+    name: "ecommerce_infra_net"
+
+volumes:
+  db_ecommerce:
+    name: "db_ecommerce"
